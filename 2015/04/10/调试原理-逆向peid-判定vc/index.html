@@ -423,7 +423,7 @@
       
 
       
-        <p>以前一直认为一个工具只要会用就可以了，可是作为一名喜欢安全的渣渣来讲，会用还远远不够，你还得了解它，欺骗它，改造它，提升它！<br>上一篇文章讲了如何脱掉peid0.94版本的壳<br><a href="http://venidic.com/2015/04/08/%E8%B0%83%E8%AF%95%E5%8E%9F%E7%90%86-%E9%80%86%E5%90%91pe-%E8%84%B1%E5%A3%B3/#more" target="_blank" rel="external">[调试原理]逆向peid_脱壳</a><br>这一篇文章对peid开始逆向分析它的原理。开始的时候，从最简单的分析起：如何判断程序有vc编译器编译的。<br><a id="more"></a></p>
+        <p>以前一直认为一个工具只要会用就可以了，可是作为一名喜欢安全的渣渣来讲，会用还远远不够，你还得了解它，欺骗它，改造它，提升它！<br>上一篇文章讲了如何脱掉peid0.94版本的壳<br><a href="http://venidic.com/2015/04/08/%E8%B0%83%E8%AF%95%E5%8E%9F%E7%90%86-%E9%80%86%E5%90%91pe-%E8%84%B1%E5%A3%B3/#more">[调试原理]逆向peid_脱壳</a><br>这一篇文章对peid开始逆向分析它的原理。开始的时候，从最简单的分析起：如何判断程序有vc编译器编译的。<br><a id="more"></a></p>
 <p>逆向工具：ollydbg，ida，winhex<br>分析对象：peid v0.94(完美脱壳后uppeid)<br>测试程序：TraceMe.exe</p>
 <hr>
 <p>打开peid加载TraceMe.exe发现为Microsoft Visual C++ 6.0编写，所以直接打开ollydbg，查找字符串Microsoft Visual C，发现字符串<br><img src="http://img.blog.csdn.net/20150410003829752" alt="这里写图片描述"><br>双机来到这个字符所在的地方<br><img src="http://img.blog.csdn.net/20150410003955100" alt="这里写图片描述"><br>发现跳转来自的地方，往上寻找，发现这个函数的起始部分<br><em>这里用IDA一样可以达到相同的效果</em><br>直接下断，然后用peid加载我们的测试程序TraceMe.exe，后F9，程序中断下来<br>单步运行，将分析的算法写在下面的代码中：</p>
@@ -558,7 +558,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-count">45</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
