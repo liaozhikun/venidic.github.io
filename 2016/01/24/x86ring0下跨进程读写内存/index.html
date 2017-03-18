@@ -1,0 +1,846 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="驱动," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="之前写过一篇关于X86下ring0读写内存的文章，功能虽然尚未完善，但是可以参考下如何通过应用层与驱动层通信进而直接改写内存数值。最近在写x64下的操作内存的驱动，于是就把之前写的代码翻出来一起发了出来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="x86架构下ring0下跨进程读写内存">
+<meta property="og:url" content="http://venidic.com/2016/01/24/x86ring0下跨进程读写内存/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="之前写过一篇关于X86下ring0读写内存的文章，功能虽然尚未完善，但是可以参考下如何通过应用层与驱动层通信进而直接改写内存数值。最近在写x64下的操作内存的驱动，于是就把之前写的代码翻出来一起发了出来">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0fm9zphghj20hr041mxl.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0fmafe9h6j20so0ar0vz.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0fmc0j9d4j20le06cta1.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0fmvt3sizj205y01nt8j.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0fmcdtkuuj204v02k748.jpg">
+<meta property="og:updated_time" content="2016-01-28T15:35:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="x86架构下ring0下跨进程读写内存">
+<meta name="twitter:description" content="之前写过一篇关于X86下ring0读写内存的文章，功能虽然尚未完善，但是可以参考下如何通过应用层与驱动层通信进而直接改写内存数值。最近在写x64下的操作内存的驱动，于是就把之前写的代码翻出来一起发了出来">
+<meta name="twitter:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0fm9zphghj20hr041mxl.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2016/01/24/x86ring0下跨进程读写内存/"/>
+
+
+
+
+
+  <title> x86架构下ring0下跨进程读写内存 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2016/01/24/x86ring0下跨进程读写内存/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                x86架构下ring0下跨进程读写内存
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-24T23:02:38+08:00">
+                2016-01-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统安全/" itemprop="url" rel="index">
+                    <span itemprop="name">系统安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/01/24/x86ring0下跨进程读写内存/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/24/x86ring0下跨进程读写内存/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前写过一篇关于X86下ring0读写内存的文章，功能虽然尚未完善，但是可以参考下如何通过应用层与驱动层通信进而直接改写内存数值。最近在写x64下的操作内存的驱动，于是就把之前写的代码翻出来一起发了出来<br><a id="more"></a></p>
+<p>#从ReadProcessMemory说起<br>我们知道ReadProcessMemory在底层通过调用NtReadVirtualMemory实现，我们用windbg打印下函数的实现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; uf NtReadVirtualMemory</div><div class="line">nt!NtReadVirtualMemory:</div><div class="line">805b528a 6a1c            push    1Ch</div><div class="line">805b528c 68e8ae4d80      push    offset nt!MmClaimParameterAdjustDownTime+0x90 (804daee8)</div><div class="line">805b5291 e8ea78f8ff      call    nt!_SEH_prolog (8053cb80)</div><div class="line">805b5296 64a124010000    mov     eax,dword ptr fs:[00000124h]</div><div class="line">805b529c 8bf8            mov     edi,eax</div><div class="line">… … … … </div><div class="line">nt!NtReadVirtualMemory+0x99:</div><div class="line">805b5323 50              push    eax</div><div class="line">805b5324 8d45dc          lea     eax,[ebp-24h]</div><div class="line">805b5327 50              push    eax</div><div class="line">805b5328 ff75e0          push    dword ptr [ebp-20h]</div><div class="line">805b532b ff35b8495680    push    dword ptr [nt!PsProcessType (805649b8)]</div><div class="line">805b5331 6a10            push    10h     </div><div class="line">805b5333 ff7508          push    dword ptr [ebp+8]  </div><div class="line">805b5336 e857710000      call    nt!ObReferenceObjectByHandle (805bc492)</div><div class="line">805b533b 8945e4          mov     dword ptr [ebp-1Ch],eax</div><div class="line">805b533e 85c0            test    eax,eax</div><div class="line">805b5340 7524            jne     nt!NtReadVirtualMemory+0xdc (805b5366)</div><div class="line"></div><div class="line">nt!NtReadVirtualMemory+0xb8:</div><div class="line">805b5342 8d45d8          lea     eax,[ebp-28h]</div><div class="line">805b5345 50              push    eax</div><div class="line">805b5346 ff75e0          push    dword ptr [ebp-20h]</div><div class="line">805b5349 56              push    esi</div><div class="line">805b534a ff7510          push    dword ptr [ebp+10h]</div><div class="line">805b534d ff7744          push    dword ptr [edi+44h]</div><div class="line">805b5350 ff750c          push    dword ptr [ebp+0Ch]</div><div class="line">805b5353 ff75dc          push    dword ptr [ebp-24h]</div><div class="line">805b5356 e891feffff      call    nt!MmCopyVirtualMemory (805b51ec)</div><div class="line">… … … …</div></pre></td></tr></table></figure></p>
+<p>可以知道系统通过调用ObReferenceObjectByHandle得到进程的eprocess结构<br>紧接着我们分析nt!MmCopyVirtualMemory<br>（为了方便我们简单的只保留函数调用部分）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; uf nt!MmCopyVirtualMemory </div><div class="line">nt!MmCopyVirtualMemory:</div><div class="line">805b51ec 8bff            mov     edi,edi</div><div class="line">805b51ee 55              push    ebp</div><div class="line">805b51ef 8bec            mov     ebp,esp</div><div class="line">… … … … </div><div class="line">nt!MmCopyVirtualMemory+0x4d:</div><div class="line">805b5239 57              push    edi</div><div class="line">805b523a ff751c          push    dword ptr [ebp+1Ch]</div><div class="line">805b523d ff7518          push    dword ptr [ebp+18h]</div><div class="line">805b5240 ff7514          push    dword ptr [ebp+14h]</div><div class="line">805b5243 ff7510          push    dword ptr [ebp+10h]</div><div class="line">805b5246 ff750c          push    dword ptr [ebp+0Ch]</div><div class="line">805b5249 53              push    ebx</div><div class="line">805b524a e87ffbffff      call    nt!MiDoMappedCopy (805b4dce)</div><div class="line">805b524f 8bf0            mov     esi,eax</div><div class="line">805b5251 81fea10000c0    cmp     esi,0C00000A1h</div><div class="line">805b5257 751b            jne     nt!MmCopyVirtualMemory+0x88 (805b5274)</div><div class="line"></div><div class="line">nt!MmCopyVirtualMemory+0x6d:</div><div class="line">805b5259 832700          and     dword ptr [edi],0</div><div class="line"></div><div class="line">nt!MmCopyVirtualMemory+0x70:</div><div class="line">805b525c 57              push    edi</div><div class="line">805b525d ff751c          push    dword ptr [ebp+1Ch]</div><div class="line">805b5260 ff7518          push    dword ptr [ebp+18h]</div><div class="line">805b5263 ff7514          push    dword ptr [ebp+14h]</div><div class="line">805b5266 ff7510          push    dword ptr [ebp+10h]</div><div class="line">805b5269 ff750c          push    dword ptr [ebp+0Ch]</div><div class="line">805b526c 53              push    ebx</div><div class="line">805b526d e882fdffff      call    nt!MiDoPoolCopy (805b4ff4)</div><div class="line">… … … …</div></pre></td></tr></table></figure></p>
+<p>而我们跟进MiDoPoolCopy和MiDoMappedCopy分别发现他们都调用了<br>KeStackAttachProcess<br>根据上述，ReadProcessMemory通过ObReferenceObjectByHandle得到EPROCESS结构，然后调用KeStackAttachProcess进行附加，切换进程环境之后进行拷贝，进而得到目标进程中内存内容。</p>
+<p>#获得EPROCESS结构<br>通常情况下在内核层获取进程信息通过会调用一个这样的函数：<br>PsGetCurrentProcess<br>微软给的定义：<br>PEPROCESS  PsGetCurrentProcess(void);<br>我们查看下在底层的实现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; u PsGetCurrentProcess</div><div class="line">nt!PsGetCurrentProcess:</div><div class="line">8052c2d2 64a124010000    mov     eax,dword ptr fs:[00000124h]</div><div class="line">8052c2d8 8b4044          mov     eax,dword ptr [eax+44h]</div></pre></td></tr></table></figure></p>
+<p>FS寄存器：<br>在ring0下 我们比较好利用的是 fs 寄存器<br>在ring0 下fs指向的是kpcr结构<br>首先我们查看kpcr结构<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">nt!_KPCR</div><div class="line">   +0x000 NtTib            : _NT_TIB</div><div class="line">   +0x01c SelfPcr          : Ptr32 _KPCR</div><div class="line">   +0x020 Prcb             : Ptr32 _KPRCB</div><div class="line">   +0x024 Irql             : UChar</div><div class="line">   +0x028 IRR              : Uint4B</div><div class="line">   +0x02c IrrActive        : Uint4B</div><div class="line">   +0x030 IDR              : Uint4B</div><div class="line">  … … … … </div><div class="line">   +0x0d8 Spare1           : UChar</div><div class="line">   +0x0dc KernelReserved2  : [17] Uint4B</div><div class="line">   +0x120 PrcbData         : _KPRCB</div></pre></td></tr></table></figure></p>
+<p>我们查看0x120这个结构<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _kprcb</div><div class="line">nt!_KPRCB</div><div class="line">   +0x000 MinorVersion     : Uint2B</div><div class="line">   +0x002 MajorVersion     : Uint2B</div><div class="line">   +0x004 CurrentThread    : Ptr32 _KTHREAD</div><div class="line">   +0x008 NextThread       : Ptr32 _KTHREAD</div><div class="line">   +0x00c IdleThread       : Ptr32 _KTHREAD</div></pre></td></tr></table></figure></p>
+<p>继续查看currentthread结构<br>为了方便我们打印详细信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _kthread -v -r2</div><div class="line">nt!_KTHREAD</div><div class="line">struct _KTHREAD, 73 elements, 0x1c0 bytes</div><div class="line">   +0x000 Header           : struct _DISPATCHER_HEADER, 6 elements, 0x10 bytes</div><div class="line">      +0x000 Type             : UChar</div><div class="line">      +0x001 Absolute         : UChar</div><div class="line">      +0x002 Size             : UChar</div><div class="line">      +0x003 Inserted         : UChar</div><div class="line">      +0x004 SignalState      : Int4B</div><div class="line">      +0x008 WaitListHead     : struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x000 Flink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x004 Blink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">   +0x010 MutantListHead   : struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">      +0x000 Flink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x000 Flink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x004 Blink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">      +0x004 Blink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x000 Flink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x004 Blink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">   +0x018 InitialStack     : Ptr32 to Void</div><div class="line">   +0x01c StackLimit       : Ptr32 to Void</div><div class="line">   +0x020 Teb              : Ptr32 to Void</div><div class="line">   +0x024 TlsArray         : Ptr32 to Void</div><div class="line">   +0x028 KernelStack      : Ptr32 to Void</div><div class="line">   +0x02c DebugActive      : UChar</div><div class="line">   +0x02d State            : UChar</div><div class="line">   +0x02e Alerted          : [2] UChar</div><div class="line">   +0x030 Iopl             : UChar</div><div class="line">   +0x031 NpxState         : UChar</div><div class="line">   +0x032 Saturation       : Char</div><div class="line">   +0x033 Priority         : Char</div><div class="line">   +0x034 ApcState         : struct _KAPC_STATE, 5 elements, 0x18 bytes</div><div class="line">      +0x000 ApcListHead      : [2] struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x000 Flink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x004 Blink            : Ptr32 to struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">      +0x010 Process          : Ptr32 to struct _KPROCESS, 29 elements, 0x6c bytes</div><div class="line">         +0x000 Header           : struct _DISPATCHER_HEADER, 6 elements, 0x10 bytes</div><div class="line">         +0x010 ProfileListHead  : struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line">         +0x018 DirectoryTableBase : [2] Uint4B</div><div class="line">         +0x020 LdtDescriptor    : struct _KGDTENTRY, 3 elements, 0x8 bytes</div><div class="line">         +0x028 Int21Descriptor  : struct _KIDTENTRY, 4 elements, 0x8 bytes</div><div class="line">         +0x030 IopmOffset       : Uint2B</div><div class="line">         +0x032 Iopl             : UChar</div><div class="line">         ….. ….. .. . . .. .</div></pre></td></tr></table></figure></p>
+<p>得到eprocess之后就可以得到很多信息了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _eprocess</div><div class="line">nt!_EPROCESS</div><div class="line">   +0x000 Pcb              : _KPROCESS</div><div class="line">   +0x06c ProcessLock      : _EX_PUSH_LOCK</div><div class="line">   +0x070 CreateTime       : _LARGE_INTEGER</div><div class="line">   +0x078 ExitTime         : _LARGE_INTEGER</div><div class="line">   +0x080 RundownProtect   : _EX_RUNDOWN_REF</div><div class="line">   +0x084 UniqueProcessId  : Ptr32 Void</div><div class="line">   +0x088 ActiveProcessLinks : _LIST_ENTRY</div><div class="line">   +0x090 QuotaUsage       : [3] Uint4B</div><div class="line">   +0x09c QuotaPeak        : [3] Uint4B</div><div class="line">   +0x0a8 CommitCharge     : Uint4B</div><div class="line">   +0x0ac PeakVirtualSize  : Uint4B</div><div class="line">   +0x0b0 VirtualSize      : Uint4B</div><div class="line">   +0x0b4 SessionProcessLinks : _LIST_ENTRY</div><div class="line">   +0x0bc DebugPort        : Ptr32 Void</div><div class="line">   +0x0c0 ExceptionPort    : Ptr32 Void</div><div class="line">   +0x0c4 ObjectTable      : Ptr32 _HANDLE_TABLE</div><div class="line">   +0x0c8 Token            : _EX_FAST_REF</div><div class="line">   +0x0cc WorkingSetLock   : _FAST_MUTEX</div><div class="line">   +0x0ec WorkingSetPage   : Uint4B</div><div class="line">   +0x0f0 AddressCreationLock : _FAST_MUTEX</div><div class="line">   +0x110 HyperSpaceLock   : Uint4B</div><div class="line">   +0x114 ForkInProgress   : Ptr32 _ETHREAD</div><div class="line">   +0x118 HardwareTrigger  : Uint4B</div><div class="line">   +0x11c VadRoot          : Ptr32 Void</div><div class="line">   +0x120 VadHint          : Ptr32 Void</div><div class="line">   +0x124 CloneRoot        : Ptr32 Void</div><div class="line">   +0x128 NumberOfPrivatePages : Uint4B</div><div class="line">   +0x12c NumberOfLockedPages : Uint4B</div><div class="line">   +0x130 Win32Process     : Ptr32 Void</div><div class="line">   +0x134 Job              : Ptr32 _EJOB</div><div class="line">   +0x138 SectionObject    : Ptr32 Void</div><div class="line">   +0x13c SectionBaseAddress : Ptr32 Void</div><div class="line">   +0x140 QuotaBlock       : Ptr32 _EPROCESS_QUOTA_BLOCK</div><div class="line">   +0x144 WorkingSetWatch  : Ptr32 _PAGEFAULT_HISTORY</div><div class="line">   +0x148 Win32WindowStation : Ptr32 Void</div><div class="line">   +0x14c InheritedFromUniqueProcessId : Ptr32 Void</div><div class="line">   +0x150 LdtInformation   : Ptr32 Void</div><div class="line">   +0x154 VadFreeHint      : Ptr32 Void</div><div class="line">   +0x158 VdmObjects       : Ptr32 Void</div><div class="line">   +0x15c DeviceMap        : Ptr32 Void</div><div class="line">   +0x160 PhysicalVadList  : _LIST_ENTRY</div><div class="line">   +0x168 PageDirectoryPte : _HARDWARE_PTE</div><div class="line">   +0x168 Filler           : Uint8B</div><div class="line">   +0x170 Session          : Ptr32 Void</div><div class="line">   +0x174 ImageFileName    : [16] UChar</div><div class="line">   +0x184 JobLinks         : _LIST_ENTRY</div><div class="line">   +0x18c LockedPagesList  : Ptr32 Void</div><div class="line">   +0x190 ThreadListHead   : _LIST_ENTRY</div><div class="line">   +0x198 SecurityPort     : Ptr32 Void</div></pre></td></tr></table></figure></p>
+<p>#遍历进程<br>通过遍历链表便可以得到每一个进程的eprocess结构、<br>如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !dml_proc</div><div class="line">Address  PID  Image file name</div><div class="line">865b5830 4    System         </div><div class="line">8652f020 23c  smss.exe       </div><div class="line">861692a0 280  csrss.exe      </div><div class="line">86285570 2a0  winlogon.exe   </div><div class="line">864b2020 2cc  services.exe   </div><div class="line">861b7310 2d8  lsass.exe      </div><div class="line">8649db10 388  vmacthlp.exe   </div><div class="line">863a03c0 398  svchost.exe    </div><div class="line">8613ada0 3dc  svchost.exe    </div><div class="line">86411da0 43c  svchost.exe    </div><div class="line">863d5020 4a0  svchost.exe    </div><div class="line">861af258 504  svchost.exe    </div><div class="line">86084da0 564  spoolsv.exe    </div><div class="line">8627ca20 6a0  explorer.exe   </div><div class="line">861cf558 750  rundll32.exe   </div><div class="line">8617e6d8 758  vmtoolsd.exe   </div><div class="line">864ef358 760  ctfmon.exe     </div><div class="line">8605f440 7f4  svchost.exe    </div><div class="line">861c87e8 100  svchost.exe    </div><div class="line">86110da0 1b4  vmtoolsd.exe   </div><div class="line">863948b0 694  TPAutoConnSvc.e</div><div class="line">8638e940 6d8  alg.exe        </div><div class="line">8638a850 fc   wscntfy.exe    </div><div class="line">864ecda0 d1c  PlantsVsZombies</div><div class="line">861b6b90 d34  wuauclt.exe    </div><div class="line">85f19368 8a4  notepad.exe    </div><div class="line">8640c5f8 af4  logon.scr</div></pre></td></tr></table></figure></p>
+<p>我们通过遍历eprocess<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _eprocess 85f19368</div><div class="line">nt!_EPROCESS</div><div class="line">   +0x000 Pcb              : _KPROCESS</div><div class="line">   +0x06c ProcessLock      : _EX_PUSH_LOCK</div><div class="line">   +0x070 CreateTime       : _LARGE_INTEGER 0x01d0d404`4155cb66</div><div class="line">   +0x078 ExitTime         : _LARGE_INTEGER 0x0</div><div class="line">   +0x080 RundownProtect   : _EX_RUNDOWN_REF</div><div class="line">… … … …</div><div class="line">    +0x168 Filler           : 0</div><div class="line">   +0x170 Session          : 0xf7b11000 Void</div><div class="line">   +0x174 ImageFileName    : [16]  “notepad.exe” </div><div class="line"></div><div class="line"></div><div class="line">0: kd&gt; dt _eprocess (0x8640c680 - 0x88)</div><div class="line">nt!_EPROCESS</div><div class="line">   +0x000 Pcb              : _KPROCESS</div><div class="line">   +0x06c ProcessLock      : _EX_PUSH_LOCK</div><div class="line">   +0x070 CreateTime       : _LARGE_INTEGER 0x01d0d409`65015648</div><div class="line">   +0x078 ExitTime         : _LARGE_INTEGER 0x0</div><div class="line">   +0x080 RundownProtect   : _EX_RUNDOWN_REF</div><div class="line">   +0x084 UniqueProcessId  : 0x00000af4 Void</div><div class="line">   +0x088 ActiveProcessLinks : _LIST_ENTRY [ 0x805648b8 - 0x85f193f0 ]</div><div class="line">   +0x090 QuotaUsage       : [3] 0x988</div><div class="line">   +0x09c QuotaPeak        : [3] 0xa28</div><div class="line">   +0x0a8 CommitCharge     : 0x233</div><div class="line">   +0x0ac PeakVirtualSize  : 0x1706000</div><div class="line">… . .. . . .</div><div class="line">+0x168 PageDirectoryPte : _HARDWARE_PTE</div><div class="line">   +0x168 Filler           : 0</div><div class="line">   +0x170 Session          : 0xf7b11000 Void</div><div class="line">   +0x174 ImageFileName    : [16]  &quot;logon.scr&quot;</div><div class="line">   +0x184 JobLinks         : _LIST_ENTRY [ 0x862ceac8 - 0x862ceac8 ]</div></pre></td></tr></table></figure></p>
+<p>#获得CR3<br>通过遍历可以得到每一个进程的EPROCESS结构，进而可以得到每个进程独立的CR3寄存器<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _eprocess</div><div class="line">nt!_EPROCESS</div><div class="line">   +0x000 Pcb              : _KPROCESS</div><div class="line">   +0x06c ProcessLock      : _EX_PUSH_LOCK</div><div class="line">   +0x070 CreateTime       : _LARGE_INTEGER</div><div class="line">… … … … </div><div class="line">0: kd&gt; dt _kprocess </div><div class="line">nt!_KPROCESS</div><div class="line">   +0x000 Header           : _DISPATCHER_HEADER</div><div class="line">   +0x010 ProfileListHead  : _LIST_ENTRY</div><div class="line">   +0x018 DirectoryTableBase : [2] Uint4B</div><div class="line">   +0x020 LdtDescriptor    : _KGDTENTRY</div><div class="line">… … … …</div></pre></td></tr></table></figure></p>
+<p>DirectoryTableBase[0]存放的就是cr3寄存器内容，DirectoryTableBase[1]通常用于hyperspace。<br>通过上面遍历进程可以得到EPROCESS结构，然后eprocess+0x18便是我们要获取的DirectoryTableBase[0]。<br>得到DirectoryTableBase[0]之后，就可以将其写入cr3来切换进程环境。进而可以实现读取内存，和修改内存。<br>这里如果想要通过偏移读取内存，则会涉及到windows分页机制，关于windows分页机制参见另外一篇文章。</p>
+<p>#读取内存<br>通过驱动加载遍历进程然后获得了每一个进程的EPROCESS结构指针，然后在读取内存时将读取地址，大小和对应的进程指针通过结构传入底层<br>结构<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">typedef struct _ReadMemInfo</div><div class="line">&#123;</div><div class="line">    DWORD dwReadAddr;</div><div class="line">    int dwReadLen;</div><div class="line">    DWORD dwEprocess;</div><div class="line">&#125;ReadMemInfo;</div></pre></td></tr></table></figure></p>
+<p>通过选择进程列表中进程来获取eprocess结构<br>strEprocess = m_process.GetItemText(dwSelect, 3);<br>        //将十六进制字符串转换为十进制数<br>sscanf_s(strEprocess, “%x”, &amp;g_dwEprocess);<br>然后通过deviceIoControl传入底层<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">BOOL bRet =  DeviceIoControl(m_hDevice,</div><div class="line">            IOCTL_READ_MEMORY,</div><div class="line">            pReadMemInfo,</div><div class="line">            sizeof(ReadMemInfo),</div><div class="line">            pOutMemInfo,</div><div class="line">            pReadMemInfo-&gt;dwReadLen,</div><div class="line">            &amp;dwbyteReturn,</div><div class="line">            NULL);</div></pre></td></tr></table></figure></p>
+<p>在驱动方面：<br>通过传入nEprocess获得cr3切换进程环境<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">ULONG uNewCr3 = *(PULONG)(pReadMemInfo-&gt;nEprocess + 0x18);</div><div class="line">_asm</div><div class="line">&#123;</div><div class="line">    mov eax, cr3</div><div class="line">    mov uOldCr3, eax</div><div class="line">                     </div><div class="line">mov eax, uNewCr3</div><div class="line">    mov cr3, eax</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后进行内存拷贝<br><code>RtlCopyMemory(pIoBuffer,(PVOID)pReadMemInfo-&gt;nMemoryAddr, pReadMemInfo-&gt;nReadSize);</code><br>最后恢复进程环境<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">_asm</div><div class="line">    &#123;</div><div class="line">        mov eax, uOldCr3</div><div class="line">        mov cr3, eax</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>#修改内存<br>应用层上，通过选择进程列表进程获取遍历之后的eprocess指针，后通过将写入地址，内容，大小和进程指针通过结构体传入底层<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">typedef struct _WriteMemInfo</div><div class="line">&#123;</div><div class="line">    int dwWriteAddr;</div><div class="line">    int nWriteLen;</div><div class="line">    int nEprocess;</div><div class="line">    BYTE* pWriteData;</div><div class="line">&#125;WriteMemInfo;</div></pre></td></tr></table></figure></p>
+<p>仍然通过deviceiocontrol 缓冲区读写方式交互<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">DWORD bRet = DeviceIoControl(m_hDevice,</div><div class="line">            IOCTL_WRITE_MEMORY,</div><div class="line">            pWriteMemInfo,</div><div class="line">            sizeof(WriteMemInfo),</div><div class="line">            NULL,</div><div class="line">            NULL,</div><div class="line">            &amp;dwReturnByte,</div><div class="line">            NULL);</div></pre></td></tr></table></figure></p>
+<p>在驱动层：<br>切换进程环境，关中断<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">_asm</div><div class="line">&#123;</div><div class="line">    mov eax, cr3</div><div class="line">    mov uOldCr3,  eax</div><div class="line">                    </div><div class="line">mov eax, uNewCr3</div><div class="line">mov cr3,  eax</div><div class="line">    //关中断</div><div class="line">    cli</div><div class="line">    push eax</div><div class="line">    mov eax, cr0</div><div class="line">    and eax, not 10000h</div><div class="line">    mov cr0, eax</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>写内存<br><code>RtlCopyMemory((PVOID)pWriteMemInfo-&gt;nMemoryAddr, pWriteData, pWriteMemInfo-&gt;nWriteLen);</code><br>开中断，恢复环境<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">_asm</div><div class="line">&#123;</div><div class="line">    //开中断</div><div class="line">    mov eax, cr0</div><div class="line">    or eax, 10000h</div><div class="line">    mov cr0, eax</div><div class="line">    pop eax</div><div class="line">    sti</div><div class="line"></div><div class="line">    //恢复现场</div><div class="line">    mov eax, uOldCr3</div><div class="line">    mov cr3, eax</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>#demo效果<br>加载驱动：<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0fm9zphghj20hr041mxl.jpg" alt=""><br>开启应用层程序<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0fmafe9h6j20so0ar0vz.jpg" alt=""><br>选择程序读取<br><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0fmc0j9d4j20le06cta1.jpg" alt=""><br>对比OD发现读取正确<br>选择上述地址写入<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0fmvt3sizj205y01nt8j.jpg" alt=""><br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0fmcdtkuuj204v02k748.jpg" alt=""><br>写入成功</p>
+<p>#后<br>相关代码已上传github<br>工具尚不完善<br>读取功能会添加多级指针读取内存地址<br>写入功能会添加不同数据格式写入<br>部分代码有借鉴<br>其他功能继续完善<br>大牛勿喷<br>…</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/驱动/" rel="tag"># 驱动</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/23/x64内核安全（2）-驱动加载/" rel="next" title="win7 x64内核安全（2）-驱动加载">
+                <i class="fa fa-chevron-left"></i> win7 x64内核安全（2）-驱动加载
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/26/x64内核安全（3）-内存/" rel="prev" title="win7 x64内核安全（3）-内存管理及操作">
+                win7 x64内核安全（3）-内存管理及操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/01/24/x86ring0下跨进程读写内存/"
+           data-title="x86架构下ring0下跨进程读写内存" data-url="http://venidic.com/2016/01/24/x86ring0下跨进程读写内存/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,846 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="破解,竞赛,算法分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近被告知部门举办了关于游戏安全的比赛，网址是游戏安全技术竞赛,看了下，奖励还算可以，就是不该全是QB，再加上这几天实在是冻的不行，宅在寝室就分析了下这个题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="腾讯游戏安全竞赛分析">
+<meta property="og:url" content="http://venidic.com/2016/03/10/腾讯游戏安全竞赛分析/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="最近被告知部门举办了关于游戏安全的比赛，网址是游戏安全技术竞赛,看了下，奖励还算可以，就是不该全是QB，再加上这几天实在是冻的不行，宅在寝室就分析了下这个题。">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1046d6j20cz05b74h.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr1htgvuj20p20etgra.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1pkrkcj20jz084zn1.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/dcfd67b5gw1f1rr1zg2hhj20da086acq.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr2864ufj20ei029wf6.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f1rr2go097j20eq0220t4.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr2rc3vuj20d4058t8x.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f1rr32i0bxj20g208i3z2.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr3d7ll3j20d005c74i.jpg">
+<meta property="og:updated_time" content="2016-03-11T13:01:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="腾讯游戏安全竞赛分析">
+<meta name="twitter:description" content="最近被告知部门举办了关于游戏安全的比赛，网址是游戏安全技术竞赛,看了下，奖励还算可以，就是不该全是QB，再加上这几天实在是冻的不行，宅在寝室就分析了下这个题。">
+<meta name="twitter:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1046d6j20cz05b74h.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2016/03/10/腾讯游戏安全竞赛分析/"/>
+
+
+
+
+
+  <title> 腾讯游戏安全竞赛分析 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2016/03/10/腾讯游戏安全竞赛分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                腾讯游戏安全竞赛分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-10T13:03:35+08:00">
+                2016-03-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/03/10/腾讯游戏安全竞赛分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/10/腾讯游戏安全竞赛分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近被告知部门举办了关于游戏安全的比赛，网址是<a href="http://gslab.qq.com/competition/index.shtml" title="游戏安全技术竞赛" target="_blank" rel="external">游戏安全技术竞赛</a>,看了下，奖励还算可以，就是不该全是QB，再加上这几天实在是冻的不行，宅在寝室就分析了下这个题。<br><a id="more"></a></p>
+<p>#初步分析<br>刚拿到程序，还是老套路PEID扫扫，然后就直接OD打开了，好在没有什么壳和反调，所以找到关键点也是比较容易的。<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1046d6j20cz05b74h.jpg" alt=""><br>打开OD，查找字符串和GetDlgItemText都无果，于是进一步分析，发现在读取用户名和序列号都用到了GetDlgItem，然后调用了SendMessage，差不多应该可以知道是Get到每一个按钮的ID，然后获得对应的句柄，在调用SendMessage进行传递。<br>我们打开资源工具进行分析<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr1htgvuj20p20etgra.jpg" alt=""><br>结合OD分析<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1pkrkcj20jz084zn1.jpg" alt=""><br>验证上述猜想。<br>我们接着分析得到字符串和注册码之后的流程，发现在运行过程中，将“失败”和“成功”这两个字符传入内存，这就是为什么查不到字符的原因：<br><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f1rr1zg2hhj20da086acq.jpg" alt=""><br>继续往下分析，发现最后调用了GetDlgItem之后SendMessage，由此可以知道，是通过算法判断判定最后是否注册成功，然后取相应的“成功”或“失败”字串，拷贝到相应的ID为1005的静态控件上，进而通过Send显示出来<br>下图是运行前<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr2864ufj20ei029wf6.jpg" alt=""><br>出错后将“失败”拷贝到前面内存处<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f1rr2go097j20eq0220t4.jpg" alt=""><br>那么大体流程弄清楚后，patch就很好写了，修改跳转，修改寄存器，或者直接修改内存即可以爆破成功，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">013E21E7   &gt; \33C0          xor eax,eax                              ;  不能走这一步</div><div class="line">013E21E9   &gt;  8B5484 7D     mov edx,dword ptr ss:[esp+eax*4+0x7D]    ;  eax控制取成功还是失败，这里需要=1</div><div class="line">013E21ED   .  8B4C24 54     mov ecx,dword ptr ss:[esp+0x54]</div><div class="line">013E21F1   .  8D4424 74     lea eax,dword ptr ss:[esp+0x74]</div><div class="line">013E21F5   .  50            push eax</div><div class="line">013E21F6   .  53            push ebx</div><div class="line">013E21F7   .  6A 0C         push 0xC</div><div class="line">013E21F9   .  68 ED030000   push 0x3ED</div><div class="line">013E21FE   .  899424 880000&gt;mov dword ptr ss:[esp+0x88],edx</div><div class="line">013E2205   .  E8 52580000   call Tencent2.013E7A5C</div></pre></td></tr></table></figure></p>
+<p>这里不再过多叙述：<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr2rc3vuj20d4058t8x.jpg" alt=""></p>
+<p>#算法分析<br>题目要求是写出算法注册机，那么patch肯定不行的。那我们开始分析算法：</p>
+<p>##用户名部分<br>直接定位到用户名部分算法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">013E1FE2   .  99            cdq</div><div class="line">013E1FE3   .  F7FF          idiv edi</div><div class="line">013E1FE5   .  8DB40C 880000&gt;lea esi,dword ptr ss:[esp+ecx+0x88]</div><div class="line">013E1FEC   .  41            inc ecx</div><div class="line">013E1FED   .  0FBE8414 9C00&gt;movsx eax,byte ptr ss:[esp+edx+0x9C]     ;  遍历用户名，取ascii</div><div class="line">013E1FF5   .  8D142E        lea edx,dword ptr ds:[esi+ebp]</div><div class="line">013E1FF8   .  0FAFC2        imul eax,edx                             ;  edx = 20160126+次数</div><div class="line">013E1FFB   .  0FAFC7        imul eax,edi                             ;  eax = len_name*(name_asii*(20160126+次数))</div><div class="line">013E1FFE   .  0106          add dword ptr ds:[esi],eax</div><div class="line">013E2000   .  83F9 10       cmp ecx,0x10                             ;  循环次数</div></pre></td></tr></table></figure></p>
+<p>其实可以看到用户名部分算法还是蛮简单的，将每一个用户名的字符取ASCII，然后x（ 用户名长度） ×（20160126+次数），最后通过取余，进行循环乘16次，最后累加到内存中<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0025EF08  8C 1F 46 8B 21 5A 07 BB BA A8 B9 59 86 0E 64 26  ?F?Z缓üY?d&amp;</div><div class="line">0025EF18  AE 6F 52 00                                      畂R.v</div></pre></td></tr></table></figure></p>
+<p>##序列号部分<br>其实这个题刚开始看的时候，觉得序列号部分的算法还是蛮复杂的。跟了很多函数，后来发现很多函数其实是编译器进行了安全优化。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">013E2053   &gt; /8A08          mov cl,byte ptr ds:[eax]                 ;  注册码长度遍历</div><div class="line">013E2055   . |40            inc eax</div><div class="line">013E2056   . |3ACB          cmp cl,bl</div><div class="line">013E2058   .^\75 F9         jnz XTencent2.013E2053</div><div class="line">013E205A   .  2BC2          sub eax,edx                              ;  得到注册码的长度</div><div class="line">013E205C   .  50            push eax                                 ;  key_len</div><div class="line">013E205D   .  8D9424 A40100&gt;lea edx,dword ptr ss:[esp+0x1A4]</div><div class="line">013E2064   .  52            push edx                                 ;  key_str</div><div class="line">013E2065   .  8D4C24 60     lea ecx,dword ptr ss:[esp+0x60]</div><div class="line">013E2069   .  E8 A2050000   call Tencent2.013E2610                   ;  key安全拷贝</div><div class="line">013E206E   .  8D4424 58     lea eax,dword ptr ss:[esp+0x58]          ;  key_str偏移-0x4</div><div class="line">013E2072   .  50            push eax</div><div class="line">013E2073   .  8D4424 18     lea eax,dword ptr ss:[esp+0x18]</div><div class="line">013E2077   .  C68424 B40200&gt;mov byte ptr ss:[esp+0x2B4],0x2</div><div class="line">013E207F   .  E8 DCF8FFFF   call Tencent2.013E1960                   ;  关键call</div></pre></td></tr></table></figure></p>
+<p>像这里的<strong>Tencent2.013E2610</strong>函数，便是优化后的安全的<strong>memcpy</strong>，只不过做了蛮多的校验和检测。<strong>Tencent2.013E1960</strong>是一个重要的函数，我们着重的分析下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div></pre></td><td class="code"><pre><div class="line">013E19AA  |&gt; \8B5424 28     mov edx,dword ptr ss:[esp+0x28]          ;  this</div><div class="line">013E19AE  |.  8B06          mov eax,dword ptr ds:[esi]</div><div class="line">013E19B0  |.  53            push ebx</div><div class="line">013E19B1  |.  52            push edx</div><div class="line">013E19B2  |.  51            push ecx</div><div class="line">013E19B3  |.  50            push eax</div><div class="line">013E19B4  |.  8D5C24 38     lea ebx,dword ptr ss:[esp+0x38]</div><div class="line">013E19B8  |.  E8 A30B0000   call Tencent2.013E2560                   ;  memmove_s(逆向发现什么都没move)</div><div class="line">013E19BD  |.  837C24 24 00  cmp dword ptr ss:[esp+0x24],0x0          ;  key_len != 0</div><div class="line">013E19C2  |.  0F84 3C020000 je Tencent2.013E1C04</div><div class="line">013E19C8  |&gt;  8B4424 1C     /mov eax,dword ptr ss:[esp+0x1C]</div><div class="line">013E19CC  |.  FF4C24 24     |dec dword ptr ss:[esp+0x24]             ;  key_len--</div><div class="line">013E19D0  |.  3B47 14       |cmp eax,dword ptr ds:[edi+0x14]         ;  key_len大于0</div><div class="line">013E19D3  |.  76 05         |jbe XTencent2.013E19DA</div><div class="line">013E19D5  |.  E8 80F60000   |call Tencent2.013F105A</div><div class="line">013E19DA  |&gt;  837F 18 10    |cmp dword ptr ds:[edi+0x18],0x10</div><div class="line">013E19DE  |.  8D5F 04       |lea ebx,dword ptr ds:[edi+0x4]          ;  key_str</div><div class="line">013E19E1  |.  72 04         |jb XTencent2.013E19E7</div><div class="line">013E19E3  |.  8B03          |mov eax,dword ptr ds:[ebx]</div><div class="line">013E19E5  |.  EB 02         |jmp XTencent2.013E19E9</div><div class="line">013E19E7  |&gt;  8BC3          |mov eax,ebx                             ;  key_str</div><div class="line">013E19E9  |&gt;  8B4C24 1C     |mov ecx,dword ptr ss:[esp+0x1C]         ;  ecx应该为循环次数，从0开始累加</div><div class="line">013E19ED  |.  803C08 2A     |cmp byte ptr ds:[eax+ecx],0x2A          ;  注册码第一位如果为*，则break</div><div class="line">013E19F1  |.  0F84 33010000 |je Tencent2.013E1B2A</div><div class="line">013E19F7  |.  3B4F 14       |cmp ecx,dword ptr ds:[edi+0x14]         ;  len与次数比较</div><div class="line">013E19FA  |.  76 09         |jbe XTencent2.013E1A05</div><div class="line">013E19FC  |.  E8 59F60000   |call Tencent2.013F105A</div><div class="line">013E1A01  |.  8B4C24 1C     |mov ecx,dword ptr ss:[esp+0x1C]</div><div class="line">013E1A05  |&gt;  837F 18 10    |cmp dword ptr ds:[edi+0x18],0x10</div><div class="line">013E1A09  |.  72 04         |jb XTencent2.013E1A0F</div><div class="line">013E1A0B  |.  8B03          |mov eax,dword ptr ds:[ebx]</div><div class="line">013E1A0D  |.  EB 02         |jmp XTencent2.013E1A11</div><div class="line">013E1A0F  |&gt;  8BC3          |mov eax,ebx                             ;  key_str</div><div class="line">013E1A11  |&gt;  8A0408        |mov al,byte ptr ds:[eax+ecx]            ;  key_str[ecx]</div><div class="line">013E1A14  |.  0FB6C8        |movzx ecx,al                            ;  取ascii</div><div class="line">013E1A17  |.  51            |push ecx</div><div class="line">013E1A18  |.  884424 14     |mov byte ptr ss:[esp+0x14],al</div><div class="line">013E1A1C  |.  E8 A5F70000   |call Tencent2.013F11C6                  ;  判断注册码是字母或者数字</div><div class="line">013E1A21  |.  83C4 04       |add esp,0x4</div><div class="line">013E1A24  |.  85C0          |test eax,eax</div><div class="line">013E1A26  |.  75 10         |jnz XTencent2.013E1A38</div><div class="line">013E1A28  |.  8A4424 10     |mov al,byte ptr ss:[esp+0x10]</div><div class="line">013E1A2C  |.  3C 40         |cmp al,0x40                             ;  判断是否为&apos;@&apos;</div><div class="line">013E1A2E  |.  74 08         |je XTencent2.013E1A38</div><div class="line">013E1A30  |.  3C 25         |cmp al,0x25                             ;  判断是否为&apos;%&apos;</div><div class="line">013E1A32  |.  0F85 F2000000 |jnz Tencent2.013E1B2A</div><div class="line">013E1A38  |&gt;  8B5424 1C     |mov edx,dword ptr ss:[esp+0x1C]</div><div class="line">013E1A3C  |.  3B57 14       |cmp edx,dword ptr ds:[edi+0x14]</div><div class="line">013E1A3F  |.  76 05         |jbe XTencent2.013E1A46</div><div class="line">013E1A41  |.  E8 14F60000   |call Tencent2.013F105A</div><div class="line">013E1A46  |&gt;  837F 18 10    |cmp dword ptr ds:[edi+0x18],0x10</div><div class="line">013E1A4A  |.  72 02         |jb XTencent2.013E1A4E</div><div class="line">013E1A4C  |.  8B1B          |mov ebx,dword ptr ds:[ebx]</div><div class="line">013E1A4E  |&gt;  8B4C24 1C     |mov ecx,dword ptr ss:[esp+0x1C]</div><div class="line">013E1A52  |.  8B4424 20     |mov eax,dword ptr ss:[esp+0x20]</div><div class="line">013E1A56  |.  8A140B        |mov dl,byte ptr ds:[ebx+ecx]            ;  key_str[ecx]</div><div class="line">013E1A59  |.  885404 18     |mov byte ptr ss:[esp+eax+0x18],dl       ;  存放回去</div><div class="line">013E1A5D  |.  40            |inc eax</div><div class="line">013E1A5E  |.  41            |inc ecx</div><div class="line">013E1A5F  |.  894424 20     |mov dword ptr ss:[esp+0x20],eax</div><div class="line">013E1A63  |.  894C24 1C     |mov dword ptr ss:[esp+0x1C],ecx</div><div class="line">013E1A67  |.  83F8 04       |cmp eax,0x4                             ;  4位一取？</div><div class="line">013E1A6A  |.  0F85 AF000000 |jnz Tencent2.013E1B1F</div><div class="line">013E1A70  |.  33FF          |xor edi,edi</div><div class="line">013E1A72  |&gt;  8A443C 18     |/mov al,byte ptr ss:[esp+edi+0x18]      ;  key_str[edi]，edi为偏移量</div><div class="line">013E1A76  |.  8D5C24 10     ||lea ebx,dword ptr ss:[esp+0x10]        ;  取地址</div><div class="line">013E1A7A  |.  884424 10     ||mov byte ptr ss:[esp+0x10],al          ;  取ascii</div><div class="line">013E1A7E  |.  E8 9D090000   ||call Tencent2.013E2420                 ;  取字符在数字字母字符串中的位置</div><div class="line">013E1A83  |.  88443C 18     ||mov byte ptr ss:[esp+edi+0x18],al</div><div class="line">013E1A87  |.  47            ||inc edi</div><div class="line">013E1A88  |.  83FF 04       ||cmp edi,0x4</div><div class="line">013E1A8B  |.^ 7C E5         |\jl XTencent2.013E1A72</div></pre></td></tr></table></figure></p>
+<p>这一段很长，差不多先是检测了长度最小值，然后判断是否是字符数字和“@”和“%”<br>然后关键点是，取每一个序列号的ascii，会在一个字符串“ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@%”<br>中找到自己的偏移，每4位一取，将偏移放入32位寄存器，我们将32位的寄存器分为4个字节，分别设为dcba，那么接下来就是<strong>序列号的计算过程</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">013E1A8D  |.  8B4C24 18     |mov ecx,dword ptr ss:[esp+0x18]         ;  4个字符分别在数字字母字符串中的位置</div><div class="line">013E1A91  |.  8AC1          |mov al,cl</div><div class="line">013E1A93  |.  02C0          |add al,al</div><div class="line">013E1A95  |.  8AD5          |mov dl,ch</div><div class="line">013E1A97  |.  C0EA 04       |shr dl,0x4</div><div class="line">013E1A9A  |.  80E2 03       |and dl,0x3</div><div class="line">013E1A9D  |.  02C0          |add al,al</div><div class="line">013E1A9F  |.  02D0          |add dl,al                               ;  4*a + ((b&gt;&gt;4)&amp;3)</div><div class="line">013E1AA1  |.  8A4424 1A     |mov al,byte ptr ss:[esp+0x1A]</div><div class="line">013E1AA5  |.  885424 14     |mov byte ptr ss:[esp+0x14],dl           ;  回存数据</div><div class="line">013E1AA9  |.  8AD0          |mov dl,al</div><div class="line">013E1AAB  |.  C0EA 02       |shr dl,0x2</div><div class="line">013E1AAE  |.  8ACD          |mov cl,ch</div><div class="line">013E1AB0  |.  C0E0 06       |shl al,0x6</div><div class="line">013E1AB3  |.  024424 1B     |add al,byte ptr ss:[esp+0x1B]           ;  d + ((c) &lt;&lt;6)</div><div class="line">013E1AB7  |.  80E2 0F       |and dl,0xF</div><div class="line">013E1ABA  |.  C0E1 04       |shl cl,0x4</div><div class="line">013E1ABD  |.  32D1          |xor dl,cl                               ;  (16*b)^((c&gt;&gt;2) &amp; 15)</div><div class="line">013E1ABF  |.  885424 15     |mov byte ptr ss:[esp+0x15],dl           ;  回存数据</div><div class="line">013E1AC3  |.  884424 16     |mov byte ptr ss:[esp+0x16],al           ;  回存数据</div><div class="line">013E1AC7  |.  33FF          |xor edi,edi</div></pre></td></tr></table></figure></p>
+<p>所以这里将每4为序列号通过偏移后计算，生成3字节的数据存放于内存中</p>
+<p>##用户名再运算<br>我们已经知道用户名通过乘和加存放在内存中，在最后比对前，又将刚刚计算好的数据做了一次运算，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">013E2102   &gt; /8B8C34 880000&gt;mov ecx,dword ptr ss:[esp+esi+0x88]      ;  最开始计算用户名生成的地方</div><div class="line">013E2109   . |B8 67666666   mov eax,0x66666667</div><div class="line">013E210E   . |F7E9          imul ecx</div><div class="line">013E2110   . |C1FA 02       sar edx,0x2</div><div class="line">013E2113   . |8BCA          mov ecx,edx</div><div class="line">013E2115   . |C1E9 1F       shr ecx,0x1F                             ;  /10</div><div class="line">013E2118   . |03CA          add ecx,edx</div><div class="line">013E211A   . |8B5424 24     mov edx,dword ptr ss:[esp+0x24]</div><div class="line">013E211E   . |2BD7          sub edx,edi</div><div class="line">013E2120   . |894C34 2C     mov dword ptr ss:[esp+esi+0x2C],ecx      ;  回存</div><div class="line">013E2124   .  3BF2          cmp esi,edx</div><div class="line">013E2126   .  72 09         jb XTencent2.013E2131</div><div class="line">013E2128   .  E8 2DEF0000   call Tencent2.013F105A</div><div class="line"></div><div class="line">013E212D   .  8B7C24 20     mov edi,dword ptr ss:[esp+0x20]</div><div class="line">013E2131   &gt;  8B043E        mov eax,dword ptr ds:[esi+edi]           ;  回存（edi赋值见上</div><div class="line">013E2134   .  894434 40     mov dword ptr ss:[esp+esi+0x40],eax</div><div class="line">013E2138   .  83C6 04       add esi,0x4</div><div class="line">013E213B   .  83FE 14       cmp esi,0x14</div></pre></td></tr></table></figure></p>
+<p>这里运用了编译器对除法的优化，通过乘以MagicNumber后右移，来达到大数除法的优化。<br>这里将上述<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0025EF08  8C 1F 46 8B 21 5A 07 BB BA A8 B9 59 86 0E 64 26  ?F?Z缓üY?d&amp;</div><div class="line">0025EF18  AE 6F 52 00                                      畂R.v</div></pre></td></tr></table></figure></p>
+<p>运算后变换成：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0025EEAC  F5 CF 53 F4 D1 55 1A F9 45 F7 F8 08 40 CE D6 03  跸S粞U鵈鼬@沃</div><div class="line">0025EEBC  5E 3E 08 00                                      ^&gt;.</div></pre></td></tr></table></figure></p>
+<p>而紧接着又将刚刚算好的序列号拷贝到附近<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0025EEBC              CA BC C8 15 71 A7 E2 1A BB F5 C1 E1      始?qр货玲</div><div class="line">0025EECC  85 C5 CF 0C C6 25 6E ED                          吪??n泶?.</div></pre></td></tr></table></figure></p>
+<p>##最后的比较<br>有了这两组数据，就可以开始比较了，这里为了方便描述，我们将用户名生成的描述成<br>U1(F5 CF 53 F4),U2( D1 55 1A F9), U3(45 F7 F8 08), U4(40 CE D6 03),U5(5E 3E 08 00 )<br>同理将序列号以4位一取，描述成K1，K2，K3，K4，K5<br>接下来就是比较的地方了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">013E2140   .  8B4C24 2C     mov ecx,dword ptr ss:[esp+0x2C]          ;  U1</div><div class="line">013E2144   .  8B4424 50     mov eax,dword ptr ss:[esp+0x50]          ;  K5</div><div class="line">013E2148   .  8D1408        lea edx,dword ptr ds:[eax+ecx]           ;  U1+K5</div><div class="line">013E214B   .  8B4C24 48     mov ecx,dword ptr ss:[esp+0x48]          ;  K3</div><div class="line">013E214F   .  3BD1          cmp edx,ecx                              ;  U1+K5 = K3</div><div class="line">013E2151   .  75 58         jnz XTencent2.013E21AB</div><div class="line">013E2153   .  8B5424 30     mov edx,dword ptr ss:[esp+0x30]          ;  U2</div><div class="line">013E2157   .  03D1          add edx,ecx                              ;  U2+K3</div><div class="line">013E2159   .  03C0          add eax,eax                              ;  K5*2</div><div class="line">013E215B   .  3BD0          cmp edx,eax                              ;  U2+K3 = K5*2</div><div class="line">013E215D   .  75 4C         jnz XTencent2.013E21AB</div><div class="line">013E215F   .  8B4C24 4C     mov ecx,dword ptr ss:[esp+0x4C]          ;  K4</div><div class="line">013E2163   .  8B4424 34     mov eax,dword ptr ss:[esp+0x34]          ;  U3</div><div class="line">013E2167   .  8B5424 40     mov edx,dword ptr ss:[esp+0x40]          ;  K1</div><div class="line">013E216B   .  8D3401        lea esi,dword ptr ds:[ecx+eax]           ;  K4+U3</div><div class="line">013E216E   .  3BF2          cmp esi,edx                              ;  K4+U3 = K1</div><div class="line">013E2170   .  75 39         jnz XTencent2.013E21AB</div><div class="line">013E2172   .  8B7424 38     mov esi,dword ptr ss:[esp+0x38]          ;  U4</div><div class="line">013E2176   .  03F2          add esi,edx                              ;  U4+K1</div><div class="line">013E2178   .  03C9          add ecx,ecx                              ;  K4*2</div><div class="line">013E217A   .  3BF1          cmp esi,ecx                              ;  U4+K1 = K4*2</div><div class="line">013E217C   .  75 2D         jnz XTencent2.013E21AB</div><div class="line">013E217E   .  8B5424 3C     mov edx,dword ptr ss:[esp+0x3C]          ;  U5</div><div class="line">013E2182   .  8B4C24 44     mov ecx,dword ptr ss:[esp+0x44]          ;  K2</div><div class="line">013E2186   .  03CA          add ecx,edx                              ;  U5+K2</div><div class="line">013E2188   .  8D1440        lea edx,dword ptr ds:[eax+eax*2]         ;  U3*3</div><div class="line">013E218B   .  3BCA          cmp ecx,edx                              ;  U5+K2 = U3*3</div></pre></td></tr></table></figure></p>
+<p>列出方程：<br>U1+K5 = K3<br>U2+K3 = K5<em>2<br>K4+U3 = K1<br>U4+K1 = K4</em>2<br>U5+K2 = U3<em>3<br>因为我们一般知道用户名，需要求注册码，那么U为已知，解K<br>K1 = U3</em>2 + U4<br>K2 = U3<em>3 - U5<br>K3 = U1</em>2 + K5<br>K4 = U3 + U4<br>K5 = U1 + U2</p>
+<p>#编程求解：<br>我们以venidic为用户名，算出<br>U1 = F453CFF5<br>U2 = F91A55D1<br>U3 = 08F8F745<br>U4 = 03D6CE40<br>U5 = 00083E5E<br>那么则通过上述方程可以求解<br>K1 = 15C8BCCA<br>K2 = 1AE2A771<br>K3 = E1C1F5BB<br>K4 = 0CCFC585<br>K5 = ED6E25C6<br>又在序列号计算中可知4为字符生成三字节的k，则将k1–k5以3字节分组，编程求解，即可以得到每一个偏移(最后少一个字节数据，那我们可以直接穷举)：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">void Enmu(int key1, int key2, int key3)</div><div class="line">&#123;</div><div class="line">    int a,b,c,d;</div><div class="line">    int k1,k2,k3;</div><div class="line">    for (a=0;a&lt;=64;a++)</div><div class="line">    &#123;</div><div class="line">        for (b=0;b&lt;=64;b++)</div><div class="line">        &#123;</div><div class="line">            for (c=0;c&lt;=64;c++)</div><div class="line">            &#123;</div><div class="line">                for(d = 0;d&lt;=64;d++)</div><div class="line">                &#123;</div><div class="line">                    k1 = (4*a + ((b&gt;&gt;4)&amp;3))&amp;0xff;</div><div class="line">                    k2 = ((16*b)^((c&gt;&gt;2) &amp; 15))&amp;0xff;</div><div class="line">                    k3 = (d + ((c) &lt;&lt;6))&amp;0xff;</div><div class="line">                    if ((k1 == key1) &amp;&amp; (k2 == key2) &amp;&amp; (k3 == key3))</div><div class="line">                    &#123;</div><div class="line">                        //printf(&quot;a=%d\tb=%d\tc=%d\td=%d\t\n&quot;,a,b,c,d);</div><div class="line">                        printf(&quot;key = %c, %c, %c, %c\n&quot;,gstr[a], gstr[b], gstr[c],gstr[d]);</div><div class="line">                        return;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line">void KenKey()</div><div class="line">&#123;</div><div class="line">    </div><div class="line">    int naddr0, naddr1, naddr2, naddr3;</div><div class="line">    int k1,k2,k3;</div><div class="line">    </div><div class="line">    Enmu(0xCA,0xBC,0xC8);</div><div class="line">    Enmu(0x15,0x71,0xA7);</div><div class="line">    Enmu(0xE2,0x1A,0xBB);</div><div class="line">    Enmu(0xF5,0xC1,0xE1);</div><div class="line">    Enmu(0x85,0xC5,0xCF);</div><div class="line">    Enmu(0x0C,0xC6,0x25);</div><div class="line">    //Enmu(0x6E,0xF3,);</div><div class="line">    int a,b,c;</div><div class="line">    for (a=0;a&lt;=64;a++)</div><div class="line">    &#123;</div><div class="line">        for (b=0;b&lt;=64;b++)</div><div class="line">        &#123;</div><div class="line">            for (c=0;c&lt;=64;c++)</div><div class="line">            &#123;</div><div class="line">                k1 = (4*a + ((b&gt;&gt;4)&amp;3))&amp;0xff;</div><div class="line">                k2 = ((16*b)^((c&gt;&gt;2) &amp; 15))&amp;0xff;</div><div class="line">                if ((k1 == 0x6E) &amp;&amp; (k2 == 0xED) )</div><div class="line">                &#123;</div><div class="line">                    printf(&quot;key = %c, %c, %c\n&quot;,gstr[a], gstr[b], gstr[c]);</div><div class="line">                    </div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最终得到<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f1rr32i0bxj20g208i3z2.jpg" alt=""><br>可获得一组key<br>用户名:venidic<br>序列号：yrzIFXGn4hq79cHhhcXPDMYlbu0<br>或者yrzIFXGn4hq79cHhhcXPDMYlbu1，或者yrzIFXGn4hq79cHhhcXPDMYlbu2<br>或者yrzIFXGn4hq79cHhhcXPDMYlbu3<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr3d7ll3j20d005c74i.jpg" alt=""></p>
+<p>#后<br>最后就可以结合分析出来的算法写出注册机了。不得不说，自己的编程能力还是不行，分析这个程序一个下午不到，写个程序妈蛋快花了一天了。<br>哎！我还是去看下数据结构和算法吧。(ಥ _ ಥ)</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/破解/" rel="tag"># 破解</a>
+          
+            <a href="/tags/竞赛/" rel="tag"># 竞赛</a>
+          
+            <a href="/tags/算法分析/" rel="tag"># 算法分析</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/16/win7x64内核安全（4）-字符串操作HAHA /" rel="next" title="win7x64内核安全（4）-字符串操作">
+                <i class="fa fa-chevron-left"></i> win7x64内核安全（4）-字符串操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/10/腾讯游戏安全竞赛分析/"
+           data-title="腾讯游戏安全竞赛分析" data-url="http://venidic.com/2016/03/10/腾讯游戏安全竞赛分析/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,892 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="逆向,虚函数," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例中分配了指向这个表的指针的内存，所以，当用父类的指针来操作一个子类的时候，这张虚函数表就显得尤为重要了，它就像一个地图一样，指明了实际所应该调用的函数。虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例">
+<meta property="og:type" content="article">
+<meta property="og:title" content="c++虚函数逆向分析">
+<meta property="og:url" content="http://venidic.com/2015/11/12/c++虚函数逆向分析/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例中分配了指向这个表的指针的内存，所以，当用父类的指针来操作一个子类的时候，这张虚函数表就显得尤为重要了，它就像一个地图一样，指明了实际所应该调用的函数。虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150501089">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150524610">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150601793">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150701090">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150720148">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150744298">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150801188">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150819734">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150921945">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122150950004">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151021219">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151122615">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151139105">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151156329">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151222827">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151251870">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151315414">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151338867">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151352483">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151425264">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151509435">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151528803">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151627657">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151655384">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151742269">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151801115">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151812050">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151911239">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122151929266">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122152008473">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122152027057">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122152041313">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122152054844">
+<meta property="og:image" content="http://img.blog.csdn.net/20151122152109782">
+<meta property="og:updated_time" content="2015-11-22T07:38:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="c++虚函数逆向分析">
+<meta name="twitter:description" content="虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例中分配了指向这个表的指针的内存，所以，当用父类的指针来操作一个子类的时候，这张虚函数表就显得尤为重要了，它就像一个地图一样，指明了实际所应该调用的函数。虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20151122150501089">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/11/12/c++虚函数逆向分析/"/>
+
+
+
+
+
+  <title> c++虚函数逆向分析 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/11/12/c++虚函数逆向分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                c++虚函数逆向分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-12T14:48:12+08:00">
+                2015-11-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/11/12/c++虚函数逆向分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/11/12/c++虚函数逆向分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例中分配了指向这个表的指针的内存，所以，当用父类的指针来操作一个子类的时候，这张虚函数表就显得尤为重要了，它就像一个地图一样，指明了实际所应该调用的函数。<br>虚函数表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例中分配了指向这个表的指针的内存，所以，当用父类的指针来操作一个子类的时候，这张虚函数表就显得尤为重要了，它就像一个地图一样，指明了实际所应该调用的函数。<br><a id="more"></a></p>
+<p>#无继承时虚函数表<br>编写demo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">#include &lt;iostream&gt;</div><div class="line">using namespace std;</div><div class="line"></div><div class="line">class base_class</div><div class="line">&#123;</div><div class="line">private:</div><div class="line">	int m_base;</div><div class="line">public:</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func2()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func3()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>OD载入逆向分析<br>构造函数<br><img src="http://img.blog.csdn.net/20151122150501089" alt="这里写图片描述"></p>
+<p>我们查看一下虚表指针<br><img src="http://img.blog.csdn.net/20151122150524610" alt="这里写图片描述"></p>
+<p>内存中应该为：<br><img src="http://img.blog.csdn.net/20151122150601793" alt="这里写图片描述"></p>
+<p>#虚表单一继承：<br>改写demo：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">class base_class</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func2()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func3()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div><div class="line">class dev_class : public base_class</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func4()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class&apos;s v_func4()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func5()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class&apos;s v_func5()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p> 构造函数逆向如下<br>基类构造函数改写指针<br><img src="http://img.blog.csdn.net/20151122150701090" alt="这里写图片描述"><br>此时虚表<br><img src="http://img.blog.csdn.net/20151122150720148" alt="这里写图片描述"><br>在派生类中又改写了虚函数指针<br><img src="http://img.blog.csdn.net/20151122150744298" alt="这里写图片描述"><br>此时虚表<br><img src="http://img.blog.csdn.net/20151122150801188" alt="这里写图片描述"><br>在内存中的布局应该为：<br><img src="http://img.blog.csdn.net/20151122150819734" alt="这里写图片描述"></p>
+<p>在改写虚表指针的时候，按照父类-子类的顺序存放在虚表中</p>
+<p>#重写父类虚函数继承<br>继续改写demo：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">class base_class</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func2()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class&apos;s v_func3()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div><div class="line">class dev_class : public base_class</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class&apos;s v_func4()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func4()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class&apos;s v_func5()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>OD载入分析构造函数<br>我们按照上述方法打印虚表<br>在构造基类的时候<br><img src="http://img.blog.csdn.net/20151122150921945" alt="这里写图片描述"><br>在派生类修改虚表指针后<br><img src="http://img.blog.csdn.net/20151122150950004" alt="这里写图片描述"></p>
+<p>可以很清楚的发现，在第三个虚函数地址被派生类修改<br>内存中布局应该是这样<br> <img src="http://img.blog.csdn.net/20151122151021219" alt="这里写图片描述">  </p>
+<p>#多重继承下的虚函数表_子类没有改写父类<br>继续改写demo：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">class base_class_A</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func2()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;;</div><div class="line">class base_class_B</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_B&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func4()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_B&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div><div class="line">class dev_class : public base_class_A,base_class_B</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func5()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>OD载入分析构造函数<br><img src="http://img.blog.csdn.net/20151122151122615" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20151122151139105" alt="这里写图片描述"><br>Base_a 虚表：<br><img src="http://img.blog.csdn.net/20151122151156329" alt="这里写图片描述"><br>Base_b虚表：<br><img src="http://img.blog.csdn.net/20151122151222827" alt="这里写图片描述"><br>dev虚表<br><img src="http://img.blog.csdn.net/20151122151251870" alt="这里写图片描述"><br>修改虚表指针<br><img src="http://img.blog.csdn.net/20151122151315414" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20151122151338867" alt="这里写图片描述"><br>和<br><img src="http://img.blog.csdn.net/20151122151352483" alt="这里写图片描述"><br>通过分析我们可以发现当<strong>多重</strong>继承中会存在<strong>多张</strong>虚表<br>内存中的布局应该为：<br><img src="http://img.blog.csdn.net/20151122151425264" alt="这里写图片描述"></p>
+<p>#多重继承下的虚函数表_子类改写父类</p>
+<p>继续改写demo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">class base_class_A</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func2()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;;</div><div class="line">class base_class_B</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_B&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func4()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_B&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div><div class="line">class dev_class : public base_class_A,base_class_B</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func1&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func3&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_fun5()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func5&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>虚表为：<br><img src="http://img.blog.csdn.net/20151122151509435" alt="这里写图片描述"><br>内存中的布局为：<br><img src="http://img.blog.csdn.net/20151122151528803" alt="这里写图片描述"></p>
+<p>我们稍微修改下我们的demo</p>
+<p><strong>加入成员变量：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line">class root </div><div class="line">&#123;</div><div class="line">private:</div><div class="line">	int m_r1;</div><div class="line">	int m_r2;</div><div class="line">public:</div><div class="line">	root()</div><div class="line">	&#123;</div><div class="line">		m_r1 = 1;</div><div class="line">		m_r2 = 2;</div><div class="line">	&#125;</div><div class="line">	~root()&#123;&#125;;</div><div class="line">	virtual void v_funr()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is root&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	</div><div class="line">&#125;;</div><div class="line">class base_class_A : public root</div><div class="line">&#123;</div><div class="line">private:</div><div class="line">	int m_a;</div><div class="line"></div><div class="line">public:</div><div class="line">	base_class_A()</div><div class="line">	&#123;</div><div class="line">		m_a = 3;</div><div class="line">	&#125;</div><div class="line">	~base_class_A()&#123;&#125;;</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func2()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;;</div><div class="line">class base_class_B : public root</div><div class="line">&#123;</div><div class="line">private: </div><div class="line">	int m_b ;</div><div class="line"></div><div class="line">public:</div><div class="line">	base_class_B()</div><div class="line">	&#123;</div><div class="line">		m_b = 4;</div><div class="line">	&#125;</div><div class="line">	~base_class_B()&#123;&#125;;</div><div class="line">	void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_B&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	void v_func4()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_B&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class dev_class : public base_class_A,base_class_B</div><div class="line">&#123;</div><div class="line">private: </div><div class="line">	int m_a;</div><div class="line">	int m_b;</div><div class="line">	int m_c;</div><div class="line">public:</div><div class="line">	dev_class();</div><div class="line">	~dev_class()&#123;&#125;;</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func1&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func3&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_fun5()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func5&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;;</div><div class="line"></div><div class="line"> dev_class :: dev_class():m_a(1),m_b(2),m_c(3)</div><div class="line">&#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们看下最开始的基类root的构造：<br><img src="http://img.blog.csdn.net/20151122151627657" alt="这里写图片描述"><br>虚表为：<br><img src="http://img.blog.csdn.net/20151122151655384" alt="这里写图片描述"></p>
+<p>#虚拟多重继承<br>改写demo：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div></pre></td><td class="code"><pre><div class="line">class root </div><div class="line">&#123;</div><div class="line">private:</div><div class="line">	int m_r1;</div><div class="line">	int m_r2;</div><div class="line">public:</div><div class="line">	root()</div><div class="line">	&#123;</div><div class="line">		m_r1 = 1;</div><div class="line">		m_r2 = 2;</div><div class="line">	&#125;</div><div class="line">	~root()&#123;&#125;;</div><div class="line">	virtual void v_funr()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is root&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line"></div><div class="line"></div><div class="line">&#125;;</div><div class="line">class base_class : virtual public root</div><div class="line">&#123;</div><div class="line">private:</div><div class="line">	int m_a;</div><div class="line">	int m_b;</div><div class="line"></div><div class="line">public:</div><div class="line">	base_class()</div><div class="line">	&#123;</div><div class="line">		m_a = 3;</div><div class="line">		m_b = 4;</div><div class="line">	&#125;</div><div class="line">	~base_class()&#123;&#125;;</div><div class="line">	virtual void v_funr()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_funcr()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func1()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func2()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is base_class_A&apos;s v_func2()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;;</div><div class="line"></div><div class="line">class dev_class :virtual public base_class</div><div class="line">&#123;</div><div class="line">private: </div><div class="line">	int m_a;</div><div class="line">	int m_b;</div><div class="line">	int m_c;</div><div class="line">public:</div><div class="line">	dev_class();</div><div class="line">	~dev_class()&#123;&#125;;</div><div class="line">	virtual void v_funr()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class&apos;s v_funcr()&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func1()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func1&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_func3()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func3&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line">	virtual void v_fun5()</div><div class="line">	&#123;</div><div class="line">		cout &lt;&lt; &quot;This is dev_class`s v_func5&quot; &lt;&lt; endl;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;;</div><div class="line">dev_class :: dev_class():m_a(1),m_b(2),m_c(3)</div><div class="line">&#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Dev_class的时候<br><img src="http://img.blog.csdn.net/20151122151742269" alt="这里写图片描述"><br>此时[eax+0x4]和[eax+0x2c]存放的不再为虚表指针，而是一个偏转<br>我们可以查看下地址</p>
+<p><img src="http://img.blog.csdn.net/20151122151801115" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20151122151812050" alt="这里写图片描述"><br>在root构造时，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">00A22BA7    8B45 F8         mov eax,dword ptr ss:[ebp-0x8]</div><div class="line">00A22BAA    C700 90DCA200   mov dword ptr ds:[eax],offset vft.base_class::`vftable&apos;</div><div class="line">00A22BB0    8B45 F8         mov eax,dword ptr ss:[ebp-0x8]</div><div class="line">00A22BB3    8B48 04         mov ecx,dword ptr ds:[eax+0x4]                                          ; 得到偏转表地址</div><div class="line">00A22BB6    8B51 04         mov edx,dword ptr ds:[ecx+0x4]                                          ; 得到偏移地址</div><div class="line">00A22BB9    8B45 F8         mov eax,dword ptr ss:[ebp-0x8]</div><div class="line">00A22BBC    C74410 04 A0DCA&gt;mov dword ptr ds:[eax+edx+0x4],offset vft.base_class::`vftable&apos;         ; 通过偏转地址计算得到虚基类指针并修改</div><div class="line">00A22BC4    8B45 F8         mov eax,dword ptr ss:[ebp-0x8]</div><div class="line">00A22BC7    8B48 04         mov ecx,dword ptr ds:[eax+0x4]</div><div class="line">00A22BCA    8B51 04         mov edx,dword ptr ds:[ecx+0x4]</div><div class="line">00A22BCD    83EA 10         sub edx,0x10                                                            ; 减去类大小得到相对长度</div><div class="line">00A22BD0    8B45 F8         mov eax,dword ptr ss:[ebp-0x8]</div><div class="line">00A22BD3    8B48 04         mov ecx,dword ptr ds:[eax+0x4]                                          ; 得到偏移表地址</div><div class="line">00A22BD6    8B41 04         mov eax,dword ptr ds:[ecx+0x4]                                          ; 得到偏移</div><div class="line">00A22BD9    8B4D F8         mov ecx,dword ptr ss:[ebp-0x8]</div><div class="line">00A22BDC    891401          mov dword ptr ds:[ecx+eax],edx                                          ; 将偏移大小存放在虚基类前</div><div class="line">00A22BDF    8B45 F8         mov eax,dword ptr ss:[ebp-0x8]</div><div class="line">00A22BE2    C740 08 0300000&gt;mov dword ptr ds:[eax+0x8],0x3</div><div class="line">00A22BE9    8B45 F8         mov eax,dword ptr ss:[ebp-0x8]</div></pre></td></tr></table></figure>
+<p>可以发现刚刚分析 出来的偏转地址均指向 虚基类（root）的虚表指针<br><img src="http://img.blog.csdn.net/20151122151911239" alt="这里写图片描述"></p>
+<p>而FFFFFFFC则为-4，指向偏转表的前一个DWORD地址<br>我们继续看base类的构造<br><img src="http://img.blog.csdn.net/20151122151929266" alt="这里写图片描述"><br>通过偏移，使子类可以很容易访问到虚基类，进而对虚基类指针进行改写</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line">00FE2C8C    837D 08 00      cmp dword ptr ss:[ebp+0x8],0x0                                          ; 判断虚基类</div><div class="line">00FE2C90    74 51           je Xvft.00FE2CE3</div><div class="line">00FE2C92    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2C95    C740 04 58DDFE0&gt;mov dword ptr ds:[eax+0x4],offset vft.dev_class::`vbtable&apos;              ; 偏转表</div><div class="line">00FE2C9C    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2C9F    C740 2C 68DDFE0&gt;mov dword ptr ds:[eax+0x2C],offset vft.dev_class::`vbtable&apos;             ; 偏转表</div><div class="line">00FE2CA6    8B4D EC         mov ecx,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2CA9    83C1 18         add ecx,0x18                                                            ; 得到虚基类指针</div><div class="line">00FE2CAC    E8 5FE7FFFF     call vft.00FE1410</div><div class="line">00FE2CB1    C745 FC 0000000&gt;mov dword ptr ss:[ebp-0x4],0x0</div><div class="line">00FE2CB8    8B85 20FFFFFF   mov eax,dword ptr ss:[ebp-0xE0]</div><div class="line">00FE2CBE    83C8 01         or eax,0x1</div><div class="line">00FE2CC1    8985 20FFFFFF   mov dword ptr ss:[ebp-0xE0],eax                                         ; 虚基类已经构造</div><div class="line">00FE2CC7    6A 00           push 0x0</div><div class="line">00FE2CC9    8B4D EC         mov ecx,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2CCC    83C1 28         add ecx,0x28</div><div class="line">00FE2CCF    E8 BFE6FFFF     call vft.00FE1393                                                       ; base构造</div><div class="line">00FE2CD4    8B85 20FFFFFF   mov eax,dword ptr ss:[ebp-0xE0]</div><div class="line">00FE2CDA    83C8 02         or eax,0x2</div><div class="line">00FE2CDD    8985 20FFFFFF   mov dword ptr ss:[ebp-0xE0],eax</div><div class="line">00FE2CE3    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2CE6    C700 30DDFE00   mov dword ptr ds:[eax],offset vft.dev_class::`vftable&apos;                  ; dev的虚表指针（指向fun3,fun5）</div><div class="line">00FE2CEC    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2CEF    8B48 04         mov ecx,dword ptr ds:[eax+0x4]</div><div class="line">00FE2CF2    8B51 04         mov edx,dword ptr ds:[ecx+0x4]                                          ; 得到偏移</div><div class="line">00FE2CF5    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2CF8    C74410 04 40DDF&gt;mov dword ptr ds:[eax+edx+0x4],offset vft.dev_class::`vftable&apos;          ; 通过偏移访问到虚基类并修改</div><div class="line">00FE2D00    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D03    8B48 04         mov ecx,dword ptr ds:[eax+0x4]</div><div class="line">00FE2D06    8B51 08         mov edx,dword ptr ds:[ecx+0x8]                                          ; 取到base类偏移</div><div class="line">00FE2D09    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]                                         ; 得到基址</div><div class="line">00FE2D0C    C74410 04 4CDDF&gt;mov dword ptr ds:[eax+edx+0x4],offset vft.dev_class::`vftable&apos;          ; 修改base类虚表指针</div><div class="line">00FE2D14    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D17    8B48 04         mov ecx,dword ptr ds:[eax+0x4]</div><div class="line">00FE2D1A    8B51 04         mov edx,dword ptr ds:[ecx+0x4]                                          ; 得到长度</div><div class="line">00FE2D1D    83EA 14         sub edx,0x14                                                            ; 减去类大小</div><div class="line">00FE2D20    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D23    8B48 04         mov ecx,dword ptr ds:[eax+0x4]</div><div class="line">00FE2D26    8B41 04         mov eax,dword ptr ds:[ecx+0x4]</div><div class="line">00FE2D29    8B4D EC         mov ecx,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D2C    891401          mov dword ptr ds:[ecx+eax],edx                                          ; 将偏移存放在虚基类前</div><div class="line">00FE2D2F    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D32    8B48 04         mov ecx,dword ptr ds:[eax+0x4]</div><div class="line">00FE2D35    8B51 08         mov edx,dword ptr ds:[ecx+0x8]</div><div class="line">00FE2D38    83EA 24         sub edx,0x24</div><div class="line">00FE2D3B    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]                                         ; 得到基址</div><div class="line">00FE2D3E    8B48 04         mov ecx,dword ptr ds:[eax+0x4]                                          ; 偏转表</div><div class="line">00FE2D41    8B41 08         mov eax,dword ptr ds:[ecx+0x8]                                          ; 偏移大小</div><div class="line">00FE2D44    8B4D EC         mov ecx,dword ptr ss:[ebp-0x14]                                         ; 基址</div><div class="line">00FE2D47    891401          mov dword ptr ds:[ecx+eax],edx                                          ; 将相对偏移存放在base前</div><div class="line">00FE2D4A    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D4D    C740 08 0100000&gt;mov dword ptr ds:[eax+0x8],0x1                                          ; m_a = 1</div><div class="line">00FE2D54    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D57    C740 0C 0200000&gt;mov dword ptr ds:[eax+0xC],0x2                                          ; m_b = 2</div><div class="line">00FE2D5E    8B45 EC         mov eax,dword ptr ss:[ebp-0x14]</div><div class="line">00FE2D61    C740 10 0300000&gt;mov dword ptr ds:[eax+0x10],0x3                                         ; m_c = 3</div></pre></td></tr></table></figure>
+<p>最终虚表为：<br><img src="http://img.blog.csdn.net/20151122152008473" alt="这里写图片描述"></p>
+<p>在虚表中我们发现<br><img src="http://img.blog.csdn.net/20151122152027057" alt="这里写图片描述"><br>而我们在funcr时发现有这样的结构：<br><img src="http://img.blog.csdn.net/20151122152041313" alt="这里写图片描述"><br>在dev.func1也有这样的结构<br><img src="http://img.blog.csdn.net/20151122152054844" alt="这里写图片描述"></p>
+<p>我们现在总结在内存中，虚拟继承结构如下：<br><img src="http://img.blog.csdn.net/20151122152109782" alt="这里写图片描述"></p>
+<p>#总结：<br>在分析虚函数，当存在多重继承（虚拟继承中有虚函数）情况下，虚表的结构会发生变化，将会多出一个偏转表，通过对偏移地址的操作进而去访问和改写父类虚表指针。而其在内存中的结构也与普通继承有些不同（考虑跟编译器有关！）。</p>
+<p><em>本文如需转载，请注明出处</em></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/逆向/" rel="tag"># 逆向</a>
+          
+            <a href="/tags/虚函数/" rel="tag"># 虚函数</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/01/EssentialPIM逆向分析及二次开发/" rel="next" title="EssentialPIM逆向分析及二次开发">
+                <i class="fa fa-chevron-left"></i> EssentialPIM逆向分析及二次开发
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/26/虾米音乐vip破解/" rel="prev" title="虾米音乐vip破解">
+                虾米音乐vip破解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/11/12/c++虚函数逆向分析/"
+           data-title="c++虚函数逆向分析" data-url="http://venidic.com/2015/11/12/c++虚函数逆向分析/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

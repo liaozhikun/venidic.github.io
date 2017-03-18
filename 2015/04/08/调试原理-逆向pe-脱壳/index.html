@@ -1,0 +1,842 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="脱壳,调试原理," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="这几天都没怎么写博客了，主要是因为在写文件系统过滤的时候老是 蓝屏，感觉心力交瘁，根本一点都不想再看内核代码，就逆向分析了一下peid的原理，前辈们关于这一块的分析的文章也很多，这里只是按照我个人的思路对peid进行逆向分析，大体弄清楚peid怎么对一个pe文件进行分析的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[调试原理]逆向peid_脱壳">
+<meta property="og:url" content="http://venidic.com/2015/04/08/调试原理-逆向pe-脱壳/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="这几天都没怎么写博客了，主要是因为在写文件系统过滤的时候老是 蓝屏，感觉心力交瘁，根本一点都不想再看内核代码，就逆向分析了一下peid的原理，前辈们关于这一块的分析的文章也很多，这里只是按照我个人的思路对peid进行逆向分析，大体弄清楚peid怎么对一个pe文件进行分析的。">
+<meta property="og:image" content="http://img.blog.csdn.net/20150409003057754">
+<meta property="og:image" content="http://img.blog.csdn.net/20150409003438997">
+<meta property="og:image" content="http://img.blog.csdn.net/20150409003748752">
+<meta property="og:image" content="http://img.blog.csdn.net/20150409003801158">
+<meta property="og:image" content="http://img.blog.csdn.net/20150409011008366">
+<meta property="og:image" content="http://img.blog.csdn.net/20150409011201310">
+<meta property="og:image" content="http://img.blog.csdn.net/20150409011247143">
+<meta property="og:updated_time" content="2015-04-08T17:21:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[调试原理]逆向peid_脱壳">
+<meta name="twitter:description" content="这几天都没怎么写博客了，主要是因为在写文件系统过滤的时候老是 蓝屏，感觉心力交瘁，根本一点都不想再看内核代码，就逆向分析了一下peid的原理，前辈们关于这一块的分析的文章也很多，这里只是按照我个人的思路对peid进行逆向分析，大体弄清楚peid怎么对一个pe文件进行分析的。">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150409003057754">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/04/08/调试原理-逆向pe-脱壳/"/>
+
+
+
+
+
+  <title> [调试原理]逆向peid_脱壳 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/04/08/调试原理-逆向pe-脱壳/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [调试原理]逆向peid_脱壳
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-08T00:06:53+08:00">
+                2015-04-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/08/调试原理-逆向pe-脱壳/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/08/调试原理-逆向pe-脱壳/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这几天都没怎么写博客了，主要是因为在写文件系统过滤的时候老是 蓝屏，感觉心力交瘁，根本一点都不想再看内核代码，就逆向分析了一下peid的原理，前辈们关于这一块的分析的文章也很多，这里只是按照我个人的思路对peid进行逆向分析，大体弄清楚peid怎么对一个pe文件进行分析的。<br><a id="more"></a></p>
+<p>#工具：<br>逆向工具：ollydbg，peid<br>脱壳工具：lordpe，importREC，ollydump<br>分析对象：peid v0.94</p>
+<p>#分析过程：</p>
+<p>##收集信息<br>首先用peid分析peid <del>好奇怪的样子</del>，得知加过壳，壳的版本为PECompact 2.x -&gt; Jeremy Collake，不算是强壳，直接od载入程序，先脱壳再说</p>
+<p>##oep不完美脱壳<br>单步一步发现只有eax和eip变化，不管，在尝试单步一次，发现只有esp和eip变化，不多说，直接右键esp数据窗口跟随，然后下硬件访问断点，shift+F9忽略异常运行，中断在系统领空</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">77B8B5BB    3B45 F8         cmp eax,dword ptr ss:[ebp-0x8]</div><div class="line">77B8B5BE    72 09           jb Xntdll_1A.77B8B5C9</div><div class="line">77B8B5C0    3B45 F4         cmp eax,dword ptr ss:[ebp-0xC]</div><div class="line">77B8B5C3    0F82 1DAE0100   jb ntdll_1A.77BA63E6</div><div class="line">77B8B5C9    FF75 F0         push dword ptr ss:[ebp-0x10]</div><div class="line">77B8B5CC    FF73 04         push dword ptr ds:[ebx+0x4]</div><div class="line">77B8B5CF    E8 15FEFFFF     call ntdll_1A.77B8B3E9</div></pre></td></tr></table></figure>
+<p>再次shift+F9，到上一步的call中，再次shift+f9，两次后，返回程序领空</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">0047A497    53              push ebx</div><div class="line">0047A498    51              push ecx</div><div class="line">0047A499    57              push edi</div><div class="line">0047A49A    56              push esi</div><div class="line">0047A49B    52              push edx</div><div class="line">0047A49C    8D98 04129300   lea ebx,dword ptr ds:[eax+0x931204]</div><div class="line">0047A4A2    8B53 18         mov edx,dword ptr ds:[ebx+0x18]</div></pre></td></tr></table></figure>
+<p>可以发现，这个地方仍然不是OEP，仍然在壳中对程序进行处理，我们再一次shitf+f9，来到关键跳转</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">0047A525    5D              pop ebp</div><div class="line">0047A526  - FFE0            jmp eax           ; PEiD.0045A8CC</div><div class="line">0047A528    CC              int3</div><div class="line">0047A529    A8 45           test al,0x45</div><div class="line">0047A52B    0000            add byte ptr ds:[eax],al</div></pre></td></tr></table></figure>
+<p>毫无疑问，跳转过去就应该是oep了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">0045A8CC   .  6A 60         push 0x60</div><div class="line">0045A8CE   .  68 10CF4200   push PEiD.0042CF10</div><div class="line">0045A8D3   ?  E8 B4180000   call PEiD.0045C18C</div><div class="line">0045A8D8   .  BF 94000000   mov edi,0x94</div><div class="line">0045A8DD   ?  8BC7          mov eax,edi</div><div class="line">0045A8DF   ?  E8 5CFDFFFF   call PEiD.0045A640</div></pre></td></tr></table></figure>
+<p>很经典的vc的开头，那么直接脱壳吧<br>lordpe先纠正一下镜像大小后完整转存<br><img src="http://img.blog.csdn.net/20150409003057754" alt="这里写图片描述"><br>后用ollydump记录一下oep后，用importREC修复一下转存文件<br><img src="http://img.blog.csdn.net/20150409003438997" alt="这里写图片描述"><br>发现这个地方有3个无效函数，这里直接cut掉，并不会影响程序的运行，然后修复一下转存文件，双击发现可以正常运行<br><img src="http://img.blog.csdn.net/20150409003748752" alt="这里写图片描述"><br>用peid在查一下dumped_发现脱壳完成<br><img src="http://img.blog.csdn.net/20150409003801158" alt="这里写图片描述"><br>这里算是不完美脱壳，因为有几个函数直接被删掉了，如果想要完美脱壳，需要手动修复IAT表</p>
+<p>##完美脱壳<br>前面一模一样，在importREC检查到有无效函数的时候，在oep下硬件执行断点，然后在数据窗口找到这个RVA，下硬件访问断点<br><img src="http://img.blog.csdn.net/20150409011008366" alt="这里写图片描述"><br>执行到OEP，然后在反汇编窗口查看rva<br><img src="http://img.blog.csdn.net/20150409011201310" alt="这里写图片描述"><br>在用importREC修复<br><img src="http://img.blog.csdn.net/20150409011247143" alt="这里写图片描述"><br>完美修复</p>
+<p>#后<br>今天只是将peid的壳脱了，其实脱PECompact的方法很多，因为是一款比较经典的压缩壳， 所以其实bp VirtualAlloc和bp VirtualFree配合使用也是可以脱壳的。<br>比较晚了，准备睡了，之后另外一部分逆向peid的内容明天再写吧，晚安！</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/脱壳/" rel="tag"># 脱壳</a>
+          
+            <a href="/tags/调试原理/" rel="tag"># 调试原理</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/06/filter-键盘过滤/" rel="next" title="[filter]键盘过滤">
+                <i class="fa fa-chevron-left"></i> [filter]键盘过滤
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/09/逆向-360逆向writeup/" rel="prev" title="[逆向]360逆向writeup">
+                [逆向]360逆向writeup <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/04/08/调试原理-逆向pe-脱壳/"
+           data-title="[调试原理]逆向peid_脱壳" data-url="http://venidic.com/2015/04/08/调试原理-逆向pe-脱壳/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

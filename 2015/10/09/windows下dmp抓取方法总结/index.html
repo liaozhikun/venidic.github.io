@@ -1,0 +1,855 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="windbg,dmp," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近一段时间在帮一个同学调代码（当然是萌妹子，要不然谁会高兴看别人的代码啊喂！！！）发现妹子写的代码进程容易crash掉。其实作为windows开发员很头疼的就是程序编译通过但是在运行的时候crash掉。但是作为一个软件调试者，最基本的crash后dmp的抓取和分析是基本的技能了。这段时间趁着这个机会也回顾下这些知识然后总结下来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows下dmp抓取方法总结">
+<meta property="og:url" content="http://venidic.com/2015/10/09/windows下dmp抓取方法总结/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="最近一段时间在帮一个同学调代码（当然是萌妹子，要不然谁会高兴看别人的代码啊喂！！！）发现妹子写的代码进程容易crash掉。其实作为windows开发员很头疼的就是程序编译通过但是在运行的时候crash掉。但是作为一个软件调试者，最基本的crash后dmp的抓取和分析是基本的技能了。这段时间趁着这个机会也回顾下这些知识然后总结下来。">
+<meta property="og:image" content="http://img.blog.csdn.net/20151106184958883">
+<meta property="og:image" content="http://img.blog.csdn.net/20151106190237075">
+<meta property="og:image" content="http://img.blog.csdn.net/20151106192435963">
+<meta property="og:image" content="http://img.blog.csdn.net/20151106192522028">
+<meta property="og:updated_time" content="2015-11-07T03:01:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="windows下dmp抓取方法总结">
+<meta name="twitter:description" content="最近一段时间在帮一个同学调代码（当然是萌妹子，要不然谁会高兴看别人的代码啊喂！！！）发现妹子写的代码进程容易crash掉。其实作为windows开发员很头疼的就是程序编译通过但是在运行的时候crash掉。但是作为一个软件调试者，最基本的crash后dmp的抓取和分析是基本的技能了。这段时间趁着这个机会也回顾下这些知识然后总结下来。">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20151106184958883">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/10/09/windows下dmp抓取方法总结/"/>
+
+
+
+
+
+  <title> windows下dmp抓取方法总结 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/10/09/windows下dmp抓取方法总结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                windows下dmp抓取方法总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-10-09T17:36:03+08:00">
+                2015-10-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统安全/" itemprop="url" rel="index">
+                    <span itemprop="name">系统安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/10/09/windows下dmp抓取方法总结/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/10/09/windows下dmp抓取方法总结/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近一段时间在帮一个同学调代码（当然是萌妹子，要不然谁会高兴看别人的代码啊喂！！！）发现妹子写的代码进程容易crash掉。其实作为windows开发员很头疼的就是程序编译通过但是在运行的时候crash掉。但是作为一个软件调试者，最基本的crash后dmp的抓取和分析是基本的技能了。这段时间趁着这个机会也回顾下这些知识然后总结下来。<br><a id="more"></a></p>
+<p>#程序崩溃的种类</p>
+<ul>
+<li>程序崩溃后弹出提示框</li>
+<li>程序直接退出</li>
+<li>系统崩溃，蓝屏</li>
+</ul>
+<p>#第三方程序dmp抓取<br>一般运行第三方程序的时候可能会遇到程序宕掉的情况，但是此时我们又没有源码，如果想要重现dmp过程的话，通过对软件的逆向分析可以从正向的角度去跟踪程序crash的过程，当然也可以通过借助软件来辅助我们分析崩掉了的程序。<br>类似的工具有很多，之前也有人搜集过了：<br><a href="http://www.wintellect.com/devcenter/jrobbins/how-to-capture-a-minidump-let-me-count-the-ways" target="_blank" rel="external">How To Capture A Minidump</a><br>这里我简单的介绍下自己进程使用的一些工具：</p>
+<p>##windows自带工具<br>对，你没看错，windows自带的工具很完善</p>
+<ul>
+<li>windows任务管理器</li>
+</ul>
+<p><img src="http://img.blog.csdn.net/20151106184958883" alt="这里写图片描述"></p>
+<ul>
+<li>windows注册表<br>在注册表项<br><strong>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting\ </strong>添加<br>LocalDumps项，<br><img src="http://img.blog.csdn.net/20151106190237075" alt="这里写图片描述"><br>DumpType：<br>0 = Create a custom dump<br>1 = Mini dump<br>2 = Full dump </li>
+</ul>
+<p>##windbg<br>windbg是经典的分析dmp的工具啦<br> 比较简单的，就是为windbg设置一个运行的参数。<br> <img src="http://img.blog.csdn.net/20151106192435963" alt="这里写图片描述"><br>然后windbg会弹出提示过框：<br><img src="http://img.blog.csdn.net/20151106192522028" alt="这里写图片描述"><br>然后此时在运行程序，如果程序崩溃，则会默认启动windbg加载，然后就可以通过windbg生成dmp文件：<br>.dump /参数 dmp路径<br>/m ：生成minidump，只保存系统信息，加载模块，进程及线程<br>/ma：尽可能多的信息，包括整的内存内容、句柄、未加载的模块，等等<br>/mFhutwd：带有数据段，非共享的读/写内存页和其他有用信息的minidump<br>这种生成dmp文件的方式是借助了windbg的附加，所以如果程序加入了反调试的话，就稍微显得复杂些。</p>
+<p>##drwtsn32.exe<br>用法和windbg类似，可以先将他设置为默认的调试器<br>drwtsn32 [-i][-g][-p pid][-e event]<br>-i：讲drwtsn设置为默认的应用程序错误调试程序<br>-g: 被忽略，但作为windbg和ntsd的兼容而被提供<br>-p：pid为要调试的进程id<br>-e：event表示进程附加完成的事件</p>
+<p>具体可参见：<br><a href="http://wenku.baidu.com/link?url=pvpcRmv-7qasikv4For9yJA3fU8LuCoLL1VTJdEnU5_P_RD_FTCMz4qdN1_WYRnetH69bBPVBH12Om3BM4APSrlw2m392mSIpw1-7o4i8LW" target="_blank" rel="external">drwtsn32使用手册</a></p>
+<p>##google breakpad</p>
+<blockquote>
+<p>Google breakpad是一个非常实用的跨平台的崩溃转储和分析模块，他支持Windows，Linux和Mac和Solaris。由于他本身跨平台，所以很大的减少我们在平台移植时的工作，毕竟崩溃转储，每个平台下都不同，使用起来很难统一，而Google breakpad就帮我们做到了这一点，不管是哪个平台下的崩溃，都能够进行统一的分析。</p>
+</blockquote>
+<p>一般使用这种方式主要是为了跨平台，抓取dmp方式也分为进程内抓取和进程外抓取，可以参见：<br><a href="http://bigasp.com/archives/450" target="_blank" rel="external">Google Breakpad 完全解析</a></p>
+<p>#程序自己生成dmp文件<br>上面多数应用与我们在分析第三方软件时崩溃所要抓取的dmp，但是在我们自己写程序的时候，可以让程序自动生成dmp文件以辅助我们以后的分析。<br>一般我们使用2个api就可以实现dmp的生成了。SetUnhandledExceptionFilter截获异常；MiniDumpWriteDump写dump文件。大体是先设置异常处理函数，这样当触发异常的时候回调我们的处理函数，然后在回调函数中完成对dmp的生成。<br>关于MiniDumpWriteDump:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">BOOL MiniDumpWriteDump (</div><div class="line">HANDLE hProcess,	//进程句柄</div><div class="line">DWORD ProcessId,	//进程ID</div><div class="line">HANDLE hFile,	//写入的文件句柄</div><div class="line">MINIDUMP_TYPE DumpType,	//dmp文件类型</div><div class="line">PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, //指向MINIDUMP_EXCEPTION_INFORMATION 结构的指针</div><div class="line">PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, //null</div><div class="line">PMINIDUMP_CALLBACK_INFORMATION CallbackParam	//null</div><div class="line">);</div></pre></td></tr></table></figure>
+<p>一般我们在异常回调的函数内这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">CString   strDumpFile; </div><div class="line">    strDumpFile.Format(&quot;%d&quot;,CTime::GetCurrentTime().GetTickCount());</div><div class="line">    strDumpFile   +=  &quot;.dmp &quot;; </div><div class="line">    HANDLE   hFile   =   CreateFile(strDumpFile,   GENERIC_WRITE,   FILE_SHARE_WRITE,   NULL,   CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,   NULL   );</div><div class="line"></div><div class="line">    if   (hFile!=INVALID_HANDLE_VALUE)</div><div class="line">    &#123; </div><div class="line">        MINIDUMP_EXCEPTION_INFORMATION   ExInfo; </div><div class="line"></div><div class="line">        ExInfo.ThreadId   =   ::GetCurrentThreadId();</div><div class="line">        ExInfo.ExceptionPointers   =   ExceptionInfo;</div><div class="line">        ExInfo.ClientPointers   =   NULL;</div><div class="line"></div><div class="line">        //   write   the   dump</div><div class="line">        BOOL   bOK   =   MiniDumpWriteDump(GetCurrentProcess(),   GetCurrentProcessId(),   hFile,   MiniDumpNormal,  &amp;ExInfo,   NULL,   NULL   );</div><div class="line">        CloseHandle(hFile); </div><div class="line">    &#125; </div><div class="line"></div><div class="line">    theApp.PostThreadMessage(WM_QUIT,0,0);</div><div class="line">    return EXCEPTION_EXECUTE_HANDLER;</div></pre></td></tr></table></figure>
+<p>但是这样就会在想要生成dmp的每一次都要设置一次异常处理函数，为了方便，可以将其封装成一个类（<em>代码来自nightxie前辈</em>：）<br>NXLog.h：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">#if !defined(AFX_NXLOG_H__DF9682BE_3FD5_4712_897D_22193AD50832__INCLUDED_)</div><div class="line">#define AFX_NXLOG_H__DF9682BE_3FD5_4712_897D_22193AD50832__INCLUDED_</div><div class="line"></div><div class="line">#include &lt;windows.h&gt;</div><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &lt;DbgHelp.h&gt;</div><div class="line">#include &lt;tchar.h&gt;</div><div class="line"></div><div class="line">#pragma comment(lib, &quot;DbgHelp.lib&quot;)</div><div class="line">#if _MSC_VER &gt; 1000</div><div class="line">#pragma once</div><div class="line">#endif // _MSC_VER &gt; 1000</div><div class="line"></div><div class="line">class CNXExpRpt</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	CNXExpRpt();</div><div class="line">	~CNXExpRpt();</div><div class="line"></div><div class="line">	static LONG WINAPI NXUnhandledExceptionFilter(</div><div class="line">		PEXCEPTION_POINTERS pExceptionInfo );</div><div class="line"></div><div class="line"></div><div class="line">	static TCHAR m_szLogFileName[MAX_PATH];</div><div class="line">	static LPTOP_LEVEL_EXCEPTION_FILTER m_previousFilter;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">extern CNXExpRpt g_NXExpRpt;</div><div class="line">#endif // !defined(AFX_NXLOG_H__DF9682BE_3FD5_4712_897D_22193AD50832__INCLUDED_)</div></pre></td></tr></table></figure></p>
+<p>NXLog.cpp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line">// NXLog.cpp: implementation of the CNXLog class.</div><div class="line">//</div><div class="line">//////////////////////////////////////////////////////////////////////</div><div class="line"></div><div class="line">#include &quot;NXLog.h&quot;</div><div class="line"></div><div class="line">//////////////////////////////////////////////////////////////////////</div><div class="line">// Construction/Destruction</div><div class="line">//////////////////////////////////////////////////////////////////////</div><div class="line"></div><div class="line">TCHAR CNXExpRpt::m_szLogFileName[MAX_PATH];</div><div class="line">LPTOP_LEVEL_EXCEPTION_FILTER CNXExpRpt::m_previousFilter;</div><div class="line"></div><div class="line">CNXExpRpt g_NXExpRpt;</div><div class="line"></div><div class="line">CNXExpRpt::CNXExpRpt()</div><div class="line">&#123;</div><div class="line">	SYSTEMTIME	systime = &#123;0&#125;;</div><div class="line">	TCHAR		pDataBuffer[24] = &#123;0&#125;;</div><div class="line">	m_previousFilter = SetUnhandledExceptionFilter(NXUnhandledExceptionFilter);</div><div class="line"></div><div class="line">	GetModuleFileName(0, m_szLogFileName, MAX_PATH);</div><div class="line"></div><div class="line">	GetLocalTime(&amp;systime);</div><div class="line">	_stprintf(pDataBuffer, TEXT(&quot;%04d-%02d-%02d_%02d-%02d-%02d.dmp&quot;), </div><div class="line">		systime.wYear, systime.wMonth, systime.wDay, systime.wHour,</div><div class="line">		systime.wMinute, systime.wSecond);</div><div class="line"></div><div class="line">	PTSTR pszDot = _tcsrchr(m_szLogFileName, _T(&apos;\\&apos;));</div><div class="line">	if (pszDot)</div><div class="line">	&#123;</div><div class="line">		pszDot++;</div><div class="line">		if (_tcslen(pszDot) &gt;= 3)</div><div class="line">			_tcscpy(pszDot, pDataBuffer);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">CNXExpRpt::~CNXExpRpt()</div><div class="line">&#123;</div><div class="line">	SetUnhandledExceptionFilter(m_previousFilter);</div><div class="line">&#125;</div><div class="line"></div><div class="line">LONG WINAPI CNXExpRpt::NXUnhandledExceptionFilter(</div><div class="line">	PEXCEPTION_POINTERS lpExceptionInfo)</div><div class="line">&#123;</div><div class="line"></div><div class="line">	MINIDUMP_EXCEPTION_INFORMATION mdei = &#123;0&#125;;</div><div class="line">	MINIDUMP_TYPE	mdt;</div><div class="line">	BOOL			retv = FALSE;</div><div class="line">	HANDLE			hFile = 0;</div><div class="line"></div><div class="line">	hFile = CreateFile(m_szLogFileName, GENERIC_READ | GENERIC_WRITE,</div><div class="line">		0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);</div><div class="line">	if (hFile == INVALID_HANDLE_VALUE )</div><div class="line">		return FALSE;</div><div class="line"></div><div class="line">	mdei.ThreadId			= GetCurrentThreadId();</div><div class="line">	mdei.ExceptionPointers	= lpExceptionInfo;</div><div class="line">	mdei.ClientPointers		= FALSE;</div><div class="line"></div><div class="line">	mdt	= MiniDumpNormal;</div><div class="line">	retv = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),</div><div class="line">		hFile, mdt, ( lpExceptionInfo != 0 ) ? &amp;mdei : 0, 0, 0);</div><div class="line"></div><div class="line">	CloseHandle(hFile);</div><div class="line">	return (LONG)retv;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>一般在使用这种方法时，需要注意是否有其他的异常回调函数，很有可能我们的代码不会捕获这次异常，有可能会被调试器或者veh或者其他的seh接管。所以一般可能我们还会hook 掉设置异常的系统api，让异常能够被我们接管，这样就可以自己生产dmp文件了</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/windbg/" rel="tag"># windbg</a>
+          
+            <a href="/tags/dmp/" rel="tag"># dmp</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/09/20/命令与征服崩溃分析/" rel="next" title="[命令与征服]崩溃分析">
+                <i class="fa fa-chevron-left"></i> [命令与征服]崩溃分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/20/windows分层过滤驱动再理解/" rel="prev" title="windows分层过滤驱动再理解">
+                windows分层过滤驱动再理解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/10/09/windows下dmp抓取方法总结/"
+           data-title="windows下dmp抓取方法总结" data-url="http://venidic.com/2015/10/09/windows下dmp抓取方法总结/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

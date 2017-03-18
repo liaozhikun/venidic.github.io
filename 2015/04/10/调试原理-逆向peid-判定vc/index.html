@@ -1,0 +1,839 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="逆向,调试原理," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="以前一直认为一个工具只要会用就可以了，可是作为一名喜欢安全的渣渣来讲，会用还远远不够，你还得了解它，欺骗它，改造它，提升它！上一篇文章讲了如何脱掉peid0.94版本的壳[调试原理]逆向peid_脱壳这一篇文章对peid开始逆向分析它的原理。开始的时候，从最简单的分析起：如何判断程序有vc编译器编译的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[调试原理]逆向peid_判定vc">
+<meta property="og:url" content="http://venidic.com/2015/04/10/调试原理-逆向peid-判定vc/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="以前一直认为一个工具只要会用就可以了，可是作为一名喜欢安全的渣渣来讲，会用还远远不够，你还得了解它，欺骗它，改造它，提升它！上一篇文章讲了如何脱掉peid0.94版本的壳[调试原理]逆向peid_脱壳这一篇文章对peid开始逆向分析它的原理。开始的时候，从最简单的分析起：如何判断程序有vc编译器编译的。">
+<meta property="og:image" content="http://img.blog.csdn.net/20150410003829752">
+<meta property="og:image" content="http://img.blog.csdn.net/20150410003955100">
+<meta property="og:image" content="http://img.blog.csdn.net/20150410004953236">
+<meta property="og:image" content="http://img.blog.csdn.net/20150410114519068">
+<meta property="og:image" content="http://img.blog.csdn.net/20150410114805922">
+<meta property="og:image" content="http://img.blog.csdn.net/20150410115057585">
+<meta property="og:image" content="http://img.blog.csdn.net/20150410115754530">
+<meta property="og:updated_time" content="2015-04-10T04:08:20.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[调试原理]逆向peid_判定vc">
+<meta name="twitter:description" content="以前一直认为一个工具只要会用就可以了，可是作为一名喜欢安全的渣渣来讲，会用还远远不够，你还得了解它，欺骗它，改造它，提升它！上一篇文章讲了如何脱掉peid0.94版本的壳[调试原理]逆向peid_脱壳这一篇文章对peid开始逆向分析它的原理。开始的时候，从最简单的分析起：如何判断程序有vc编译器编译的。">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150410003829752">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/04/10/调试原理-逆向peid-判定vc/"/>
+
+
+
+
+
+  <title> [调试原理]逆向peid_判定vc | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/04/10/调试原理-逆向peid-判定vc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [调试原理]逆向peid_判定vc
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-10T00:21:43+08:00">
+                2015-04-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/10/调试原理-逆向peid-判定vc/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/10/调试原理-逆向peid-判定vc/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>以前一直认为一个工具只要会用就可以了，可是作为一名喜欢安全的渣渣来讲，会用还远远不够，你还得了解它，欺骗它，改造它，提升它！<br>上一篇文章讲了如何脱掉peid0.94版本的壳<br><a href="http://venidic.com/2015/04/08/%E8%B0%83%E8%AF%95%E5%8E%9F%E7%90%86-%E9%80%86%E5%90%91pe-%E8%84%B1%E5%A3%B3/#more" target="_blank" rel="external">[调试原理]逆向peid_脱壳</a><br>这一篇文章对peid开始逆向分析它的原理。开始的时候，从最简单的分析起：如何判断程序有vc编译器编译的。<br><a id="more"></a></p>
+<p>逆向工具：ollydbg，ida，winhex<br>分析对象：peid v0.94(完美脱壳后uppeid)<br>测试程序：TraceMe.exe</p>
+<hr>
+<p>打开peid加载TraceMe.exe发现为Microsoft Visual C++ 6.0编写，所以直接打开ollydbg，查找字符串Microsoft Visual C，发现字符串<br><img src="http://img.blog.csdn.net/20150410003829752" alt="这里写图片描述"><br>双机来到这个字符所在的地方<br><img src="http://img.blog.csdn.net/20150410003955100" alt="这里写图片描述"><br>发现跳转来自的地方，往上寻找，发现这个函数的起始部分<br><em>这里用IDA一样可以达到相同的效果</em><br>直接下断，然后用peid加载我们的测试程序TraceMe.exe，后F9，程序中断下来<br>单步运行，将分析的算法写在下面的代码中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line">00438C26  |.  53            push ebx</div><div class="line">00438C27  |.  55            push ebp</div><div class="line">00438C28  |.  56            push esi</div><div class="line">00438C29  |.  57            push edi                                 ;  下面就是填充一个数组</div><div class="line">00438C2A  |.  B0 72         mov al,0x72                              ;  &quot;r&quot;</div><div class="line">00438C2C  |.  884424 2F     mov byte ptr ss:[esp+0x2F],al</div><div class="line">00438C30  |.  884424 31     mov byte ptr ss:[esp+0x31],al</div><div class="line">00438C34  |.  884424 34     mov byte ptr ss:[esp+0x34],al</div><div class="line">00438C38  |.  884424 39     mov byte ptr ss:[esp+0x39],al</div><div class="line">00438C3C  |.  884424 3D     mov byte ptr ss:[esp+0x3D],al</div><div class="line">00438C40  |.  B0 63         mov al,0x63</div><div class="line">00438C42  |.  884424 40     mov byte ptr ss:[esp+0x40],al            ;  &quot;c&quot;</div><div class="line">00438C46  |.  884424 41     mov byte ptr ss:[esp+0x41],al</div><div class="line">00438C4A  |.  B0 73         mov al,0x73</div><div class="line">00438C4C  |.  884424 43     mov byte ptr ss:[esp+0x43],al            ;  &quot;s&quot;</div><div class="line">00438C50  |.  884424 44     mov byte ptr ss:[esp+0x44],al</div><div class="line">00438C54  |.  B0 6C         mov al,0x6C</div><div class="line">00438C56  |.  884424 47     mov byte ptr ss:[esp+0x47],al            ;  &quot;l&quot;</div><div class="line">00438C5A  |.  884424 48     mov byte ptr ss:[esp+0x48],al</div><div class="line">00438C5E  |.  8BB424 A00400&gt;mov esi,dword ptr ss:[esp+0x4A0]</div><div class="line">00438C65  |.  8B46 0C       mov eax,dword ptr ds:[esi+0xC]           ;  &quot;PE&quot;</div><div class="line">00438C68  |.  8B56 18       mov edx,dword ptr ds:[esi+0x18]          ;  .text</div><div class="line">00438C6B  |.  B1 6D         mov cl,0x6D</div><div class="line">00438C6D  |.  884C24 36     mov byte ptr ss:[esp+0x36],cl            ;  &quot;m&quot;</div><div class="line">00438C71  |.  884C24 3E     mov byte ptr ss:[esp+0x3E],cl</div><div class="line">00438C75  |.  B3 41         mov bl,0x41                              ;  &apos;A&apos;</div><div class="line">00438C77  |.  C64424 2C 7B  mov byte ptr ss:[esp+0x2C],0x7B          ;  &quot;g&quot;</div><div class="line">00438C7C  |.  C64424 2D 4F  mov byte ptr ss:[esp+0x2D],0x4F</div><div class="line">00438C81  |.  C64424 2E 75  mov byte ptr ss:[esp+0x2E],0x75</div><div class="line">00438C86  |.  C64424 30 50  mov byte ptr ss:[esp+0x30],0x50</div><div class="line">00438C8B  |.  C64424 32 6F  mov byte ptr ss:[esp+0x32],0x6F</div><div class="line">00438C90  |.  C64424 33 67  mov byte ptr ss:[esp+0x33],0x67</div><div class="line">00438C95  |.  C64424 35 61  mov byte ptr ss:[esp+0x35],0x61</div><div class="line">00438C9A  |.  C64424 37 44  mov byte ptr ss:[esp+0x37],0x44</div><div class="line">00438C9F  |.  C64424 38 69  mov byte ptr ss:[esp+0x38],0x69</div><div class="line">00438CA4  |.  C64424 3A 7D  mov byte ptr ss:[esp+0x3A],0x7D</div><div class="line">00438CA9  |.  C64424 3B 5C  mov byte ptr ss:[esp+0x3B],0x5C</div><div class="line">00438CAE  |.  885C24 3C     mov byte ptr ss:[esp+0x3C],bl</div><div class="line">00438CB2  |.  885C24 3F     mov byte ptr ss:[esp+0x3F],bl</div><div class="line">00438CB6  |.  C64424 42 65  mov byte ptr ss:[esp+0x42],0x65</div><div class="line">00438CBB  |.  C64424 45 2E  mov byte ptr ss:[esp+0x45],0x2E</div><div class="line">00438CC0  |.  C64424 46 64  mov byte ptr ss:[esp+0x46],0x64</div><div class="line">00438CC5  |.  C64424 18 4D  mov byte ptr ss:[esp+0x18],0x4D</div><div class="line">00438CCA  |.  C64424 19 53  mov byte ptr ss:[esp+0x19],0x53</div><div class="line">00438CCF  |.  C64424 1A 43  mov byte ptr ss:[esp+0x1A],0x43</div><div class="line">00438CD4  |.  C64424 1B 46  mov byte ptr ss:[esp+0x1B],0x46</div><div class="line">00438CD9  |.  0FB740 06     movzx eax,word ptr ds:[eax+0x6]          ;  PE后偏移6位置为块的数目</div><div class="line">00438CDD  |.  8D0C80        lea ecx,dword ptr ds:[eax+eax*4]         ;  块数目*5=0x14</div><div class="line">00438CE0  |.  8B6CCA E8     mov ebp,dword ptr ds:[edx+ecx*8-0x18]    ;  .text段地址+块数*40-0x18 = 1000（最后一个段大小）</div><div class="line">00438CE4  |.  8D44CA D8     lea eax,dword ptr ds:[edx+ecx*8-0x28]    ;  最后一个段地址（&quot;.rsrc&quot;段地址）</div><div class="line">00438CE8  |.  8B78 14       mov edi,dword ptr ds:[eax+0x14]          ;  获取最后一个段（.rsrc）的偏移</div><div class="line">00438CEB  |.  8B46 04       mov eax,dword ptr ds:[esi+0x4]           ;  最后一个节末尾偏移</div><div class="line">00438CEE  |.  03FD          add edi,ebp</div><div class="line">00438CF0  |.  8BAC24 9C0400&gt;mov ebp,dword ptr ss:[esp+0x49C]         ;  数组中某值</div><div class="line">00438CF7  |.  8D8F 00390000 lea ecx,dword ptr ds:[edi+0x3900]</div><div class="line">00438CFD  |.  3BC1          cmp eax,ecx</div><div class="line">00438CFF  |.  73 1A         jnb XupPEiD.00438D1B</div><div class="line">00438D01  |.  8B55 20       mov edx,[arg.7]                          ;  获得程序rva</div><div class="line">00438D04  |.  85D2          test edx,edx                             ;  判断是否为0</div><div class="line">00438D06  |.  74 13         je XupPEiD.00438D1B</div><div class="line">00438D08  |.  8B4E 18       mov ecx,dword ptr ds:[esi+0x18]          ;  text段</div><div class="line">00438D0B  |.  8B79 14       mov edi,dword ptr ds:[ecx+0x14]          ;  text段在文件中的偏移</div><div class="line">00438D0E  |.  0379 10       add edi,dword ptr ds:[ecx+0x10]          ;  偏移+text段在文件中的块大小=text末尾偏移</div><div class="line">00438D11  |.  3BD7          cmp edx,edi</div><div class="line">00438D13  |.  0F82 E4020000 jb upPEiD.00438FFD                       ;  跳（确保oep在text段中）（vc的一个特征）</div></pre></td></tr></table></figure>
+<p>在上面的代码中00438D01处我的注释是获得程序 RVA</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">00438D01  |.  8B55 20       mov edx,[arg.7]   ;  获得程序rva</div></pre></td></tr></table></figure>
+<p>这个地方并不是直接分析得到的，发现程序每次加载的时候arg.7的地址为00471018<br><img src="http://img.blog.csdn.net/20150410004953236" alt="这里写图片描述"><br>右键数据窗口中跟随，记录地址，然后重新加载程序，在00471018地方下 内存访问断点，F9运行后加载TraceMe.exe，在下面的地方断下：<br><img src="http://img.blog.csdn.net/20150410114519068" alt="这里写图片描述"><br>而直接在数据窗口中跟随，并没有发现任何头绪，往上回溯代码，发现最开始赋给eax的地方在这里：<br><img src="http://img.blog.csdn.net/20150410114805922" alt="这里写图片描述"><br>数据窗口中跟随：</p>
+<p><img src="http://img.blog.csdn.net/20150410115057585" alt="这里写图片描述"><br>熟悉pe结构的看A0130000那个地方是不是在IMAGE_NT_HEADERS部分中IMAGE_OPTIONAL_HEADER中偏移为16的位置，而这个位置对应的就是address of entrypoint，所以这个地方就应该是程序的RVA(OEP)</p>
+<p>那么这个分析只是分析了部分判定vc的代码，那么在之前还会不会又判定呢？我们看看那在判定vc的时候的堆栈<br><img src="http://img.blog.csdn.net/20150410115754530" alt="这里写图片描述"><br>右键跟随，发现回到刚刚赋给rva的代码空间，前面的代码段其实就是在将程序的偏移，基址送给这个函数，然后判断，下面的代码段主要就是将函数指针数组的下标存进一个数组，然后调用相关函数确认程序类型。</p>
+<p><del>昨晚分析一般加载TraceMe的时候电脑卡死了，瞬间很是生气，就没有在进行分析了，有兴趣的大牛们可以进行分析指针数组那个地方</del></p>
+<p>分析了一点，其他分析的思路也差不多和这个一样，大牛勿喷！</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/逆向/" rel="tag"># 逆向</a>
+          
+            <a href="/tags/调试原理/" rel="tag"># 调试原理</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/09/逆向-360逆向writeup/" rel="next" title="[逆向]360逆向writeup">
+                <i class="fa fa-chevron-left"></i> [逆向]360逆向writeup
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/13/反调试-去除各种反调试/" rel="prev" title="[反调试]去除各种反调试">
+                [反调试]去除各种反调试 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/04/10/调试原理-逆向peid-判定vc/"
+           data-title="[调试原理]逆向peid_判定vc" data-url="http://venidic.com/2015/04/10/调试原理-逆向peid-判定vc/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

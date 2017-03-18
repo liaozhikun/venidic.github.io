@@ -1,0 +1,850 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="逆向,游戏分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近思来想去，眼看着自己就要进某厂游戏安全团队实习了，也不能整天的无所事事，所以就寻思着先找点最简单的游戏用来练练手，于是乎就选择了扫雷这款经典的游戏作为逆向分析算法和外挂编写的第一战！本文着重分析扫雷的算法，外挂编写请看随后的文章">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[逆向]扫雷算法分析">
+<meta property="og:url" content="http://venidic.com/2015/05/04/逆向-扫雷算法分析/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="最近思来想去，眼看着自己就要进某厂游戏安全团队实习了，也不能整天的无所事事，所以就寻思着先找点最简单的游戏用来练练手，于是乎就选择了扫雷这款经典的游戏作为逆向分析算法和外挂编写的第一战！本文着重分析扫雷的算法，外挂编写请看随后的文章">
+<meta property="og:image" content="http://img.blog.csdn.net/20150505100915668">
+<meta property="og:image" content="http://img.blog.csdn.net/20150505102637308">
+<meta property="og:image" content="http://img.blog.csdn.net/20150505103847119">
+<meta property="og:image" content="http://img.blog.csdn.net/20150506192037729">
+<meta property="og:image" content="http://img.blog.csdn.net/20150505155516200">
+<meta property="og:image" content="http://img.blog.csdn.net/20150506194030803">
+<meta property="og:image" content="http://img.blog.csdn.net/20150506194149006">
+<meta property="og:image" content="http://img.blog.csdn.net/20150506194435431">
+<meta property="og:updated_time" content="2015-11-19T11:54:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[逆向]扫雷算法分析">
+<meta name="twitter:description" content="最近思来想去，眼看着自己就要进某厂游戏安全团队实习了，也不能整天的无所事事，所以就寻思着先找点最简单的游戏用来练练手，于是乎就选择了扫雷这款经典的游戏作为逆向分析算法和外挂编写的第一战！本文着重分析扫雷的算法，外挂编写请看随后的文章">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150505100915668">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/05/04/逆向-扫雷算法分析/"/>
+
+
+
+
+
+  <title> [逆向]扫雷算法分析 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/05/04/逆向-扫雷算法分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [逆向]扫雷算法分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-05-04T21:15:59+08:00">
+                2015-05-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/05/04/逆向-扫雷算法分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/05/04/逆向-扫雷算法分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近思来想去，眼看着自己就要进某厂游戏安全团队实习了，也不能整天的无所事事，所以就寻思着先找点最简单的游戏用来练练手，于是乎就选择了扫雷这款经典的游戏作为逆向分析算法和外挂编写的第一战！<br><em>本文着重分析扫雷的算法，外挂编写请看随后的文章</em><br><a id="more"></a></p>
+<p>#工具<br>分析对象：winmine/扫雷(windows xp版本)<br>逆向工具：ollydbg，IDA，peid，ResHacker<br>操作平台：windows7 旗舰版</p>
+<p>#分析过程</p>
+<p>##main函数定位<br>peid加载winmine发现为vc编写的，没有加过壳，则可以确定加载程序的流程为：<del>获取当前版本号，堆初始化，获取命令行参数，获取环境变量，分离出命令行参数，全局数据和浮点寄存器初始化</del>所以在main（这里应该是winmain了）调用前，调用流程为：<br>GetVersion()—–&gt;_heap_init()—–&gt;GetCommandLine()—–&gt;_crtGetEnvironmentStrings()—–&gt;_setargv()—–&gt;_setenvp()—–&gt;_cinit()<br>所以很容易找到winmain的调用地址，跟进之后发现<br><img src="http://img.blog.csdn.net/20150505100915668" alt="这里写图片描述"><br>发现这里便是在做一些初始化<br>很快找到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line">:010022D5                 	   mov     ecx, yBottom</div><div class="line">.text:010022DB                 mov     edx, xRight</div><div class="line">.text:010022E1                 push    edi             ; lpParam</div><div class="line">.text:010022E2                 push    hInstance       ; hInstance</div><div class="line">.text:010022E8                 add     ecx, eax</div><div class="line">.text:010022EA                 push    edi             ; hMenu</div><div class="line">.text:010022EB                 push    edi             ; hWndParent</div><div class="line">.text:010022EC                 push    ecx             ; nHeight</div><div class="line">.text:010022ED                 mov     ecx, dword_1005A90</div><div class="line">.text:010022F3                 add     edx, ecx</div><div class="line">.text:010022F5                 push    edx             ; nWidth</div><div class="line">.text:010022F6                 mov     edx, Y</div><div class="line">.text:010022FC                 sub     edx, eax</div><div class="line">.text:010022FE                 mov     eax, X</div><div class="line">.text:01002303                 push    edx             ; Y</div><div class="line">.text:01002304                 sub     eax, ecx</div><div class="line">.text:01002306                 push    eax             ; X</div><div class="line">.text:01002307                 push    0CA0000h        ; dwStyle</div><div class="line">.text:0100230C                 push    esi             ; lpWindowName</div><div class="line">.text:0100230D                 push    esi             ; lpClassName</div><div class="line">.text:0100230E                 push    edi             ; dwExStyle</div><div class="line">.text:0100230F                 call    ds:CreateWindowExW</div><div class="line">.text:01002315                 cmp     eax, edi</div><div class="line">.text:01002317                 mov     hWnd, eax</div><div class="line">.text:0100231C                 jnz     short loc_1002325</div><div class="line">.text:0100231E                 push    3E8h</div><div class="line">.text:01002323                 jmp     short loc_1002336</div><div class="line">.text:01002325 ; ---------------------------------------------------------------------------</div><div class="line">.text:01002325</div><div class="line">.text:01002325 loc_1002325:                            ; CODE XREF: WinMain+12Cj</div><div class="line">.text:01002325                 push    ebx</div><div class="line">.text:01002326                 call    sub_1001950     ；位置</div><div class="line">.text:0100232B                 call    sub_1002B14     ; 装载资源</div><div class="line">.text:01002330                 test    eax, eax</div><div class="line">.text:01002332                 jnz     short loc_1002342</div><div class="line">.text:01002334                 push    5</div><div class="line">.text:01002336</div><div class="line">.text:01002336 loc_1002336:                            ; CODE XREF: WinMain+133j</div><div class="line">.text:01002336                 call    sub_1003950</div><div class="line">.text:0100233B</div><div class="line">.text:0100233B loc_100233B:                            ; CODE XREF: WinMain+ABj</div><div class="line">.text:0100233B                 xor     eax, eax</div><div class="line">.text:0100233D                 jmp     loc_10023C6</div><div class="line">.text:01002342 ; ---------------------------------------------------------------------------</div><div class="line">.text:01002342</div><div class="line">.text:01002342 loc_1002342:                            ; CODE XREF: WinMain+142j</div><div class="line">.text:01002342                 push    dword_10056C4</div><div class="line">.text:01002348                 call    sub_1003CE5</div><div class="line">.text:0100234D                 call    SetMine         ; 布置雷区</div><div class="line">.text:01002352                 push    ebx             ; nCmdShow</div><div class="line">.text:01002353                 push    hWnd            ; hWnd</div><div class="line">.text:01002359                 call    ds:ShowWindow</div><div class="line">.text:0100235F                 push    hWnd            ; hWnd</div><div class="line">.text:01002365                 call    ds:UpdateWindow</div><div class="line">.text:0100236B                 mov     esi, ds:GetMessageW</div><div class="line">.text:01002371                 mov     dword_1005B38, edi</div><div class="line">.text:01002377                 jmp     short loc_10023A4</div></pre></td></tr></table></figure>
+<p>##分析可疑函数<br>在createwindow，分别调用了4个函数，然后就showwindow了，那么这4个函数肯定完成了在扫雷前用户的选择，资源的加载，雷区的绘制.<br>跟进第一个函数<strong>sub_1001950</strong>,发现主要调用了GetMenuItemRect和MoveWindow函数将窗口待会创建到制定位置，这里跟我们关心的算法没有太大关系，所以不做分析。<br>跟进第二个函数<strong>sub_1002B14</strong>，发现主要在调用LoadResource进行加载资源<br>跟进第三个函数<strong>sub_1003CE5</strong>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">.text:01003CE5 sub_1003CE5     proc near               ; CODE XREF: sub_1001BC9:loc_1001D00p</div><div class="line">.text:01003CE5                                         ; WinMain+158p</div><div class="line">.text:01003CE5</div><div class="line">.text:01003CE5 arg_0           = dword ptr  4</div><div class="line">.text:01003CE5</div><div class="line">.text:01003CE5                 mov     eax, [esp+arg_0]</div><div class="line">.text:01003CE9                 mov     dword_10056C4, eax</div><div class="line">.text:01003CEE                 call    sub_1001516     ; 菜单选项</div><div class="line">.text:01003CF3                 mov     eax, dword_10056C4</div><div class="line">.text:01003CF8                 and     al, 1</div><div class="line">.text:01003CFA                 neg     al</div><div class="line">.text:01003CFC                 sbb     eax, eax</div><div class="line">.text:01003CFE                 not     eax</div><div class="line">.text:01003D00                 and     eax, hMenu</div><div class="line">.text:01003D06                 push    eax             ; hMenu</div><div class="line">.text:01003D07                 push    hWnd            ; hWnd</div><div class="line">.text:01003D0D                 call    ds:SetMenu</div><div class="line">.text:01003D13                 push    2</div><div class="line">.text:01003D15                 call    sub_1001950</div><div class="line">.text:01003D1A                 retn    4</div><div class="line">.text:01003D1A sub_1003CE5     endp</div></pre></td></tr></table></figure>
+<p>发现在调用<strong>sub_1001516</strong>之后调用了SerMenu，之后再次调用了第一个函数<strong>sub_1001950</strong>,应该就是处理用户选择不同难度而对窗口进行的重新布置吧<br><img src="http://img.blog.csdn.net/20150505102637308" alt="这里写图片描述"><br>跟进<strong>sub_1001516</strong><br><em>为了之后分析方便，将sub_1001516改名为MenuChoose，sub_1001950改名为SetWindow</em></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">/*注：本代码中CheckMenu为自己分析后自己起的函数名*/</div><div class="line">.text:01001516 MenuChoose      proc near               ; CODE XREF: sub_1001B49+24p</div><div class="line">.text:01001516                                         ; sub_1003CE5+9p</div><div class="line">.text:01001516                 xor     eax, eax</div><div class="line">.text:01001518                 cmp     word ptr dword_10056A0, ax</div><div class="line">.text:0100151F                 setz    al</div><div class="line">.text:01001522                 push    eax</div><div class="line">.text:01001523                 push    209h            ; 521</div><div class="line">.text:01001528                 call    CheckMenu</div><div class="line">.text:0100152D                 xor     eax, eax</div><div class="line">.text:0100152F                 cmp     word ptr dword_10056A0, 1</div><div class="line">.text:01001537                 setz    al</div><div class="line">.text:0100153A                 push    eax</div><div class="line">.text:0100153B                 push    20Ah            ; 522</div><div class="line">.text:01001540                 call    CheckMenu</div><div class="line">.text:01001545                 xor     eax, eax</div><div class="line">.text:01001547                 cmp     word ptr dword_10056A0, 2</div><div class="line">.text:0100154F                 setz    al</div><div class="line">.text:01001552                 push    eax</div><div class="line">.text:01001553                 push    20Bh            ; 523</div><div class="line">.text:01001558                 call    CheckMenu</div><div class="line">.text:0100155D                 xor     eax, eax</div><div class="line">.text:0100155F                 cmp     word ptr dword_10056A0, 3</div><div class="line">.text:01001567                 setz    al</div><div class="line">.text:0100156A                 push    eax</div><div class="line">.text:0100156B                 push    20Ch            ; 524</div><div class="line">.text:01001570                 call    CheckMenu</div><div class="line">.text:01001575                 push    dword_10056C8</div><div class="line">.text:0100157B                 push    211h            ; 529</div><div class="line">.text:01001580                 call    CheckMenu</div><div class="line">.text:01001585                 push    Data</div><div class="line">.text:0100158B                 push    20Fh            ; 527</div><div class="line">.text:01001590                 call    CheckMenu</div><div class="line">.text:01001595                 push    dword_10056B8</div><div class="line">.text:0100159B                 push    20Eh</div><div class="line">.text:010015A0                 call    CheckMenu</div><div class="line">.text:010015A5                 retn</div><div class="line">.text:010015A5 MenuChoose      endp</div></pre></td></tr></table></figure>
+<p>这里差不多就应该是通过资源ID选择了，用ResHacker分析一下得证<br><img src="http://img.blog.csdn.net/20150505103847119" alt="这里写图片描述"></p>
+<p>然后分析最后一个函数SetMine(<em>原函数名为sun_xxxxxx，通过分析已经修改函数名</em>)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">.text:010036A4</div><div class="line">.text:010036A4 loc_10036A4:                            ; CODE XREF: SetMine+1Cj</div><div class="line">.text:010036A4                                         ; SetMine+24j</div><div class="line">.text:010036A4                 push    6</div><div class="line">.text:010036A6</div><div class="line">.text:010036A6 loc_10036A6:                            ; CODE XREF: SetMine+28j</div><div class="line">.text:010036A6                 pop     ebx</div><div class="line">.text:010036A7                 mov     dword_1005334, eax</div><div class="line">.text:010036AC                 mov     dword_1005338, ecx</div><div class="line">.text:010036B2                 call    PaintMine</div><div class="line">.text:010036B7                 mov     eax, dword_10056A4</div><div class="line">.text:010036BC                 mov     dword_1005160, edi</div><div class="line">.text:010036C2                 mov     dword_1005330, eax</div><div class="line">.text:010036C7</div><div class="line">.text:010036C7 loc_10036C7:                            ; CODE XREF: SetMine+74j</div><div class="line">.text:010036C7                                         ; SetMine+89j</div><div class="line">.text:010036C7                 push    dword_1005334</div><div class="line">.text:010036CD                 call    Rand</div><div class="line">.text:010036D2                 push    dword_1005338</div><div class="line">.text:010036D8                 mov     esi, eax</div><div class="line">.text:010036DA                 inc     esi</div><div class="line">.text:010036DB                 call    Rand</div><div class="line">.text:010036E0                 inc     eax</div><div class="line">.text:010036E1                 mov     ecx, eax</div><div class="line">.text:010036E3                 shl     ecx, 5</div><div class="line">.text:010036E6                 test    byte_1005340[ecx+esi], 80h</div><div class="line">.text:010036EE                 jnz     short loc_10036C7</div></pre></td></tr></table></figure>
+<p>##绘制雷区函数分析<br>发现期中一个函数（<strong>PaintMine</strong>）便是在绘制雷区<br>大体F5把握一下大致的意思</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">int __cdecl PaintMine()</div><div class="line">&#123;</div><div class="line">  signed int v0; // eax@1</div><div class="line">  int v1; // ecx@3</div><div class="line">  int v2; // edx@3</div><div class="line">  int result; // eax@3</div><div class="line">  int v4; // esi@5</div><div class="line">  char *v5; // edx@6</div><div class="line"></div><div class="line">  v0 = 864;</div><div class="line">  do</div><div class="line">  &#123;</div><div class="line">    --v0;</div><div class="line">    byte_1005340[v0] = 15;</div><div class="line">  &#125;</div><div class="line">  while ( v0 );</div><div class="line">  v1 = dword_1005334;</div><div class="line">  v2 = dword_1005338;</div><div class="line">  result = dword_1005334 + 2;</div><div class="line">  if ( dword_1005334 != -2 )</div><div class="line">  &#123;</div><div class="line">    do</div><div class="line">    &#123;</div><div class="line">      --result;</div><div class="line">      byte_1005340[result] = 16;</div><div class="line">      *(&amp;byte_1005360[32 * v2] + result) = 16;</div><div class="line">    &#125;</div><div class="line">    while ( result );</div><div class="line">  &#125;</div><div class="line">  v4 = v2 + 2;</div><div class="line">  if ( v2 != -2 )</div><div class="line">  &#123;</div><div class="line">    v5 = &amp;byte_1005340[32 * v4];</div><div class="line">    result = (int)((char *)&amp;unk_1005341 + 32 * v4 + v1);</div><div class="line">    do</div><div class="line">    &#123;</div><div class="line">      v5 -= 32;</div><div class="line">      result -= 32;</div><div class="line">      --v4;</div><div class="line">      *v5 = 16;</div><div class="line">      *(_BYTE *)result = 16;</div><div class="line">    &#125;</div><div class="line">    while ( v4 );</div><div class="line">  &#125;</div><div class="line">  return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>大体意思就是先将最大可能的雷区内数据全部设置为0xF，然后在根据用户选择菜单中的等级，绘制雷区的边界<br>OD动态跟踪：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">01002ED5  /$  B8 60030000   mov eax,0x360                            ;  算法如下，最大面积吧</div><div class="line">01002EDA  |&gt;  48            /dec eax                                 ;  循环0x360次</div><div class="line">01002EDB  |.  C680 40530001&gt;|mov byte ptr ds:[eax+0x1005340],0xF     ;  全部设置成0xf</div><div class="line">01002EE2  |.^ 75 F6         \jnz Xwinmine.01002EDA</div><div class="line">01002EE4  |.  8B0D 34530001 mov ecx,dword ptr ds:[0x1005334]         ;  长度</div><div class="line">01002EEA  |.  8B15 38530001 mov edx,dword ptr ds:[0x1005338]         ;  宽度</div><div class="line">01002EF0  |.  8D41 02       lea eax,dword ptr ds:[ecx+0x2]           ;  长度+2</div><div class="line">01002EF3  |.  85C0          test eax,eax</div><div class="line">01002EF5  |.  56            push esi</div><div class="line">01002EF6  |.  74 19         je Xwinmine.01002F11</div><div class="line">01002EF8  |.  8BF2          mov esi,edx</div><div class="line">01002EFA  |.  C1E6 05       shl esi,0x5                              ;  长度左移5位</div><div class="line">01002EFD  |.  8DB6 60530001 lea esi,dword ptr ds:[esi+0x1005360]     ;  为定位到边界值</div><div class="line">01002F03  |&gt;  48            /dec eax</div><div class="line">01002F04  |.  C680 40530001&gt;|mov byte ptr ds:[eax+0x1005340],0x10    ;  雷区的上边界设置为0x10</div><div class="line">01002F0B  |.  C60406 10     |mov byte ptr ds:[esi+eax],0x10          ;  设置下边界的标志位0x10</div><div class="line">01002F0F  |.^ 75 F2         \jnz Xwinmine.01002F03</div><div class="line">01002F11  |&gt;  8D72 02       lea esi,dword ptr ds:[edx+0x2]</div><div class="line">01002F14  |.  85F6          test esi,esi</div><div class="line">01002F16  |.  74 21         je Xwinmine.01002F39</div><div class="line">01002F18  |.  8BC6          mov eax,esi</div><div class="line">01002F1A  |.  C1E0 05       shl eax,0x5                              ;  宽度移位</div><div class="line">01002F1D  |.  8D90 40530001 lea edx,dword ptr ds:[eax+0x1005340]</div><div class="line">01002F23  |.  8D8408 415300&gt;lea eax,dword ptr ds:[eax+ecx+0x1005341] ;  定位到左边界</div><div class="line">01002F2A  |&gt;  83EA 20       /sub edx,0x20                            ;  一行的长度</div><div class="line">01002F2D  |.  83E8 20       |sub eax,0x20</div><div class="line">01002F30  |.  4E            |dec esi</div><div class="line">01002F31  |.  C602 10       |mov byte ptr ds:[edx],0x10              ;  设置左右边界</div><div class="line">01002F34  |.  C600 10       |mov byte ptr ds:[eax],0x10</div><div class="line">01002F37  |.^ 75 F1         \jnz Xwinmine.01002F2A</div><div class="line">01002F39  |&gt;  5E            pop esi                                  ;  winmine.01005AA0</div></pre></td></tr></table></figure>
+<p>最后在内存中画成的雷区的样子：（0x10为边界值）<br><img src="http://img.blog.csdn.net/20150506192037729" alt="这里写图片描述"><br>而我们打开游戏界面如图，刚好与之对应<br><img src="http://img.blog.csdn.net/20150505155516200" alt="这里写图片描述"></p>
+<p>##生成地雷函数分析<br>之后回到SetMine函数中，在调用<strong>PaintMine</strong>之后绘制雷区之后通过调用<strong>Rand</strong>随机在雷区中生成雷。<br>直接F5看一下SetMine</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">do</div><div class="line">  &#123;</div><div class="line">    do</div><div class="line">    &#123;</div><div class="line">      v1 = Rand(dword_1005334) + 1;</div><div class="line">      v2 = Rand(dword_1005338) + 1;</div><div class="line">    &#125;</div><div class="line">    while ( *(&amp;byte_1005340[32 * v2] + v1) &amp; 0x80 );</div><div class="line">    *(&amp;byte_1005340[32 * v2] + v1) |= 0x80u;</div><div class="line">    --Num;</div><div class="line">  &#125;</div><div class="line">  while ( Num );</div></pre></td></tr></table></figure>
+<p>通过分析，可以明白这里的v2即是纵坐标，v1为横坐标，然后判断此处是否有地雷，没有在设置地雷（0x8F）<br>OD动态分析证明上述分析：<br><img src="http://img.blog.csdn.net/20150506194030803" alt="这里写图片描述"></p>
+<p>最后生成完雷就是这个样子：<br><img src="http://img.blog.csdn.net/20150506194149006" alt="这里写图片描述"><br>按照这个自然就很好扫雷咯<br><img src="http://img.blog.csdn.net/20150506194435431" alt="这里写图片描述"></p>
+<p>#后<br>关于扫雷 游戏的核心算法大体就分析这么多了，因为主要是为了下一篇的扫雷外挂的编写，所以相关的鼠标点击算法就没有记录下来了。<br>未完待续，大牛勿喷！</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/逆向/" rel="tag"># 逆向</a>
+          
+            <a href="/tags/游戏分析/" rel="tag"># 游戏分析</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/23/安全岗实习生应聘/" rel="next" title="安全岗实习生应聘">
+                <i class="fa fa-chevron-left"></i> 安全岗实习生应聘
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/05/06/对游戏安全的一些认识/" rel="prev" title="对游戏安全的一些认识">
+                对游戏安全的一些认识 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/05/04/逆向-扫雷算法分析/"
+           data-title="[逆向]扫雷算法分析" data-url="http://venidic.com/2015/05/04/逆向-扫雷算法分析/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

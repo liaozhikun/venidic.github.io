@@ -1,0 +1,854 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="驱动," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="这篇文章接着上面一篇，主要讲述如何x64与x86编程的不同以及如何通过编程自加载所编写的驱动。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="win7 x64内核安全（2）-驱动加载">
+<meta property="og:url" content="http://venidic.com/2016/01/23/x64内核安全（2）-驱动加载/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="这篇文章接着上面一篇，主要讲述如何x64与x86编程的不同以及如何通过编程自加载所编写的驱动。">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0e41ihvhej20dl0bkq3a.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0e4272y5rj208m0ajmx9.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0e43ep5bij20jn09awfu.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0e43lbh4cj20mz0a5myg.jpg">
+<meta property="og:updated_time" content="2016-01-28T03:08:20.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="win7 x64内核安全（2）-驱动加载">
+<meta name="twitter:description" content="这篇文章接着上面一篇，主要讲述如何x64与x86编程的不同以及如何通过编程自加载所编写的驱动。">
+<meta name="twitter:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0e41ihvhej20dl0bkq3a.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2016/01/23/x64内核安全（2）-驱动加载/"/>
+
+
+
+
+
+  <title> win7 x64内核安全（2）-驱动加载 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2016/01/23/x64内核安全（2）-驱动加载/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                win7 x64内核安全（2）-驱动加载
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-23T00:46:57+08:00">
+                2016-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统安全/" itemprop="url" rel="index">
+                    <span itemprop="name">系统安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/01/23/x64内核安全（2）-驱动加载/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/23/x64内核安全（2）-驱动加载/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这篇文章接着上面一篇，主要讲述如何x64与x86编程的不同以及如何通过编程自加载所编写的驱动。</p>
+<a id="more"></a>
+<p>#x64与x86驱动编程</p>
+<p>##系统变化<br>之前在x86体系下的xp，因为当时微软底层下限制很少，导致对驱动和内核的修改可以很轻松随意。于是2000年后xp系统上的病毒的泛滥程度可谓是 随处可见。后来微软对底层出了限制，在推出64位系统架构的时候，首先增加了WOW64（windows-on windows 64-bit）子系统机制，为了安全起见又推出了KPP（kernel patch protection）和DSE（driver signature enforcement）。</p>
+<ul>
+<li>wow64子系统：为兼容32位系统新增加的机制，通过“thunking”对32下的请求进行转换</li>
+<li>KPP（内核补丁保护）：检测内核是否被修改，挂钩，如果检测到则触发蓝屏，具体实现机制是patchguard技术</li>
+<li>DSE（驱动签名机制）：拒绝加载不包含正确签名的驱动（需要想微软官方购买正规的数字签名）</li>
+</ul>
+<p>关于如何绕过或者尽量避免这些限制，我们之后在讲，比如通过加载PatchGuard为保护的上层驱动，绕过KPP</p>
+<p><strong>wow64</strong>：<br>wow64包括文件<strong>文件系统重定向器</strong>和<strong>注册表重定向器</strong>，具体靠<code>Wow64.dll, Wow64Win.dll, Wow64Cpu.dll</code>来实现。<br>wow64子系统的引进，给编程带来的就是System32和SysWOW64这两个文件夹的困扰。由于WOW64存在，则一切32位相关的文件会被定位到syswow64文件夹中，而这个时候如果我们想要访问，则需要暂时关闭这个机制，用到api如下：<br><code>Wow64DisableWow64FsRedirection</code><br>回复需要用<code>Wow64RevertWow64FsRedirection</code><br>具体参数可MSDN查阅</p>
+<p><strong>关闭DSE：</strong><br>当然在我们测试的时候，使用命令<br><code>bcdedit -testsigning on</code> 打开测试签名模式，DSE不会严格执行<br><code>bcdedit -testsigning off</code> 关闭测试签名模式<br>或者在开机时F8，选择“禁用驱动程序强制签名”</p>
+<p><strong>关闭KPP：</strong><br>而使用双机调试环境，则patchguard不会被启动</p>
+<p>##编程差异<br><strong>内联汇编</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">#if DBG</div><div class="line">        _asm int 3</div><div class="line">#endif</div><div class="line">        return STATUS_SUCCESS;</div></pre></td></tr></table></figure></p>
+<p>上述在x64下编译会出错，取而代之为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">#if DBG</div><div class="line">        DbgBreakPoint();</div><div class="line">#endif</div><div class="line">        return STATUS_SUCCESS;</div></pre></td></tr></table></figure></p>
+<p>如果要单独使用汇编，则需要将函数放在asm文件中，在source中指定asm文件</p>
+<p><strong>预处理</strong><br>_M_AMD64: 编译环境为AMD64<br>_M_IX64:  编译环境为IA64</p>
+<p><strong>数据结构</strong><br>这个在只有我们遇到了再说</p>
+<p>#驱动加载<br>一般在测试过程中会使用现成的工具加载，但是当以后我们自己开发驱动的时候，就需要自动实现了。一般需要用到SCM（service control manager）组件。<br>一般使用SCM加载驱动的流程分为：<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0e41ihvhej20dl0bkq3a.jpg" alt=""><br>（<strong>注意上述GetLastError判断服务是否存在的时候那个返回值应该是这本书作者的一个失误，这里应该是ERROR_SERVICE_EXISTS</strong>）<br>卸载对应的流程如图：<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0e4272y5rj208m0ajmx9.jpg" alt=""><br>其中用到的API：<br>打开SCM管理器函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">SC_HANDLE WINAPI OpenSCManager(</div><div class="line">  _In_opt_ LPCTSTR lpMachineName,    //计算机名称</div><div class="line">  _In_opt_ LPCTSTR lpDatabaseName,   //SCM数据库名称</div><div class="line">  _In_     DWORD   dwDesiredAccess   //使用权限</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>关闭服务句柄<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">BOOL WINAPI CloseServiceHandle(</div><div class="line">  _In_ SC_HANDLE hSCObject    //要关闭的SCM句柄</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>创建服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">SC_HANDLE WINAPI CreateService(</div><div class="line">  _In_      SC_HANDLE hSCManager,</div><div class="line">  _In_      LPCTSTR   lpServiceName,</div><div class="line">  _In_opt_  LPCTSTR   lpDisplayName,</div><div class="line">  _In_      DWORD     dwDesiredAccess,</div><div class="line">  _In_      DWORD     dwServiceType,</div><div class="line">  _In_      DWORD     dwStartType,</div><div class="line">  _In_      DWORD     dwErrorControl,</div><div class="line">  _In_opt_  LPCTSTR   lpBinaryPathName,</div><div class="line">  _In_opt_  LPCTSTR   lpLoadOrderGroup,</div><div class="line">  _Out_opt_ LPDWORD   lpdwTagId,</div><div class="line">  _In_opt_  LPCTSTR   lpDependencies,</div><div class="line">  _In_opt_  LPCTSTR   lpServiceStartName,</div><div class="line">  _In_opt_  LPCTSTR   lpPassword</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>这个函数比较大，具体的可以参见MSDN官方文档</p>
+<p>打开服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">SC_HANDLE WINAPI OpenService(</div><div class="line">  _In_ SC_HANDLE hSCManager,</div><div class="line">  _In_ LPCTSTR   lpServiceName,</div><div class="line">  _In_ DWORD     dwDesiredAccess</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>引用下官网说明：</p>
+<blockquote>
+<p>hSCManager [in]<br>A handle to the service control manager database. The OpenSCManager function returns this handle. For more information, see Service Security and Access Rights.<br>lpServiceName [in]<br>The name of the service to be opened. This is the name specified by the lpServiceName parameter of the CreateService function when the service object was created, not the service display name that is shown by user interface applications to identify the service.<br>The maximum string length is 256 characters. The service control manager database preserves the case of the characters, but service name comparisons are always case insensitive. Forward-slash (/) and backslash () are invalid service name characters.<br>dwDesiredAccess [in]<br>The access to the service. For a list of access rights, see Service Security and Access Rights.<br>Before granting the requested access, the system checks the access token of the calling process against the discretionary access-control list of the security descriptor associated with the service object.</p>
+</blockquote>
+<p>控制服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">BOOL WINAPI ControlService(</div><div class="line">  _In_  SC_HANDLE        hService,</div><div class="line">  _In_  DWORD            dwControl,</div><div class="line">  _Out_ LPSERVICE_STATUS lpServiceStatus</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>具体解释参见MSDN<br><a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms682108(v=vs.85).aspx" target="_blank" rel="external">https://msdn.microsoft.com/en-us/library/windows/desktop/ms682108(v=vs.85).aspx</a></p>
+<p>已经有前辈巨巨将这些封装到一个类中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div></pre></td><td class="code"><pre><div class="line">/*============================</div><div class="line">Drvier Control Class (SCM way)</div><div class="line">============================*/</div><div class="line"></div><div class="line">#pragma comment(lib,&quot;advapi32.lib&quot;)</div><div class="line"></div><div class="line">class cDrvCtrl</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">    cDrvCtrl()</div><div class="line">    &#123;</div><div class="line">        m_pSysPath = NULL;</div><div class="line">        m_pServiceName = NULL;</div><div class="line">        m_pDisplayName = NULL;</div><div class="line">        m_hSCManager = NULL;</div><div class="line">        m_hService = NULL;</div><div class="line">        m_hDriver = INVALID_HANDLE_VALUE;</div><div class="line">    &#125;</div><div class="line">    ~cDrvCtrl()</div><div class="line">    &#123;</div><div class="line">        CloseServiceHandle(m_hService);</div><div class="line">        CloseServiceHandle(m_hSCManager);</div><div class="line">        CloseHandle(m_hDriver);</div><div class="line">    &#125;</div><div class="line">public:</div><div class="line">    DWORD m_dwLastError;</div><div class="line">    PCHAR m_pSysPath;</div><div class="line">    PCHAR m_pServiceName;</div><div class="line">    PCHAR m_pDisplayName;</div><div class="line">    HANDLE m_hDriver;</div><div class="line">    SC_HANDLE m_hSCManager;</div><div class="line">    SC_HANDLE m_hService;</div><div class="line">public:</div><div class="line">    BOOL Install(PCHAR pSysPath,PCHAR pServiceName,PCHAR pDisplayName);</div><div class="line">    BOOL Start();</div><div class="line">    BOOL Stop();</div><div class="line">    BOOL Remove();</div><div class="line">    BOOL Open(PCHAR pLinkName);</div><div class="line">    BOOL IoControl(DWORD dwIoCode, PVOID InBuff, DWORD InBuffLen, PVOID OutBuff, DWORD OutBuffLen, DWORD *RealRetBytes);</div><div class="line">private:</div><div class="line">    BOOL GetSvcHandle(PCHAR pServiceName);</div><div class="line">    DWORD CTL_CODE_GEN(DWORD lngFunction);</div><div class="line">protected:</div><div class="line">    //null</div><div class="line">&#125;;</div><div class="line"></div><div class="line">BOOL cDrvCtrl::GetSvcHandle(PCHAR pServiceName)</div><div class="line">&#123;</div><div class="line">    m_pServiceName = pServiceName;</div><div class="line">    m_hSCManager = OpenSCManagerA(NULL,NULL,SC_MANAGER_ALL_ACCESS);</div><div class="line">    if (NULL == m_hSCManager)</div><div class="line">    &#123;</div><div class="line">        m_dwLastError = GetLastError();</div><div class="line">        return FALSE;</div><div class="line">    &#125;</div><div class="line">    m_hService = OpenServiceA(m_hSCManager,m_pServiceName,SERVICE_ALL_ACCESS);</div><div class="line">    if (NULL == m_hService)</div><div class="line">    &#123;</div><div class="line">        CloseServiceHandle(m_hSCManager);</div><div class="line">        return FALSE;</div><div class="line">    &#125;</div><div class="line">    else</div><div class="line">    &#123;</div><div class="line">        return TRUE;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">BOOL cDrvCtrl::Install(PCHAR pSysPath,PCHAR pServiceName,PCHAR pDisplayName)</div><div class="line">&#123;</div><div class="line">    m_pSysPath = pSysPath;</div><div class="line">    m_pServiceName = pServiceName;</div><div class="line">    m_pDisplayName = pDisplayName;</div><div class="line">    m_hSCManager = OpenSCManagerA(NULL,NULL,SC_MANAGER_ALL_ACCESS);</div><div class="line">    if (NULL == m_hSCManager)</div><div class="line">    &#123;</div><div class="line">        m_dwLastError = GetLastError();</div><div class="line">        return FALSE;</div><div class="line">    &#125;</div><div class="line">    m_hService = CreateServiceA(m_hSCManager,m_pServiceName,m_pDisplayName,</div><div class="line">                                SERVICE_ALL_ACCESS,SERVICE_KERNEL_DRIVER,SERVICE_DEMAND_START,SERVICE_ERROR_NORMAL,</div><div class="line">                                m_pSysPath,NULL,NULL,NULL,NULL,NULL);</div><div class="line">    if (NULL == m_hService)</div><div class="line">    &#123;</div><div class="line">        m_dwLastError = GetLastError();</div><div class="line">        if (ERROR_SERVICE_EXISTS == m_dwLastError)</div><div class="line">        &#123;</div><div class="line">            m_hService = OpenServiceA(m_hSCManager,m_pServiceName,SERVICE_ALL_ACCESS);</div><div class="line">            if (NULL == m_hService)</div><div class="line">            &#123;</div><div class="line">                CloseServiceHandle(m_hSCManager);</div><div class="line">                return FALSE;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        else</div><div class="line">        &#123;</div><div class="line">            CloseServiceHandle(m_hSCManager);</div><div class="line">            return FALSE;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return TRUE;</div><div class="line">&#125;</div><div class="line"></div><div class="line">BOOL cDrvCtrl::Start()</div><div class="line">&#123;</div><div class="line">    if (!StartServiceA(m_hService,NULL,NULL))</div><div class="line">    &#123;</div><div class="line">        m_dwLastError = GetLastError();</div><div class="line">        return FALSE;</div><div class="line">    &#125;</div><div class="line">    return TRUE;</div><div class="line">&#125;</div><div class="line"></div><div class="line">BOOL cDrvCtrl::Stop()</div><div class="line">&#123;</div><div class="line">    SERVICE_STATUS ss;</div><div class="line">    GetSvcHandle(m_pServiceName);</div><div class="line">    if (!ControlService(m_hService,SERVICE_CONTROL_STOP,&amp;ss))</div><div class="line">    &#123;</div><div class="line">        m_dwLastError = GetLastError();</div><div class="line">        return FALSE;</div><div class="line">    &#125;</div><div class="line">    return TRUE;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">BOOL cDrvCtrl::Remove()</div><div class="line">&#123;</div><div class="line">    GetSvcHandle(m_pServiceName);</div><div class="line">    if (!DeleteService(m_hService))</div><div class="line">    &#123;</div><div class="line">        m_dwLastError = GetLastError();</div><div class="line">        return FALSE;</div><div class="line">    &#125;</div><div class="line">    return TRUE;</div><div class="line">&#125;</div><div class="line"></div><div class="line">BOOL cDrvCtrl::Open(PCHAR pLinkName)//example: \\\\.\\xxoo</div><div class="line">&#123;</div><div class="line">    if (m_hDriver != INVALID_HANDLE_VALUE)</div><div class="line">        return TRUE;</div><div class="line">    m_hDriver = CreateFileA(pLinkName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);</div><div class="line">    if(m_hDriver != INVALID_HANDLE_VALUE)</div><div class="line">        return TRUE;</div><div class="line">    else</div><div class="line">        return FALSE;</div><div class="line">&#125;</div><div class="line"></div><div class="line">BOOL cDrvCtrl::IoControl(DWORD dwIoCode, PVOID InBuff, DWORD InBuffLen, PVOID OutBuff, DWORD OutBuffLen, DWORD *RealRetBytes)</div><div class="line">&#123;</div><div class="line">    DWORD dw;</div><div class="line">    BOOL b=DeviceIoControl(m_hDriver,CTL_CODE_GEN(dwIoCode),InBuff,InBuffLen,OutBuff,OutBuffLen,&amp;dw,NULL);</div><div class="line">    if(RealRetBytes)</div><div class="line">        *RealRetBytes=dw;</div><div class="line">    return b;</div><div class="line">&#125;</div><div class="line"></div><div class="line">DWORD cDrvCtrl::CTL_CODE_GEN(DWORD lngFunction)</div><div class="line">&#123;</div><div class="line">    return (FILE_DEVICE_UNKNOWN * 65536) | (FILE_ANY_ACCESS * 16384) | (lngFunction * 4) | METHOD_BUFFERED;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们可以直接使用这个类编写一段测试代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &lt;windows.h&gt;</div><div class="line">#include &quot;ScmDrvCtrl.h&quot;</div><div class="line"></div><div class="line">#define IOCTL_IO_TEST 0x800</div><div class="line">#define IOCTL_IO_SAY_HELLO 0x801</div><div class="line"></div><div class="line"></div><div class="line">void main()</div><div class="line">&#123;</div><div class="line">    //得到当前目录下的驱动的全路径</div><div class="line">    char szSysFile[MAX_PATH] = &#123;0&#125;;</div><div class="line">    GetModuleFileNameA(0, szSysFile, MAX_PATH);</div><div class="line">    //加上反斜杠</div><div class="line">    for(SIZE_T i=strlen(szSysFile)-1;i&gt;=0;i--)</div><div class="line">    &#123;</div><div class="line">        if(szSysFile[i]==&apos;\\&apos;)</div><div class="line">        &#123;</div><div class="line">            szSysFile[i+1]=&apos;\0&apos;;</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    strcat(szSysFile, &quot;KrnlHW64.sys&quot;);</div><div class="line">    char *szSvcLinkName =  &quot;KrnlHW64&quot;;</div><div class="line">    cDrvCtrl cd; </div><div class="line">    if (FALSE == cd.Install(szSysFile, szSvcLinkName, szSvcLinkName))</div><div class="line">    &#123;</div><div class="line">        printf (&quot;[ERROR] Create Service failed\n&quot;);</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    if (FALSE == cd.Start())</div><div class="line">    &#123;</div><div class="line">        printf(&quot;[ERROR] Start Service failed\n&quot;);</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    //测试与驱动通信</div><div class="line">    if (FALSE == cd.Open(&quot;\\\\.\\KrnlHW64&quot;))</div><div class="line">    &#123;</div><div class="line">        printf(&quot;[ERROR]createfile about sys failed\n&quot;);</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    //传入控制码</div><div class="line">    DWORD InBuffer =100, OutBuffer = 0, RetBytes = 0;</div><div class="line">    cd.IoControl(IOCTL_IO_TEST, &amp;InBuffer, sizeof(InBuffer), &amp;OutBuffer, sizeof(OutBuffer), &amp;RetBytes);</div><div class="line">    printf(&quot;IN: %ld\nout: %ld\nReturnBytesLength: %ld\n&quot;, InBuffer, OutBuffer, RetBytes);</div><div class="line">    cd.IoControl(IOCTL_IO_SAY_HELLO, 0, 0, 0, 0, 0);</div><div class="line">    CloseHandle(cd.m_hDriver);</div><div class="line">    if (FALSE == cd.Stop())</div><div class="line">    &#123;</div><div class="line">        printf(&quot;[ERROR] services stop failed\n&quot;);</div><div class="line">        return;</div><div class="line">    &#125;   </div><div class="line">    cd.Remove();</div><div class="line"></div><div class="line">    getchar();</div><div class="line">    return;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在编译程序的程序为了兼容，最好将其编译成x64位的<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0e43ep5bij20jn09awfu.jpg" alt=""><br>编译后拖进虚拟机后运行，运行成功：<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0e43lbh4cj20mz0a5myg.jpg" alt=""></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/驱动/" rel="tag"># 驱动</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/22/x64内核安全（1）-环境搭建/" rel="next" title="win7 x64内核安全（1）-环境搭建">
+                <i class="fa fa-chevron-left"></i> win7 x64内核安全（1）-环境搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/24/x86ring0下跨进程读写内存/" rel="prev" title="x86架构下ring0下跨进程读写内存">
+                x86架构下ring0下跨进程读写内存 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/01/23/x64内核安全（2）-驱动加载/"
+           data-title="win7 x64内核安全（2）-驱动加载" data-url="http://venidic.com/2016/01/23/x64内核安全（2）-驱动加载/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

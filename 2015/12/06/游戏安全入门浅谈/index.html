@@ -1,0 +1,913 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="随笔," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="之前田哒哒问过我关于游戏安全入门的一些建议，后来自己给搞忘记了， 今天没事的时候逛论坛的时候发现了这个问题，于是想想决定总结一下，给之后对游戏安全感兴趣的学弟（或者学妹呃）一些可能的帮助。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="游戏安全入门浅谈">
+<meta property="og:url" content="http://venidic.com/2015/12/06/游戏安全入门浅谈/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="之前田哒哒问过我关于游戏安全入门的一些建议，后来自己给搞忘记了， 今天没事的时候逛论坛的时候发现了这个问题，于是想想决定总结一下，给之后对游戏安全感兴趣的学弟（或者学妹呃）一些可能的帮助。">
+<meta property="og:updated_time" content="2015-12-05T17:25:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="游戏安全入门浅谈">
+<meta name="twitter:description" content="之前田哒哒问过我关于游戏安全入门的一些建议，后来自己给搞忘记了， 今天没事的时候逛论坛的时候发现了这个问题，于是想想决定总结一下，给之后对游戏安全感兴趣的学弟（或者学妹呃）一些可能的帮助。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/12/06/游戏安全入门浅谈/"/>
+
+
+
+
+
+  <title> 游戏安全入门浅谈 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/12/06/游戏安全入门浅谈/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                游戏安全入门浅谈
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-06T00:08:32+08:00">
+                2015-12-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/游戏安全/" itemprop="url" rel="index">
+                    <span itemprop="name">游戏安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/12/06/游戏安全入门浅谈/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/06/游戏安全入门浅谈/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前田哒哒问过我关于游戏安全入门的一些建议，后来自己给搞忘记了， 今天没事的时候逛论坛的时候发现了这个问题，于是想想决定总结一下，给之后对游戏安全感兴趣的学弟（或者学妹呃）一些可能的帮助。<br><a id="more"></a><br>我记得在今年实习之前就写过两篇软文<br><a href="http://venidic.com/2015/04/23/%E5%AE%89%E5%85%A8%E5%B2%97%E5%AE%9E%E4%B9%A0%E7%94%9F%E5%BA%94%E8%81%98/" target="_blank" rel="external">安全岗实习生应聘</a><br><a href="http://venidic.com/2015/05/06/%E5%AF%B9%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E8%AE%A4%E8%AF%86/" target="_blank" rel="external">对游戏安全的一些认识</a><br>这些是在自己实习之前通过面试官的一些提问自己琢磨的一些理解或者感悟，后来去公司实习了2个来月，怎么说呢，通过自己的一些实践可能对游戏安全的体验和理解要稍微更到位一些。于是打算在写一篇软文来瞎扯一下哈哈哈。</p>
+<p>#游戏安全分类<br>在《网络游戏安全揭密》中，作者将游戏安全分为了3个方面（<em>感谢bru爷把自己的书借我，说好的在实习期给您一篇读书笔记的，后来结束的时候一直想着开发个工具也没能将后两章的笔记结束，然后在归还电脑的时候将md给格掉了，心碎了…</em>）。结合着业务相关（主要是网络方面）可以将作者的分类扩充到4个方面：</p>
+<ul>
+<li>游戏之上：游戏之上用户层，包含UI绘制，设计模式，系统架构，游戏引擎，消息响应；</li>
+<li>游戏之中：游戏内部相应机制，涉及到游戏逻辑分析，逆向工程，hook技术，注入技术，patch技术，异常回调和处理，以及反调和加壳；</li>
+<li><p>游戏之下：游戏运行在系统之上，所以在游戏底层，涉及到驱动过滤，驱动拦截，驱动开发，驱动适配，系统运行机制，消息处理机制，rootkit及反rootkit</p>
+</li>
+<li><p>游戏之路：游戏涉及到与服务器的交互，所以在交互层设计到上下行协议分析，报文加密，服务端并发处理，及反ddos</p>
+</li>
+</ul>
+<p>在实际业务中，可以将安全跟业务结合起来，又可以分为</p>
+<ul>
+<li>外挂对抗及方案保护：外挂原理分析及反外挂方案提出</li>
+<li>游戏分析及漏洞挖掘：游戏自身安全，逻辑问题</li>
+<li>增值服务及游戏助手：分析及提取游戏数据，开发相应辅助</li>
+<li>前端保护及后台分析：游戏保护，反调，日志统计，行为分析</li>
+</ul>
+<p>具体到游戏之中，又可以将游戏安全分为：</p>
+<ul>
+<li>攻击方向：<ul>
+<li>外挂开发：分析游戏开发相应功能外挂</li>
+<li>外挂安全：版本适配，绕过外挂检测，反反调试</li>
+</ul>
+</li>
+<li>防御方向：<ul>
+<li>游戏逻辑：游戏自身逻辑安全验证</li>
+<li>游戏漏洞：游戏自身漏洞排除</li>
+<li>游戏反调：防止分析有序</li>
+<li>外挂检测：检测可能存在的外挂</li>
+</ul>
+</li>
+</ul>
+<p>#游戏安全知识<br>在这里我仅仅针对外挂开发，游戏反调所涉及到的一些知识做一些总结，关于其他的我也不是很清楚哈哈。</p>
+<ul>
+<li><p>游戏分析</p>
+<ul>
+<li>反调试绕过：（<em>太多了这里不一一陈述</em>）</li>
+<li>游戏数据查找：CE搜索，逻辑分析，数据格式 </li>
+<li>游戏数据分析：基址及偏移定位，对象属性分析，资源文件分析……</li>
+<li>游戏逻辑分析：关键call定位</li>
+<li>游戏协议分析：上，下行协议分析</li>
+<li>执行时机获取：外部进程感知，独立线程感知，hook感知……</li>
+</ul>
+</li>
+<li><p>外挂编写</p>
+<ul>
+<li>查找游戏进程<ul>
+<li>根据进程名检测</li>
+<li>根据窗口名检测</li>
+<li>游戏进程句柄</li>
+</ul>
+</li>
+<li>模块注入<ul>
+<li>应用层注入（<em>太多啦</em>）</li>
+<li>驱动注入</li>
+</ul>
+</li>
+<li>定位游戏数据：<ul>
+<li>LoadLibrary\FreeLibrary, GetModuleHandle</li>
+<li>特征码查找</li>
+</ul>
+</li>
+<li>数据修改：<ul>
+<li>跨进程读写内存（应用层ReadProcessMemory，驱动层DeviceIoControl通信）</li>
+<li>修改内存属性+直接读写</li>
+<li>修改内存属性+内存拷贝函数</li>
+</ul>
+</li>
+<li>远程调用：<ul>
+<li>参数传递</li>
+<li>堆栈，上下文环境保护</li>
+<li>this指针保护</li>
+<li>寄存器，浮点寄存器保护</li>
+<li>可能隐藏的参数</li>
+</ul>
+</li>
+<li>外挂隐藏<ul>
+<li>断链</li>
+<li>VAD树</li>
+<li>模拟自加载</li>
+</ul>
+</li>
+<li>躲避检测<ul>
+<li>随机进程名，窗口名</li>
+<li>进程隐藏</li>
+<li>模块隐藏</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>外挂版本维护</p>
+</li>
+</ul>
+<p> （<em>部分内容并没有总结完整，游戏逻辑及自身漏洞尚未总结，因为涉及到对游戏的了解程度，与技术关联不十分密切，所以这里省略，其他部分仍然有很多需要继续完善…</em>）</p>
+<p>#后<br>其实从上面的汇总差不多可以看出来游戏安全 跟逆向分析，系统底层及编程能力密切相关。<br>所以我们很容易就能确定出自己的学习方向。<br>希望写到这里能对各位看官起到些许帮助，科普软文，自己总结能力有限，非喜勿喷<br>︿(￣︶￣)︽(￣︶￣)︿飞.飞.飞.</p>
+<p><em>本文原创，如需转载，请注明出处 <a href="http://venidic.com/" target="_blank" rel="external">http://venidic.com/</a></em></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/随笔/" rel="tag"># 随笔</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/29/HACK/" rel="next" title="D3D透视-D3D HACK">
+                <i class="fa fa-chevron-left"></i> D3D透视-D3D HACK
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/12/29/python一日一练00-13/" rel="prev" title="python一日一练（00-13）">
+                python一日一练（00-13） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/12/06/游戏安全入门浅谈/"
+           data-title="游戏安全入门浅谈" data-url="http://venidic.com/2015/12/06/游戏安全入门浅谈/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

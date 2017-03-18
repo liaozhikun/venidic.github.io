@@ -1,0 +1,832 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="工具,windows编程,socket," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="#起因元旦过后本来以为自己可以开开心心的补（抄）起欠了好几个月的作业的，可是作为一个计算机专业的学生事情永远是那么多！同学，帮我选一下电脑嘛！同学，帮我装一下系统嘛！同学，帮我下载几个软件嘛！同学，帮我做一下文档嘛！同学，我游戏被虐了，快来救我嘛！同学，帮我贴一下手机模嘛！噗噗，这次又来了，同学，帮我写一下代码嘛！可是，你知道嘛，就算是学计算机的不就应该天天上着数学课，做着数学题，这关代码屁事啊！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[socket]c-s模式下的U盘检测">
+<meta property="og:url" content="http://venidic.com/2015/04/04/windows编程-c-s模式下的U盘检测/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="#起因元旦过后本来以为自己可以开开心心的补（抄）起欠了好几个月的作业的，可是作为一个计算机专业的学生事情永远是那么多！同学，帮我选一下电脑嘛！同学，帮我装一下系统嘛！同学，帮我下载几个软件嘛！同学，帮我做一下文档嘛！同学，我游戏被虐了，快来救我嘛！同学，帮我贴一下手机模嘛！噗噗，这次又来了，同学，帮我写一下代码嘛！可是，你知道嘛，就算是学计算机的不就应该天天上着数学课，做着数学题，这关代码屁事啊！">
+<meta property="og:image" content="http://img.blog.csdn.net/20150107140354554?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvTmlnaHRzYXk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:image" content="http://img.blog.csdn.net/20150107140408392?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvTmlnaHRzYXk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:updated_time" content="2015-12-29T06:16:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[socket]c-s模式下的U盘检测">
+<meta name="twitter:description" content="#起因元旦过后本来以为自己可以开开心心的补（抄）起欠了好几个月的作业的，可是作为一个计算机专业的学生事情永远是那么多！同学，帮我选一下电脑嘛！同学，帮我装一下系统嘛！同学，帮我下载几个软件嘛！同学，帮我做一下文档嘛！同学，我游戏被虐了，快来救我嘛！同学，帮我贴一下手机模嘛！噗噗，这次又来了，同学，帮我写一下代码嘛！可是，你知道嘛，就算是学计算机的不就应该天天上着数学课，做着数学题，这关代码屁事啊！">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150107140354554?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvTmlnaHRzYXk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/04/04/windows编程-c-s模式下的U盘检测/"/>
+
+
+
+
+
+  <title> [socket]c-s模式下的U盘检测 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/04/04/windows编程-c-s模式下的U盘检测/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [socket]c-s模式下的U盘检测
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-04T13:53:26+08:00">
+                2015-04-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程/" itemprop="url" rel="index">
+                    <span itemprop="name">编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/04/windows编程-c-s模式下的U盘检测/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/04/windows编程-c-s模式下的U盘检测/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#起因<br>元旦过后本来以为自己可以开开心心的补（抄）起欠了好几个月的作业的，可是作为一个计算机专业的学生事情永远是那么多！同学，帮我选一下电脑嘛！同学，帮我装一下系统嘛！同学，帮我下载几个软件嘛！同学，帮我做一下文档嘛！同学，我游戏被虐了，快来救我嘛！同学，帮我贴一下手机模嘛！噗噗，这次又来了，同学，帮我写一下代码嘛！可是，你知道嘛，就算是学计算机的不就应该天天上着数学课，做着数学题，这关代码屁事啊！！！<br><a id="more"></a><br>好在代码不难。啪啪啪（此处为机械键盘码代码的声音）写好发给她，同学怎么用啊？啪啪啪写好说明，同学怎么不是老师那个样子？啪啪啪改好界面！同学，同学？同学已死，有事烧纸，没事请看代码：</p>
+<p>那位同学如是说，要让老师能够检测到同学们是否在自己的电脑上插了U盘，呼呼，无非是c/s下的U盘检测了，然后在写客户端时消息的回调函数那里需要注意，因为回调函数是全局函数，所以里面如果访问到外面的变量时，请注意是否还是自己心中想象的那个样子。服务器为了一直检测，直接用了一个死循环，一直接受客户端的连接，直接上代码吧：</p>
+<p>#客户端部分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div></pre></td><td class="code"><pre><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &lt;WinSock2.h&gt;</div><div class="line">#include &lt;Windows.h&gt;</div><div class="line">#include &lt;Dbt.h&gt;</div><div class="line">#include &lt;time.h&gt;</div><div class="line">#include &lt;string.h&gt;</div><div class="line">#pragma comment(lib, &quot;ws2_32.lib&quot;)</div><div class="line">const int BUF_SIZE = 64;</div><div class="line">char	buf[BUF_SIZE] ;	//接收数据缓冲区</div><div class="line">char disk_time[20];</div><div class="line"></div><div class="line">void UseUDiskTime()</div><div class="line">&#123;</div><div class="line">    time_t Curtime;</div><div class="line">    tm sTime = &#123;0&#125;;</div><div class="line">    time(&amp;Curtime);</div><div class="line">    memset(disk_time,0,20);</div><div class="line">    tm *RetTime = localtime( &amp;Curtime );</div><div class="line">    sprintf(disk_time,&quot; Date: %04d-%02d-%02d %02d:%02d:%02d &quot;</div><div class="line">            ,RetTime-&gt;tm_year + 1900</div><div class="line">            ,RetTime-&gt;tm_mon + 1 </div><div class="line">            ,RetTime-&gt;tm_mday</div><div class="line">            ,RetTime-&gt;tm_hour</div><div class="line">            ,RetTime-&gt;tm_min</div><div class="line">            ,RetTime-&gt;tm_sec);</div><div class="line">&#125;</div><div class="line"></div><div class="line">char FirstDriveFromMask(ULONG unitmask)</div><div class="line">&#123;</div><div class="line">	char i;</div><div class="line">	for(i=0;i&lt;26;i++)</div><div class="line">	&#123;</div><div class="line">		if(unitmask &amp; 0x1)</div><div class="line">			break;</div><div class="line">		unitmask = unitmask &gt;&gt; 1;</div><div class="line">	&#125;</div><div class="line">	return (i+&apos;A&apos;);</div><div class="line">&#125;</div><div class="line">int Disk_Span(char *buf)</div><div class="line">&#123;</div><div class="line">	WSADATA         wsd;            //WSADATA变量  </div><div class="line">	SOCKET          sHost;          //服务器套接字  </div><div class="line">	SOCKADDR_IN     servAddr;       //服务器地址  </div><div class="line">	int  retVal;         //返回值 </div><div class="line">	if (WSAStartup(MAKEWORD(2,2), &amp;wsd) != 0)</div><div class="line">	&#123;</div><div class="line">		printf(&quot;WSAStartup failed:%d\n&quot;,GetLastError());</div><div class="line">		return -1;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	//创建套接字</div><div class="line">	sHost = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	</div><div class="line">	if(INVALID_SOCKET == sHost)</div><div class="line">	&#123;</div><div class="line">		printf(&quot;socker failed:%d\n&quot;,GetLastError());</div><div class="line">		//printf(&quot;socket failed\n&quot;);</div><div class="line">		WSACleanup();//释放套接字资源</div><div class="line">		return  -1;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	//设置服务器地址</div><div class="line">	servAddr.sin_family =AF_INET;</div><div class="line">	servAddr.sin_addr.s_addr = inet_addr(&quot;127.0.0.1&quot;);</div><div class="line">	servAddr.sin_port = htons((short)4999);</div><div class="line">	int nServAddlen  = sizeof(servAddr);</div><div class="line"></div><div class="line">	//连接服务器</div><div class="line">	retVal=connect(sHost,(LPSOCKADDR)&amp;servAddr, sizeof(servAddr));	</div><div class="line">	if(SOCKET_ERROR == retVal)</div><div class="line">	&#123;</div><div class="line">		printf(&quot;connect failed:%d\n&quot;,GetLastError());</div><div class="line">		//printf(&quot;connect failed!\n&quot;);</div><div class="line">		closesocket(sHost);	//关闭套接字</div><div class="line">		WSACleanup();		//释放套接字资源</div><div class="line">		return -1;</div><div class="line">	&#125;</div><div class="line">	retVal = send(sHost, buf, strlen(buf), 0);</div><div class="line">	if (SOCKET_ERROR == retVal)</div><div class="line">	&#123;</div><div class="line">		printf(&quot;send failed:%d\n&quot;,GetLastError());</div><div class="line">		closesocket(sHost);	//关闭套接字</div><div class="line">		WSACleanup();		//释放套接字资源</div><div class="line">		return -1;</div><div class="line">	&#125;</div><div class="line">	closesocket(sHost);	//关闭套接字</div><div class="line">	WSACleanup();		//释放套接字资源</div><div class="line">&#125;</div><div class="line">LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)</div><div class="line">&#123;</div><div class="line">	memset(buf,0,BUF_SIZE);</div><div class="line">	switch (message)</div><div class="line">	&#123;	</div><div class="line">	case WM_DESTROY:</div><div class="line">		PostQuitMessage(0);</div><div class="line">		break;</div><div class="line">	case WM_DEVICECHANGE:</div><div class="line">		if(wParam == DBT_DEVICEARRIVAL)</div><div class="line">		&#123;</div><div class="line">			PDEV_BROADCAST_HDR lpdb = (PDEV_BROADCAST_HDR)lParam;</div><div class="line">			PDEV_BROADCAST_VOLUME lpdbv = (PDEV_BROADCAST_VOLUME)lpdb;</div><div class="line">			//printf(&quot;Drive %c has arrived\n &quot;,FirstDriveFromMask(lpdbv-&gt;dbcv_unitmask));</div><div class="line">			</div><div class="line">			sprintf(buf,&quot;Drive %c has arrived...&quot;,FirstDriveFromMask(lpdbv-&gt;dbcv_unitmask));</div><div class="line">			UseUDiskTime();</div><div class="line">			 strcat(buf,disk_time);</div><div class="line">			 Disk_Span(buf);</div><div class="line">			</div><div class="line">		 &#125;</div><div class="line">		 else if(wParam == DBT_DEVICEREMOVECOMPLETE)</div><div class="line">		&#123;</div><div class="line"> 			PDEV_BROADCAST_HDR lpdb = (PDEV_BROADCAST_HDR)lParam;</div><div class="line">			PDEV_BROADCAST_VOLUME lpdbv = (PDEV_BROADCAST_VOLUME)lpdb;</div><div class="line"> 			//memset(buf,0,BUF_SIZE);</div><div class="line">			 sprintf(buf,&quot;Drive %c has get away...&quot;,FirstDriveFromMask(lpdbv-&gt;dbcv_unitmask));</div><div class="line"> 			UseUDiskTime();</div><div class="line">			 strcat(buf,disk_time);</div><div class="line"> 			Disk_Span(buf);</div><div class="line">			</div><div class="line">		 &#125;</div><div class="line">	 	break;</div><div class="line">	 default:</div><div class="line">		 return DefWindowProc(hWnd, message, wParam, lParam);</div><div class="line">	 &#125;</div><div class="line">	 return 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int main()</div><div class="line">&#123;</div><div class="line">    WNDCLASS wc;</div><div class="line">    ZeroMemory(&amp;wc, sizeof(wc));</div><div class="line">    wc.lpszClassName = TEXT(&quot;usb_detection&quot;);</div><div class="line">    wc.lpfnWndProc = WndProc;</div><div class="line">     </div><div class="line">    RegisterClass(&amp;wc);</div><div class="line">    HWND h = CreateWindow(TEXT(&quot;usb_detection&quot;), TEXT(&quot;&quot;), 0, 0, 0, 0, 0,</div><div class="line">        0, 0, GetModuleHandle(0), 0);</div><div class="line">    MSG msg;</div><div class="line">	 printf(&quot;Welcome to use USB_Detection System...\n\tchecking...&quot;);</div><div class="line">	  while( GetMessage(&amp;msg, 0, 0, 0) &gt; 0 ) &#123;</div><div class="line">              TranslateMessage(&amp;msg);</div><div class="line">              DispatchMessage(&amp;msg);</div><div class="line">          &#125;</div><div class="line">	 //退出</div><div class="line">	</div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>#服务器部分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div></pre></td><td class="code"><pre><div class="line">#include &lt;stdio.h&gt;</div><div class="line">//#include &lt;tchar.h&gt;</div><div class="line">#include &quot;winsock2.h&quot;  </div><div class="line">#pragma comment(lib, &quot;ws2_32.lib&quot;)  </div><div class="line">  </div><div class="line"></div><div class="line">int main()</div><div class="line">&#123;</div><div class="line">    const int BUF_SIZE = 64;  </div><div class="line">    WSADATA wsd;            //WSADATA变量  </div><div class="line">    SOCKET sServer;        //服务器套接字  </div><div class="line">    SOCKET sClient;        //客户端套接字  </div><div class="line">    SOCKADDR_IN addrServ;;      //服务器地址  </div><div class="line">    char buf[BUF_SIZE];  //接收数据缓冲区  </div><div class="line">    char sendBuf[BUF_SIZE];//返回给客户端得数据  </div><div class="line">    int retVal;         //返回值  </div><div class="line">    int num = 0;	//使用次数</div><div class="line">    //初始化套结字动态库  </div><div class="line">    if (WSAStartup(MAKEWORD(2,2), &amp;wsd) != 0)  </div><div class="line">    &#123;  </div><div class="line">	printf(&quot;WSAStartup failed:%d\n&quot;,WSAGetLastError());</div><div class="line">        return 1;  </div><div class="line">    &#125;  </div><div class="line">      </div><div class="line">    //创建套接字  </div><div class="line">    sServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);      </div><div class="line">    if(INVALID_SOCKET == sServer)  </div><div class="line">    &#123;  </div><div class="line">	printf(&quot;socket failed:%d\n&quot;,GetLastError()); </div><div class="line">        WSACleanup();//释放套接字资源;  </div><div class="line">        return  -1;  </div><div class="line">    &#125;  </div><div class="line">      </div><div class="line">    //服务器套接字地址   </div><div class="line">    addrServ.sin_family = AF_INET;  </div><div class="line">    addrServ.sin_port = htons(4999);  </div><div class="line">    addrServ.sin_addr.s_addr = INADDR_ANY;        </div><div class="line">    //绑定套接字  </div><div class="line">    retVal = bind(sServer, (LPSOCKADDR)&amp;addrServ, sizeof(SOCKADDR_IN));  </div><div class="line">  </div><div class="line">    if(SOCKET_ERROR == retVal)  </div><div class="line">    &#123;     </div><div class="line">	printf(&quot;bind failed:%d\n&quot;,GetLastError());</div><div class="line">        closesocket(sServer);   //关闭套接字  </div><div class="line">        WSACleanup();           //释放套接字资源;  </div><div class="line">        return -1;  </div><div class="line">    &#125;  </div><div class="line">      </div><div class="line">    //开始监听   </div><div class="line">    retVal = listen(sServer, 1);  </div><div class="line">    if(SOCKET_ERROR == retVal)  </div><div class="line">    &#123;  </div><div class="line">	printf(&quot;listen failed:%d\n&quot;,GetLastError()); </div><div class="line">        closesocket(sServer);   //关闭套接字  </div><div class="line">        WSACleanup();           //释放套接字资源;  </div><div class="line">        return -1;  </div><div class="line">    &#125;  </div><div class="line">      </div><div class="line">    //接受客户端请求  </div><div class="line">    sockaddr_in addrClient;  </div><div class="line">    int addrClientlen = sizeof(addrClient);  </div><div class="line">    /*sClient = accept(sServer,(sockaddr FAR*)&amp;addrClient, &amp;addrClientlen);  </div><div class="line">    if(INVALID_SOCKET == sClient)  </div><div class="line">    &#123;  </div><div class="line">	printf(&quot;accept failed:%d\n&quot;,GetLastError()); </div><div class="line">        closesocket(sServer);   //关闭套接字  </div><div class="line">        WSACleanup();           //释放套接字资源;  </div><div class="line">        return -1;  </div><div class="line">    &#125;  */</div><div class="line">  </div><div class="line">      </div><div class="line">    while(true)&#123;  </div><div class="line">	 sClient = accept(sServer,(sockaddr FAR*)&amp;addrClient, &amp;addrClientlen);  </div><div class="line">     if(INVALID_SOCKET == sClient)  </div><div class="line">     &#123;  </div><div class="line">	printf(&quot;accept failed:%d\n&quot;,GetLastError());        </div><div class="line">        closesocket(sServer);   //关闭套接字  </div><div class="line">        WSACleanup();           //释放套接字资源;  </div><div class="line">        return -1;  </div><div class="line">     &#125;  </div><div class="line">        //接收客户端数据  </div><div class="line">        memset(buf,0,BUF_SIZE);  </div><div class="line">        retVal = recv(sClient, buf, BUF_SIZE, 0);  </div><div class="line">        if (SOCKET_ERROR == retVal)  </div><div class="line">        &#123;  </div><div class="line">	    printf(&quot;recv failed:%d\n&quot;,GetLastError());</div><div class="line">            closesocket(sServer);   //关闭套接字  </div><div class="line">            closesocket(sClient);   //关闭套接字       </div><div class="line">            WSACleanup();           //释放套接字资源;  </div><div class="line">            return -1;  </div><div class="line">        &#125;  </div><div class="line">        if(buf[0] != &apos;\0&apos;)  </div><div class="line">		&#123;</div><div class="line">			printf(&quot;From Client IP:[%s]   Use USB for %d\n\t%s\n&quot;,inet_ntoa(addrClient.sin_addr),++num,buf);</div><div class="line">		&#125;</div><div class="line">    </div><div class="line">    &#125;  </div><div class="line">      </div><div class="line">    //退出  </div><div class="line">    closesocket(sServer);   //关闭套接字  </div><div class="line">    closesocket(sClient);   //关闭套接字  </div><div class="line">    WSACleanup();           //释放套接字资源; </div><div class="line">     return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>#代码测试<br>最后差不多是这个样子：<br><img src="http://img.blog.csdn.net/20150107140354554?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvTmlnaHRzYXk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20150107140408392?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvTmlnaHRzYXk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt="这里写图片描述"></p>
+<p>我兴冲冲的把代码发过去之后，又满怀欣喜的去指导别人如何安装搜狗输入法</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工具/" rel="tag"># 工具</a>
+          
+            <a href="/tags/windows编程/" rel="tag"># windows编程</a>
+          
+            <a href="/tags/socket/" rel="tag"># socket</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/03/双进程保护及实现/" rel="next" title="[反调试]双进程保护及实现">
+                <i class="fa fa-chevron-left"></i> [反调试]双进程保护及实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/05/windows编程-多线程端口扫描器/" rel="prev" title="[socket]多线程端口扫描器">
+                [socket]多线程端口扫描器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/04/04/windows编程-c-s模式下的U盘检测/"
+           data-title="[socket]c-s模式下的U盘检测" data-url="http://venidic.com/2015/04/04/windows编程-c-s模式下的U盘检测/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

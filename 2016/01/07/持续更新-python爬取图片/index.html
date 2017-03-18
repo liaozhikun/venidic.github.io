@@ -1,0 +1,845 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="python," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="文章写在一段时间之前，这几天考完科目三之后没事会陆续更新到自己的博客上，反正自己很懒，没事的时候就将自己做过的一些笔记扔到博客上，一来是为了回顾，二来是为了总结。关于这篇文章的起因是因为之前的那篇python一日一练的第13题，爬取一个妹子的图片，后来便对python爬取图片有了兴趣（其实我只是为了爬取妹子的皂片呢），这篇文章讲持续更新关于利用python爬取妹子皂片的代码，敬请关注：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[持续更新]python爬取图片">
+<meta property="og:url" content="http://venidic.com/2016/01/07/持续更新-python爬取图片/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="文章写在一段时间之前，这几天考完科目三之后没事会陆续更新到自己的博客上，反正自己很懒，没事的时候就将自己做过的一些笔记扔到博客上，一来是为了回顾，二来是为了总结。关于这篇文章的起因是因为之前的那篇python一日一练的第13题，爬取一个妹子的图片，后来便对python爬取图片有了兴趣（其实我只是为了爬取妹子的皂片呢），这篇文章讲持续更新关于利用python爬取妹子皂片的代码，敬请关注：">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0571ntv2oj20gs07z0vd.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0572cqzs9j20ry0dvaer.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0572qj54aj20ld04zdh3.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/dcfd67b5gw1f05739f5qvj20oi0eon4d.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0573poh6aj20wv0ftaih.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0575tuju5j20ik08qq6f.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f057641j2yj20y90bhwhd.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0576dgbbdj20ss09tdju.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0576nv222j20m908qwh4.jpg">
+<meta property="og:updated_time" content="2016-01-25T06:04:36.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[持续更新]python爬取图片">
+<meta name="twitter:description" content="文章写在一段时间之前，这几天考完科目三之后没事会陆续更新到自己的博客上，反正自己很懒，没事的时候就将自己做过的一些笔记扔到博客上，一来是为了回顾，二来是为了总结。关于这篇文章的起因是因为之前的那篇python一日一练的第13题，爬取一个妹子的图片，后来便对python爬取图片有了兴趣（其实我只是为了爬取妹子的皂片呢），这篇文章讲持续更新关于利用python爬取妹子皂片的代码，敬请关注：">
+<meta name="twitter:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0571ntv2oj20gs07z0vd.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2016/01/07/持续更新-python爬取图片/"/>
+
+
+
+
+
+  <title> [持续更新]python爬取图片 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2016/01/07/持续更新-python爬取图片/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [持续更新]python爬取图片
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-07T09:05:17+08:00">
+                2016-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程/" itemprop="url" rel="index">
+                    <span itemprop="name">编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/01/07/持续更新-python爬取图片/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/07/持续更新-python爬取图片/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>文章写在一段时间之前，这几天考完科目三之后没事会陆续更新到自己的博客上，反正自己很懒，没事的时候就将自己做过的一些笔记扔到博客上，一来是为了回顾，二来是为了总结。<br>关于这篇文章的起因是因为之前的那篇python一日一练的第13题，爬取一个妹子的图片，后来便对python爬取图片有了兴趣（<del>其实我只是为了爬取妹子的皂片呢</del>），这篇文章讲持续更新关于利用python爬取妹子皂片的代码，敬请关注：<br><a id="more"></a></p>
+<p>#百度贴吧<br>最先选择这个作为爬虫的练手，是因为这个很简单，没有太多的反爬限制。咳咳，当然也是因为前段时间看到了一个妹子，最开始感觉惊为天人。于是准备最先写关于贴吧的图片爬虫：<br>关于爬取贴吧上的皂片，比较简单，弄清楚 页数即可。<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0571ntv2oj20gs07z0vd.jpg" alt=""><br>打开贴吧，一键F12后搜索下一页，知道了位置后解析获得页数（页数 = 总贴数目/每一页数目）。解析每一个帖子里面有多少楼同理。这里比较简单，直接贴出代码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">import os</div><div class="line">import urllib</div><div class="line">from bs4 import BeautifulSoup</div><div class="line">from urlparse import urlsplit</div><div class="line"></div><div class="line">TIEBA = &apos;http://tieba.baidu.com&apos;</div><div class="line"></div><div class="line">def DownloadPic(url):</div><div class="line">    image_content = urllib.urlopen(url).read()</div><div class="line">    filename = os.path.basename(urlsplit(url)[2])</div><div class="line">    pout = open(r&apos;photo/&apos;+filename, &apos;wb&apos;)</div><div class="line">    pout.write(image_content)</div><div class="line">    pout.close()</div><div class="line"></div><div class="line"></div><div class="line">def FindPic(url):</div><div class="line">    content = urllib.urlopen(url)</div><div class="line">    soup = BeautifulSoup(content, &apos;html.parser&apos;)</div><div class="line">    for img in soup.find_all(&apos;img&apos;, &#123;&apos;class&apos;: &apos;BDE_Image&apos;&#125;):</div><div class="line">        DownloadPic(img[&apos;src&apos;])</div><div class="line"></div><div class="line"></div><div class="line">def FindPosts(url):</div><div class="line">    print &apos;this is a cute spider.......\n.&apos;</div><div class="line">    content = urllib.urlopen(url)</div><div class="line">    soup = BeautifulSoup(content, &apos;html.parser&apos;)</div><div class="line">    for link in soup.find_all(&apos;a&apos;, &#123;&apos;class&apos;: &apos;j_th_tit&apos;&#125;):</div><div class="line">        inlink = TIEBA + link[&apos;href&apos;]</div><div class="line">        FindPic(inlink)</div><div class="line"></div><div class="line">def FindPages(soup, url):</div><div class="line">    for page in soup.find_all(&apos;a&apos;, &#123;&apos;class&apos;: &apos;last&apos;&#125;):</div><div class="line">        page_last = page.get(&apos;href&apos;)</div><div class="line">        page_number = int(page_last[page_last.find(&apos;pn=&apos;)+3:]) / 50</div><div class="line">        page_query = page_last[:page_last.find(&apos;pn=&apos;)]</div><div class="line">        print (&apos;page_number_all: %d\npage_query: %s&apos;%(page_number, page_query))</div><div class="line">    return page_number, page_query</div><div class="line"></div><div class="line"></div><div class="line">def BeginSpider(url):</div><div class="line">    if False == os.path.isdir(&apos;photo&apos;):</div><div class="line">        os.mkdir(&apos;photo&apos;)</div><div class="line">    content = urllib.urlopen(url)</div><div class="line">    soup = BeautifulSoup(content, &apos;html.parser&apos;)</div><div class="line">    page_all, page_query = FindPages(soup, url)</div><div class="line">    page_count = 3</div><div class="line">    #FindPosts(url)</div><div class="line">    while page_count &lt; 10:</div><div class="line">        url_query = TIEBA + page_query + &apos;pn=&apos;+str(page_count*50)</div><div class="line">        print (&quot;current page number: %d\ncurrent page url: %s&quot; % (page_count, url_query))</div><div class="line">        FindPosts(url_query)</div><div class="line">        page_count += 1</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    BeginSpider(&apos;http://tieba.baidu.com/f?kw=yurisa&amp;fr=ala0&amp;loc=rec&apos;)</div></pre></td></tr></table></figure></p>
+<p><em>上述代码单线程，只针对贴吧，自动获取页数，可以自己修改要爬取的页数，并没针对是否楼主进行判断</em><br>下面是运行结果：<br><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0572cqzs9j20ry0dvaer.jpg" alt=""><br>爬取了10页，效果还可以</p>
+<p>#知乎<br>哈，知乎上可谓是跟着轮子哥每日阅妹无数啊，而且我乎上爆照的妹子质量真心不错啊，于是爬虫还是要写的，所有的萌妹纸都得存到硬！盘！里！<br>在爬知乎上皂片的时候，F12后发现其实知乎上所有的照片<br><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0572qj54aj20ld04zdh3.jpg" alt=""><br>于是爬虫很简单的就写出来了，但是在爬取的过程中，首先可以将不是链接的照片去掉。<br>然后在爬取的过程中发现了知乎的同一张照片有两个版本，一个是大图一个是预览图，这里需要区分一下，当然是要高清无码的咯。还有就是，在爬取的时候很容易将用户的头像给爬下来。分析了下用户的头像，其实用户的头像的分辨率恒为25*25，这里可以通过分辨率来去除，但是为了方便，可以直接在html解析中通过tag来获得自己想要的img：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">import os</div><div class="line">import urllib</div><div class="line">from bs4 import BeautifulSoup</div><div class="line">from urlparse import urlsplit</div><div class="line"></div><div class="line">def DownloadPic(url):</div><div class="line">    image_content = urllib.urlopen(url).read()</div><div class="line">    filename = os.path.basename(urlsplit(url)[2])</div><div class="line">    pout = open(r&apos;photo_zhihu/&apos;+filename, &apos;wb&apos;)</div><div class="line">    pout.write(image_content)</div><div class="line">    pout.close()</div><div class="line"></div><div class="line">def BeginSpider(url):</div><div class="line">    if False == os.path.isdir(&apos;photo_zhihu&apos;):</div><div class="line">        os.mkdir(&apos;photo_zhihu&apos;)</div><div class="line">    content = urllib.urlopen(url)</div><div class="line">    soup = BeautifulSoup(content, &apos;html.parser&apos;)</div><div class="line">    #class=&quot;origin_image inline-img zh-lightbox-thumb&quot;</div><div class="line">  img_old = &apos;&apos;</div><div class="line">  for img in soup.select(&apos;img[data-original]&apos;):</div><div class="line">        img_new = img[&apos;data-original&apos;]</div><div class="line">        if img_new != img_old:</div><div class="line">            print img[&apos;data-original&apos;]</div><div class="line">            DownloadPic(img_new)</div><div class="line">        img_old = img_new</div><div class="line"></div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    BeginSpider(&apos;https://www.zhihu.com/question/28202126&apos;)</div><div class="line"></div><div class="line">#### &lt;/pre&gt;</div></pre></td></tr></table></figure></p>
+<p>运行效果<br><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f05739f5qvj20oi0eon4d.jpg" alt=""><br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f0573poh6aj20wv0ftaih.jpg" alt=""><br><em>注明：只针对知乎单一主页爬取有效，之后有时间会陆续更新关于知乎的爬虫</em></p>
+<p>#百度搜索<br>爬取百度搜索的照片就稍微复杂了一些，因为百度做了相应的反爬机制，在用浏览器浏览的时候会发现：<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0575tuju5j20ik08qq6f.jpg" alt=""><br>然后按照之前的方法继续爬取的时候，会发现并只爬取到了少量的图片<br>回过头来看看怎么传输的，F12后查看network：<br>每往下拉去鼠标，发现会收到json数据：<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f057641j2yj20y90bhwhd.jpg" alt=""><br>点击后发现：<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f0576dgbbdj20ss09tdju.jpg" alt=""><br>随便访问一个图片，便得到了对应的照片。<br>我们点击发现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">1: &#123;thumbURL: &quot;http://img2.imgtn.bdimg.com/it/u=605516665,3942838751&amp;fm=206&amp;gp=0.jpg&quot;,…&#125;</div><div class="line">DecorateCompanyGrade: &quot;&quot;</div><div class="line">DecorateCompanyId: &quot;&quot;</div><div class="line">DecorateCompanyLocation: &quot;&quot;</div><div class="line">DecorateCompanyName: &quot;&quot;</div><div class="line">DecorateWantuUrl: &quot;&quot;</div><div class="line">adType: &quot;0&quot;</div><div class="line">bdFromPageTitlePrefix: &quot;&quot;</div><div class="line">bdImgnewsDate: &quot;1970-01-01 08:00&quot;</div><div class="line">bdSetImgNum: 0</div><div class="line">bdSourceName: &quot;&quot;</div><div class="line">bdSrcType: &quot;10&quot;</div><div class="line">cs: &quot;605516665,3942838751&quot;</div><div class="line">currentIndex: &quot;&quot;</div><div class="line">di: &quot;153381291910&quot;</div><div class="line">filesize: &quot;&quot;</div><div class="line">fromPageTitle: &quot;看&lt;strong&gt;王祖贤&lt;/strong&gt;早期的美艳旧照&quot;</div><div class="line">fromURL: &quot;http://www.sznews.com/ent/content/2007-11/28/content_1680244_12.htm&quot;</div><div class="line">fromURLHost: &quot;www.sznews.com&quot;</div><div class="line">hasLarge: true</div><div class="line">height: 450</div><div class="line">hoverURL: &quot;&quot;</div><div class="line">is: &quot;&quot;</div><div class="line">isAspDianjing: false</div><div class="line">largeTnImageUrl: &quot;&quot;</div><div class="line">middleURL: &quot;http://img2.imgtn.bdimg.com/it/u=605516665,3942838751&amp;fm=206&amp;gp=0.jpg&quot;</div><div class="line">objURL: &quot;http://www.sznews.com/ent/images/site3/20071128/02374341116308b703fa28.jpg&quot;</div><div class="line">os: &quot;3424157733,1697100770&quot;</div><div class="line">pageNum: 61</div><div class="line">pi: &quot;0&quot;</div><div class="line">setDowloadURL: &quot;&quot;</div><div class="line">setTittle: &quot;&quot;</div><div class="line">simid: &quot;102628390,940766820&quot;</div><div class="line">source_type: &quot;&quot;</div><div class="line">tagTwo: &quot;&quot;</div><div class="line">thumbURL: &quot;http://img2.imgtn.bdimg.com/it/u=605516665,3942838751&amp;fm=206&amp;gp=0.jpg&quot;</div><div class="line">token: &quot;&quot;</div><div class="line">type: &quot;jpg&quot;</div><div class="line">width: 288</div></pre></td></tr></table></figure></p>
+<p>其中middleurl代表着中等比列，thumbURL代表着预览图，objurl代表着原始的图片链接。<br>看到这里应该已经明白了，度娘是将查询出来的图片链接放在js里返回了，需要加载的时候，再去重新请求获得url，从而显示出图片。之所以我们用普通的爬虫去爬取不到更多的图片是因为有规律的列表类数据都会通过JavaScript异步请求服务器获得，服务器通常返回嵌入的HTML代码或者XML代码或者JSON代码，这样的设计能够让结果多次返回，有利于加强用户体验。</p>
+<p><strong>这里需要注意的就是大部分的图片的原始链接是被加密过的，并不像上面一样可以直接看到原始数据</strong>，比如我搜索兰博基尼得到下图<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f0576nv222j20m908qwh4.jpg" alt=""><br>这里需要弄清楚百度是怎么加密的。对比html中的url和这里的objurl。<br>我们再换个女神来试试，发现同样也是被加密过的<br>对比两段代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">0: &#123;adType: &quot;0&quot;, hasAspData: &quot;0&quot;,…&#125;</div><div class="line">adPicId: &quot;0&quot;</div><div class="line">adType: &quot;0&quot;</div><div class="line">bdFromPageTitlePrefix: &quot;&quot;</div><div class="line">bdImgnewsDate: &quot;1970-01-01 08:00&quot;</div><div class="line">bdSetImgNum: 0</div><div class="line">bdSourceName: &quot;&quot;</div><div class="line">bdSrcType: &quot;0&quot;</div><div class="line">cs: &quot;1134918538,3550735636&quot;</div><div class="line">currentIndex: &quot;&quot;</div><div class="line">di: &quot;128020980890&quot;</div><div class="line">face_info: null</div><div class="line">filesize: &quot;&quot;</div><div class="line">fromPageTitle: &quot;&lt;strong&gt;高圆圆&lt;/strong&gt;…_来自zj的图片分享-堆糖网&quot;</div><div class="line">fromPageTitleEnc: &quot;高圆圆…_来自zj的图片分享-堆糖网&quot;</div><div class="line">fromURL: &quot;ippr_z2C$qAzdH3FAzdH3Fooo_z&amp;e3B17tpwg2_z&amp;e3Bv54AzdH3Frj5rsjAzdH3F4ks52AzdH3F88nbndcadAzdH3F1jpwtsAzdH3F?gjxp=8n0nm80b8&quot;</div><div class="line">fromURLHost: &quot;www.duitang.com&quot;</div><div class="line">hasAspData: &quot;0&quot;</div><div class="line">hasLarge: 0</div><div class="line">hasThumbData: &quot;0&quot;</div><div class="line">height: 800</div><div class="line">hoverURL: &quot;http://img4.imgtn.bdimg.com/it/u=1134918538,3550735636&amp;fm=23&amp;gp=0.jpg&quot;</div><div class="line">imgType: &quot;&quot;</div><div class="line">is: &quot;&quot;</div><div class="line">isAspDianjing: 0</div><div class="line">largeTnImageUrl: &quot;&quot;</div><div class="line">middleURL: &quot;http://img4.imgtn.bdimg.com/it/u=1134918538,3550735636&amp;fm=21&amp;gp=0.jpg&quot;</div><div class="line">objURL: &quot;ippr_z2C$qAzdH3FAzdH3Ft429_z&amp;e3B17tpwg2_z&amp;e3Bv54AzdH3F7rs5w1fAzdH3Fks52AzdH3Fda8n8dAzdH3FnaAzdH3Fda8n8dna88cacm_BV9c9_z&amp;e3B3rj2&quot;</div><div class="line">os: &quot;1452914021,398296588&quot;</div><div class="line">pageNum: 60</div><div class="line">simid: &quot;4220450355,717626561&quot;</div><div class="line">simid_info: null</div><div class="line">source_type: &quot;&quot;</div><div class="line">thumbURL: &quot;http://img4.imgtn.bdimg.com/it/u=1134918538,3550735636&amp;fm=21&amp;gp=0.jpg&quot;</div><div class="line">token: &quot;&quot;</div><div class="line">type: &quot;jpeg&quot;</div><div class="line">width: 600</div><div class="line">xiangshi_info: null</div></pre></td></tr></table></figure></p>
+<p>和对应到html中的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;li class=&quot;imgitem&quot; style=&quot;width: 190px; height: 254.371px; margin-right: 5px; margin-bottom: 5px; display: list-item;&quot; data-objurl=&quot;http://img4.duitang.com/uploads/blog/201312/30/20131230115056_BV454.jpeg&quot; data-thumburl=&quot;http://img4.imgtn.bdimg.com/it/u=1134918538,3550735636&amp;amp;fm=21&amp;amp;gp=0.jpg&quot; data-fromurl=&quot;ippr_z2C$qAzdH3FAzdH3Fooo_z&amp;amp;e3B17tpwg2_z&amp;amp;e3Bv54AzdH3Frj5rsjAzdH3F4ks52AzdH3F88nbndcadAzdH3F1jpwtsAzdH3F?gjxp=8n0nm80b8&quot; data-fromurlhost=&quot;www.duitang.com&quot; data-ext=&quot;jpeg&quot; data-saved=&quot;0&quot; pn=&quot;60&quot; data-cs=&quot;1134918538,3550735636&quot; data-width=&quot;600&quot; data-height=&quot;800&quot; data-title=&quot;&lt;strong&gt;高圆圆&lt;/strong&gt;…_来自zj的图片分享-堆糖网&quot;&gt;&lt;div class=&quot;imgbox div_1134918538,3550735636&quot;&gt;&lt;a href=&quot;/search/detail?ct=503316480&amp;amp;z=&amp;amp;tn=baiduimagedetail&amp;amp;ipn=d&amp;amp;word=%E9%AB%98%E5%9C%86%E5%9C%86&amp;amp;step_word=&amp;amp;ie=utf-8&amp;amp;in=&amp;amp;cl=2&amp;amp;lm=-1&amp;amp;st=-1&amp;amp;cs=1134918538,3550735636&amp;amp;os=1452914021,398296588&amp;amp;pn=60&amp;amp;rn=1&amp;amp;di=128020980890&amp;amp;ln=1000&amp;amp;fr=&amp;amp;fmq=1453192678424_R&amp;amp;ic=0&amp;amp;s=undefined&amp;amp;se=&amp;amp;sme=&amp;amp;tab=0&amp;amp;width=&amp;amp;height=&amp;amp;face=undefined&amp;amp;is=&amp;amp;istype=2&amp;amp;ist=&amp;amp;jit=&amp;amp;bdtype=0&amp;amp;gsm=0&amp;amp;objurl=http%3A%2F%2Fimg4.duitang.com%2Fuploads%2Fblog%2F201312%2F30%2F20131230115056_BV454.jpeg&quot; target=&quot;_blank&quot; style=&quot;display: block; width: 190px; height: 254px; margin-top: 0px; margin-left: 0px;&quot; name=&quot;pn60&quot;&gt;&lt;img class=&quot;main_img img-hover&quot; src=&quot;http://img4.imgtn.bdimg.com/it/u=1134918538,3550735636&amp;amp;fm=23&amp;amp;gp=0.jpg&quot; style=&quot;width: 190px; height: 254px;&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;/li&gt;</div></pre></td></tr></table></figure></p>
+<p>提取objurl<br>加密前为：<br><code>http://img4.duitang.com/uploads/blog/201312/30/20131230115056_BV454.jpeg</code><br>加密后为：<br><code>ippr_z2C$qAzdH3FAzdH3Ft429_z&amp;e3B17tpwg2_z&amp;e3Bv54AzdH3F7rs5w1fAzdH3Fks52AzdH3Fda8n8dAzdH3FnaAzdH3Fda8n8dna88cacm_BV9c9_z&amp;e3B3rj2</code></p>
+<p>于是到这一步后我懵*了，我去，怎么办，妈蛋不会啊，本来就是底层狗啊，前端什么的都不会，要不是最近看内核看的头疼，鬼才来无聊写个爬虫爬妹子呢！！！<br>Google一番后，发现自有大神在，好像还是我渣科的学长。这里将映射表引用过来：、</p>
+<blockquote>
+<p>“0”: “7”,    “1”: “d”,    “2”: “g”,    “3”: “j”,    “4”: “m”,    “5”: “o”,    “6”: “r”,    “7”: “u”,    “8”: “1”,<br>“9”: “4”,    “AzdH3F”: “/“,    “_z2C$q”: “:”,    “_z&amp;e3B”: “.”,    “a”: “0”,    “b”: “8”,    “c”: “5”,<br>“d”: “2”,    “e”: “v”,    “f”: “s”,    “g”: “n”,    “h”: “k”,    “i”: “h”,    “j”: “e”,    “k”: “b”,    “l”: “9”,<br>“m”: “6”,    “n”: “3”,    “o”: “w”,    “p”: “t”,    “q”: “q”,    “r”: “p”,    “s”: “l”,    “t”: “i”,    “u”: “f”,<br>“v”: “c”,    “w”: “a”</p>
+</blockquote>
+<p><del>被大神学长打的趴在地上起不来，我还是好好的去调我的内核吧</del><br>分析出来后代码也应该很容易写出来了…</p>
+<pre><code>
+</code></pre><p>#微博<br>听说微博上的妹纸也很多嘛，最主要的是有网红哦，哇哈哈哈，转战微博爬一发。<br>在爬取微博的时候会遇到登陆的限制，这个时候可以抓包后模拟登陆方式，也可以爬取m.weibo</p>
+<p>#后<br><em>持续更新中…</em></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/01/2016-我还是来了/" rel="next" title="2016,我还是来了">
+                <i class="fa fa-chevron-left"></i> 2016,我还是来了
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/22/x64内核安全（1）-环境搭建/" rel="prev" title="win7 x64内核安全（1）-环境搭建">
+                win7 x64内核安全（1）-环境搭建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/01/07/持续更新-python爬取图片/"
+           data-title="[持续更新]python爬取图片" data-url="http://venidic.com/2016/01/07/持续更新-python爬取图片/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

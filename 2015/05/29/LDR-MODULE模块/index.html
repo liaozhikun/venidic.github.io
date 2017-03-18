@@ -1,0 +1,853 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Rootkit,底层," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="之前学习断链的时候了解到了LDR，最近考试周刚过比较闲，就整理了一下当时学习过程中的笔记，很基础，本人小菜一枚，在本文中如果有任何不正确的地方，还望各位巨巨指正！
+在windows中，每一个模块（exe，dll）对应了一个LDR_MODULE，这个模块是让系统认识到每个模块的存在，在获取模块基址，获取api地址用的很多，进而可以用来隐藏模块，编写外壳程序等……">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LDR_MODULE模块的疑问与探索">
+<meta property="og:url" content="http://venidic.com/2015/05/29/LDR-MODULE模块/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="之前学习断链的时候了解到了LDR，最近考试周刚过比较闲，就整理了一下当时学习过程中的笔记，很基础，本人小菜一枚，在本文中如果有任何不正确的地方，还望各位巨巨指正！
+在windows中，每一个模块（exe，dll）对应了一个LDR_MODULE，这个模块是让系统认识到每个模块的存在，在获取模块基址，获取api地址用的很多，进而可以用来隐藏模块，编写外壳程序等……">
+<meta property="og:image" content="http://img.blog.csdn.net/20150529105323387">
+<meta property="og:image" content="http://img.blog.csdn.net/20150529171901831">
+<meta property="og:image" content="http://img.blog.csdn.net/20150602221534201">
+<meta property="og:updated_time" content="2015-11-19T11:56:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LDR_MODULE模块的疑问与探索">
+<meta name="twitter:description" content="之前学习断链的时候了解到了LDR，最近考试周刚过比较闲，就整理了一下当时学习过程中的笔记，很基础，本人小菜一枚，在本文中如果有任何不正确的地方，还望各位巨巨指正！
+在windows中，每一个模块（exe，dll）对应了一个LDR_MODULE，这个模块是让系统认识到每个模块的存在，在获取模块基址，获取api地址用的很多，进而可以用来隐藏模块，编写外壳程序等……">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150529105323387">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/05/29/LDR-MODULE模块/"/>
+
+
+
+
+
+  <title> LDR_MODULE模块的疑问与探索 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/05/29/LDR-MODULE模块/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                LDR_MODULE模块的疑问与探索
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-05-29T10:40:20+08:00">
+                2015-05-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统安全/" itemprop="url" rel="index">
+                    <span itemprop="name">系统安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/05/29/LDR-MODULE模块/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/05/29/LDR-MODULE模块/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前学习断链的时候了解到了LDR，最近考试周刚过比较闲，就整理了一下当时学习过程中的笔记，很基础，本人小菜一枚，在本文中如果有任何不正确的地方，还望各位巨巨指正！</p>
+<p>在windows中，每一个模块（exe，dll）对应了一个LDR_MODULE，这个模块是让系统认识到每个模块的存在，在获取模块基址，获取api地址用的很多，进而可以用来隐藏模块，编写外壳程序等……<br><a id="more"></a><br>关于结构LDR_MODULE的定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">typedef struct _LDR_MODULE </div><div class="line">&#123; </div><div class="line">	LIST_ENTRY InLoadOrderModuleList; //按加载模块顺序构成的模块链表</div><div class="line">	LIST_ENTRY InMemoryOrderModuleList; //按内存顺序的模块链表</div><div class="line">	LIST_ENTRY InInitializationOrderModuleList; //按初始化顺序的模块链表</div><div class="line">	PVOID BaseAddress; //模块的基地址</div><div class="line">	PVOID EntryPoint; //模块的入口</div><div class="line">	ULONG SizeOfImage; //模块镜像大小</div><div class="line">	UNICODE_STRING FullDllName; //路径名</div><div class="line">	UNICODE_STRING BaseDllName; //模块名</div><div class="line">	ULONG Flags; </div><div class="line">	SHORT LoadCount; //引用计数</div><div class="line">	SHORT TlsIndex; </div><div class="line">	LIST_ENTRY HashTableEntry; </div><div class="line">	ULONG TimeDateStamp; </div><div class="line">&#125; LDR_MODULE, *PLDR_MODULE;</div></pre></td></tr></table></figure>
+<p>而后来我在查看PEB_LDR_DATA结构的时候:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">typedef struct _PEB_LDR_DATA</div><div class="line">&#123; </div><div class="line">	ULONG Length; </div><div class="line">	BOOLEAN Initialized; </div><div class="line">	HANDLE SsHandle; </div><div class="line">	LIST_ENTRY InLoadOrderModuleList; </div><div class="line">	LIST_ENTRY InMemoryOrderModuleList; </div><div class="line">	LIST_ENTRY InInitializationOrderModuleList; </div><div class="line">	PVOID EntryInProgress; </div><div class="line">&#125; PEB_LDR_DATA, *PPEB_LDR_DATA;</div></pre></td></tr></table></figure>
+<p>也发现了这三个链表<strong>InLoadOrderModuleList, InMemoryOrderModuleList, InInitializationOrderModuleList</strong><br>那么这三个链表存在于两个结构中，到底有和对应的关系呢？</p>
+<p>编写了一个程序helloworld.exe，windbg载入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div></pre></td><td class="code"><pre><div class="line">0:000&gt; !peb</div><div class="line">PEB at 7efde000</div><div class="line">    InheritedAddressSpace:    No</div><div class="line">    ReadImageFileExecOptions: No</div><div class="line">    BeingDebugged:            Yes</div><div class="line">    ImageBaseAddress:         01000000</div><div class="line">   ..........</div><div class="line"></div><div class="line">0:000&gt; dt _PEB 7efde000</div><div class="line">ntdll!_PEB</div><div class="line">   +0x000 InheritedAddressSpace : 0 &apos;&apos;</div><div class="line">   +0x001 ReadImageFileExecOptions : 0 &apos;&apos;</div><div class="line">   +0x002 BeingDebugged    : 0x1 &apos;&apos;</div><div class="line">   +0x003 BitField         : 0x8 &apos;&apos;</div><div class="line">   +0x003 ImageUsesLargePages : 0y0</div><div class="line">   +0x003 IsProtectedProcess : 0y0</div><div class="line">   +0x003 IsLegacyProcess  : 0y0</div><div class="line">   +0x003 IsImageDynamicallyRelocated : 0y1</div><div class="line">   +0x003 SkipPatchingUser32Forwarders : 0y0</div><div class="line">   +0x003 SpareBits        : 0y000</div><div class="line">   +0x004 Mutant           : 0xffffffff Void</div><div class="line">   +0x008 ImageBaseAddress : 0x01000000 Void</div><div class="line">   +0x00c Ldr              : 0x77d90200 _PEB_LDR_DATA</div><div class="line">   +0x010 ProcessParameters : 0x00421918 _RTL_USER_PROCESS_PARAMETERS</div><div class="line">	..................</div><div class="line"></div><div class="line">0:000&gt; dt  _PEB_LDR_DATA 0x77d90200</div><div class="line">ntdll!_PEB_LDR_DATA</div><div class="line">   +0x000 Length           : 0x30</div><div class="line">   +0x004 Initialized      : 0x1 &apos;&apos;</div><div class="line">   +0x008 SsHandle         : (null) </div><div class="line">   +0x00c InLoadOrderModuleList : _LIST_ENTRY [ 0x593510 - 0x5941a8 ]</div><div class="line">   +0x014 InMemoryOrderModuleList : _LIST_ENTRY [ 0x593518 - 0x5941b0 ]</div><div class="line">   +0x01c InInitializationOrderModuleList : _LIST_ENTRY [ 0x5935b0 - 0x5941b8 ]</div><div class="line">   +0x024 EntryInProgress  : (null) </div><div class="line">   +0x028 ShutdownInProgress : 0 &apos;&apos;</div><div class="line">   +0x02c ShutdownThreadId : (null) </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0X593510</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x5935a0 - 0x77d9020c ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x5935a8 - 0x77d90214 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x018 DllBase          : 0x01360000 Void</div><div class="line">   +0x01c EntryPoint       : 0x0137110e Void</div><div class="line">   +0x020 SizeOfImage      : 0x1c000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;F:\helloworld.exe&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;helloworld.exe&quot;</div><div class="line">   +0x034 Flags            : 0x4000</div><div class="line">   +0x038 LoadCount        : 0xffff</div><div class="line">   +0x03a TlsIndex         : 0</div><div class="line">   +0x03c HashLinks        : _LIST_ENTRY [ 0x77d948a0 - 0x77d948a0 ]</div><div class="line">   +0x03c SectionPointer   : 0x77d948a0 Void</div><div class="line">   +0x040 CheckSum         : 0x77d948a0</div><div class="line">   +0x044 TimeDateStamp    : 0x548284c9</div><div class="line">   +0x044 LoadedImports    : 0x548284c9 Void</div><div class="line">   +0x048 EntryPointActivationContext : (null) </div><div class="line">   +0x04c PatchInformation : (null) </div><div class="line">   +0x050 ForwarderLinks   : _LIST_ENTRY [ 0x593560 - 0x593560 ]</div><div class="line">   +0x058 ServiceTagLinks  : _LIST_ENTRY [ 0x593568 - 0x593568 ]</div><div class="line">   +0x060 StaticLinks      : _LIST_ENTRY [ 0x594288 - 0x594260 ]</div><div class="line">   +0x068 ContextInformation : 0x77ccc984 Void</div><div class="line">   +0x06c OriginalBase     : 0</div><div class="line">   +0x070 LoadTime         : _LARGE_INTEGER 0x0</div></pre></td></tr></table></figure></p>
+<p>可以看到windbg中的_LDR_DATA_TABLE_ENTRY就是对应着LDR_MODULE结构，三个链表<strong>InLoadOrderModuleList, InMemoryOrderModuleList, InInitializationOrderModuleList</strong>都分别对应着各自的LDR_MODULE结构<br>用图来表示如下<br><img src="http://img.blog.csdn.net/20150529105323387" alt="这里写图片描述"><br> 由该图可知,三个链表结构被PEB_LDR_DATA和LDR_MODULE结构共用</p>
+<p> <img src="http://img.blog.csdn.net/20150529171901831" alt="这里写图片描述"></p>
+<p>那么这三个链表<strong>InLoadOrderModuleList, InMemoryOrderModuleList, InInitializationOrderModuleList</strong>又都有什么区别呢？</p>
+<p>用上面那个测试程序：<br>对<strong>InLoadOrderModuleList  加载模块顺序构成的模块链表</strong>进行调试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">//针对0x593510链表的flink进行遍历</div><div class="line">+0x00c InLoadOrderModuleList : _LIST_ENTRY [ 0x593510 - 0x5941a8 ]</div><div class="line">..................</div><div class="line"></div><div class="line">0:000&gt; dt _LIST_ENTRY 0X593510</div><div class="line">ntdll!_LIST_ENTRY</div><div class="line"> [ 0x5935a0 - 0x77d9020c ]</div><div class="line">   +0x000 Flink            : 0x005935a0 _LIST_ENTRY [ 0x593920 - 0x593510 ]</div><div class="line">   +0x004 Blink            : 0x77d9020c _LIST_ENTRY [ 0x593510 - 0x5941a8 ]</div><div class="line">   </div><div class="line">0:000&gt; dt _LIST_ENTRY 0X5935a0</div><div class="line">ntdll!_LIST_ENTRY</div><div class="line"> [ 0x593920 - 0x593510 ]</div><div class="line">   +0x000 Flink            : 0x00593920 _LIST_ENTRY [ 0x593a38 - 0x5935a0 ]</div><div class="line">   +0x004 Blink            : 0x00593510 _LIST_ENTRY [ 0x5935a0 - 0x77d9020c ]</div><div class="line">   </div><div class="line">0:000&gt; dt _LIST_ENTRY 0X593920</div><div class="line">ntdll!_LIST_ENTRY</div><div class="line"> [ 0x593a38 - 0x5935a0 ]</div><div class="line">   +0x000 Flink            : 0x00593a38 _LIST_ENTRY [ 0x5941a8 - 0x593920 ]</div><div class="line">   +0x004 Blink            : 0x005935a0 _LIST_ENTRY [ 0x593920 - 0x593510 ]</div><div class="line">   </div><div class="line">0:000&gt; dt _LIST_ENTRY 0X593a38</div><div class="line">ntdll!_LIST_ENTRY</div><div class="line"> [ 0x5941a8 - 0x593920 ]</div><div class="line">   +0x000 Flink            : 0x005941a8 _LIST_ENTRY [ 0x77d9020c - 0x593a38 ]</div><div class="line">   +0x004 Blink            : 0x00593920 _LIST_ENTRY [ 0x593a38 - 0x5935a0 ]</div><div class="line">   </div><div class="line">0:000&gt; dt _LIST_ENTRY 0X5941a8</div><div class="line">ntdll!_LIST_ENTRY</div><div class="line"> [ 0x77d9020c - 0x593a38 ]</div><div class="line">   +0x000 Flink            : 0x77d9020c _LIST_ENTRY [ 0x593510 - 0x5941a8 ]</div><div class="line">   +0x004 Blink            : 0x00593a38 _LIST_ENTRY [ 0x5941a8 - 0x593920 ]</div><div class="line">   </div><div class="line">0:000&gt; dt _LIST_ENTRY 0X77d9020c</div><div class="line">ntdll!_LIST_ENTRY</div><div class="line"> [ 0x593510 - 0x5941a8 ]</div><div class="line">   +0x000 Flink            : 0x00593510 _LIST_ENTRY [ 0x5935a0 - 0x77d9020c ]</div><div class="line">   +0x004 Blink            : 0x005941a8 _LIST_ENTRY [ 0x77d9020c - 0x593a38 ]</div></pre></td></tr></table></figure>
+<p>按照上面的地址0X593510-0X5935a0-0X593920-0X593a38-0X5941a8-0X77d9020c<br>，分别查看对应的LDR_DATA_TABLE结构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div></pre></td><td class="code"><pre><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0X593510</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x5935a0 - 0x77d9020c ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x5935a8 - 0x77d90214 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x018 DllBase          : 0x01360000 Void</div><div class="line">   +0x01c EntryPoint       : 0x0137110e Void</div><div class="line">   +0x020 SizeOfImage      : 0x1c000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;F:\helloworld.exe&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;helloworld.exe&quot;</div><div class="line">       .....................</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0X5935a0</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x593920 - 0x593510 ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x593928 - 0x593518 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x593a48 - 0x77d9021c ]</div><div class="line">   +0x018 DllBase          : 0x77c90000 Void</div><div class="line">   +0x01c EntryPoint       : (null) </div><div class="line">   +0x020 SizeOfImage      : 0x180000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;C:\Windows\SysWOW64\ntdll.dll&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;ntdll.dll&quot;</div><div class="line">     .....................</div><div class="line"></div><div class="line"></div><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0X593920</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x593a38 - 0x5935a0 ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x593a40 - 0x5935a8 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x5941b8 - 0x593a48 ]</div><div class="line">   +0x018 DllBase          : 0x76ff0000 Void</div><div class="line">   +0x01c EntryPoint       : 0x770035c8 Void</div><div class="line">   +0x020 SizeOfImage      : 0x110000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;C:\Windows\syswow64\kernel32.dll&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;kernel32.dll&quot;</div><div class="line">     .....................</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0X593a38</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x5941a8 - 0x593920 ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x5941b0 - 0x593928 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x593930 - 0x5935b0 ]</div><div class="line">   +0x018 DllBase          : 0x76f60000 Void</div><div class="line">   +0x01c EntryPoint       : 0x76f674b1 Void</div><div class="line">   +0x020 SizeOfImage      : 0x47000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;C:\Windows\syswow64\KERNELBASE.dll&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;KERNELBASE.dll&quot;</div><div class="line">   .....................</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0X5941a8</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x77d9020c - 0x593a38 ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x77d90214 - 0x593a40 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x77d9021c - 0x593930 ]</div><div class="line">   +0x018 DllBase          : 0x571f0000 Void</div><div class="line">   +0x01c EntryPoint       : 0x5724a4d0 Void</div><div class="line">   +0x020 SizeOfImage      : 0x19b000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;C:\Windows\system32\MSVCR110D.dll&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;MSVCR110D.dll&quot;</div><div class="line">      .....................</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0X77d9020c</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x593510 - 0x5941a8 ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x593518 - 0x5941b0 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x5935b0 - 0x5941b8 ]</div><div class="line">   +0x018 DllBase          : (null) </div><div class="line">   +0x01c EntryPoint       : (null) </div><div class="line">   +0x020 SizeOfImage      : 0</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;&quot;</div><div class="line">   +0x034 Flags            : 0</div><div class="line">   +0x038 LoadCount        : 0</div><div class="line">   +0x03a TlsIndex         : 0</div><div class="line">   +0x03c HashLinks        : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x03c SectionPointer   : (null) </div><div class="line">   +0x040 CheckSum         : 0</div><div class="line">   +0x044 TimeDateStamp    : 0</div><div class="line">   +0x044 LoadedImports    : (null) </div><div class="line">   +0x048 EntryPointActivationContext : (null) </div><div class="line">   +0x04c PatchInformation : (null) </div><div class="line">   +0x050 ForwarderLinks   : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x058 ServiceTagLinks  : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x060 StaticLinks      : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x068 ContextInformation : (null) </div><div class="line">   +0x06c OriginalBase     : 0</div><div class="line">   +0x070 LoadTime         : _LARGE_INTEGER 0x0</div></pre></td></tr></table></figure>
+<p>很清楚的看到在<strong>InLoadOrderModuleList </strong>中顺序是<br>xxx.exe——&gt;ntdll.dll——&gt;kernel32.dll——-&gt;KERNELBASE.dll——–&gt;MSVCR110D.dll——&gt;null</p>
+<p>用同样的方法得到在在调试 <strong>InMemoryOrderModuleList</strong>，<strong>InInitializationOrderModuleList</strong>中就出现了一个问题，按照之前读地址就出现了错误（因为苦逼学生党晚上断电，第二天重新加载了程序，地址会跟上面的会有不同，但是仍然出现无法正确读出一些信息）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x693a48 - 0x7761021c ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x77510000 - 0x0 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x180000 - 0x3c003a ]</div><div class="line">   +0x018 DllBase          : 0x00693630 Void</div><div class="line">   +0x01c EntryPoint       : 0x00140012 Void</div><div class="line">   +0x020 SizeOfImage      : 0x77555df0</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;--- memory read error at address 0x0000ffff ---&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;㗜i㗜i䣈睡䣈睡㩴i㩴i䣘睡䣘睡䣠睡䣠睡䣨睡䣨睡䣰睡䣰睡䣸睡䣸睡&quot;</div><div class="line">   +0x034 Flags            : 0x4ec49d10</div><div class="line">   +0x038 LoadCount        : 0</div><div class="line">   +0x03a TlsIndex         : 0</div><div class="line">   +0x03c HashLinks        : _LIST_ENTRY [ 0x0 - 0x6935f0 ]</div><div class="line">   +0x03c SectionPointer   : (null) </div><div class="line">   +0x040 CheckSum         : 0x6935f0</div><div class="line">   +0x044 TimeDateStamp    : 0x6935f0</div><div class="line">   +0x044 LoadedImports    : 0x006935f0 Void</div><div class="line">   +0x048 EntryPointActivationContext : 0x006935f8 _ACTIVATION_CONTEXT</div><div class="line">   +0x04c PatchInformation : 0x006935f8 Void</div><div class="line">   +0x050 ForwarderLinks   : _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">   +0x058 ServiceTagLinks  : _LIST_ENTRY [ 0x0 - 0x7de70000 ]</div><div class="line">   +0x060 StaticLinks      : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x068 ContextInformation : 0xabababab Void</div><div class="line">   +0x06c OriginalBase     : 0xabababab</div><div class="line">   +0x070 LoadTime         : _LARGE_INTEGER 0x0</div></pre></td></tr></table></figure>
+<p>为什么dt _LDR_DATA_TABLE_ENTRY之中<strong>InLoadOrderModuleList </strong>链表就可以完全读出来个所以然，而偏偏到<strong>InInitializationOrderModuleList</strong>和<strong>InMemoryOrderModuleList</strong>就不行了呢？</p>
+<p>从调试信息来看，应该是地址不对，可是到底哪出了问题呢？<br>我们回过头再来看这个结构体：<br><img src="http://img.blog.csdn.net/20150602221534201" alt="这里写图片描述"></p>
+<p>所以_PEB_LDR_DATA中InMemoryOrderLinks其实指向的是_LDR_DATA_TABLE_ENTRY中InMemoryOrderModuleList成员地址，<br>而_PEB_LDR_DATA中InInitializationOrderModuleList指向的也是_LDR_DATA_TABLE_ENTRY中InInitializationOrderModuleLinks成员地址。</p>
+<p>在CONTAINING_RECORD中应该是这样计算结构体的地址的：<br>结构体的地址   +  成员变量的偏移 = 成员变量的地址</p>
+<p>所以在进行链表遍历查看的时候应该减去对应的成员变量的偏移：<br>InMemoryOrderLinks的地址 = InMemoryOrderModuleList - 0x008<br> InInitializationOrderModuleLinks地址 = InInitializationOrderModuleList - 0x010</p>
+<p>而InLoadOrderModuleList = InLoadOrderLinks -0x000，这也就解释了为什么这有这个地方可以读出正确的地址而另外两个链表不行<br>InMemoryOrderLinks:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line">0:000&gt;  dt _LDR_DATA_TABLE_ENTRY 0x693510 -r2</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x6935a0 - 0x7761020c ]</div><div class="line">      +0x000 Flink            : 0x006935a0 _LIST_ENTRY [ 0x693920 - 0x693510 ]</div><div class="line">         +0x000 Flink            : 0x00693920 _LIST_ENTRY [ 0x693a38 - 0x6935a0 ]</div><div class="line">         +0x004 Blink            : 0x00693510 _LIST_ENTRY [ 0x6935a0 - 0x7761020c ]</div><div class="line">      +0x004 Blink            : 0x7761020c _LIST_ENTRY [ 0x693510 - 0x6941a8 ]</div><div class="line">         +0x000 Flink            : 0x00693510 _LIST_ENTRY [ 0x6935a0 - 0x7761020c ]</div><div class="line">         +0x004 Blink            : 0x006941a8 _LIST_ENTRY [ 0x7761020c - 0x693a38 ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x6935a8 - 0x77610214 ]</div><div class="line">      +0x000 Flink            : 0x006935a8 _LIST_ENTRY [ 0x693928 - 0x693518 ]</div><div class="line">         +0x000 Flink            : 0x00693928 _LIST_ENTRY [ 0x693a40 - 0x6935a8 ]</div><div class="line">         +0x004 Blink            : 0x00693518 _LIST_ENTRY [ 0x6935a8 - 0x77610214 ]</div><div class="line">      +0x004 Blink            : 0x77610214 _LIST_ENTRY [ 0x693518 - 0x6941b0 ]</div><div class="line">         +0x000 Flink            : 0x00693518 _LIST_ENTRY [ 0x6935a8 - 0x77610214 ]</div><div class="line">         +0x004 Blink            : 0x006941b0 _LIST_ENTRY [ 0x77610214 - 0x693a40 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">      +0x000 Flink            : (null) </div><div class="line">      +0x004 Blink            : (null) </div><div class="line">   +0x018 DllBase          : 0x01340000 Void</div><div class="line">   +0x01c EntryPoint       : 0x0135110e Void</div><div class="line">   +0x020 SizeOfImage      : 0x1c000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;F:\helloworld.exe&quot;</div><div class="line">      +0x000 Length           : 0x22</div><div class="line">      +0x002 MaximumLength    : 0x24</div><div class="line">      +0x004 Buffer           : 0x006922da  &quot;F:\helloworld.exe&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;helloworld.exe&quot;</div><div class="line">      +0x000 Length           : 0x1c</div><div class="line">      +0x002 MaximumLength    : 0x1e</div><div class="line">      +0x004 Buffer           : 0x006922e0  &quot;helloworld.exe&quot;</div><div class="line">   +0x034 Flags            : 0x4000</div><div class="line">   +0x038 LoadCount        : 0xffff</div><div class="line">   +0x03a TlsIndex         : 0</div><div class="line">   +0x03c HashLinks        : _LIST_ENTRY [ 0x776148a0 - 0x776148a0 ]</div><div class="line">      +0x000 Flink            : 0x776148a0 _LIST_ENTRY [ 0x69354c - 0x69354c ]</div><div class="line">         +0x000 Flink            : 0x0069354c _LIST_ENTRY [ 0x776148a0 - 0x776148a0 ]</div><div class="line">         +0x004 Blink            : 0x0069354c _LIST_ENTRY [ 0x776148a0 - 0x776148a0 ]</div><div class="line">      +0x004 Blink            : 0x776148a0 _LIST_ENTRY [ 0x69354c - 0x69354c ]</div><div class="line">         +0x000 Flink            : 0x0069354c _LIST_ENTRY [ 0x776148a0 - 0x776148a0 ]</div><div class="line">         +0x004 Blink            : 0x0069354c _LIST_ENTRY [ 0x776148a0 - 0x776148a0 ]</div><div class="line">   +0x03c SectionPointer   : 0x776148a0 Void</div><div class="line">   +0x040 CheckSum         : 0x776148a0</div><div class="line">   +0x044 TimeDateStamp    : 0x548284c9</div><div class="line">   +0x044 LoadedImports    : 0x548284c9 Void</div><div class="line">   +0x048 EntryPointActivationContext : (null) </div><div class="line">   +0x04c PatchInformation : (null) </div><div class="line">   +0x050 ForwarderLinks   : _LIST_ENTRY [ 0x693560 - 0x693560 ]</div><div class="line">      +0x000 Flink            : 0x00693560 _LIST_ENTRY [ 0x693560 - 0x693560 ]</div><div class="line">         +0x000 Flink            : 0x00693560 _LIST_ENTRY [ 0x693560 - 0x693560 ]</div><div class="line">         +0x004 Blink            : 0x00693560 _LIST_ENTRY [ 0x693560 - 0x693560 ]</div><div class="line">      +0x004 Blink            : 0x00693560 _LIST_ENTRY [ 0x693560 - 0x693560 ]</div><div class="line">         +0x000 Flink            : 0x00693560 _LIST_ENTRY [ 0x693560 - 0x693560 ]</div><div class="line">         +0x004 Blink            : 0x00693560 _LIST_ENTRY [ 0x693560 - 0x693560 ]</div><div class="line">   +0x058 ServiceTagLinks  : _LIST_ENTRY [ 0x693568 - 0x693568 ]</div><div class="line">      +0x000 Flink            : 0x00693568 _LIST_ENTRY [ 0x693568 - 0x693568 ]</div><div class="line">         +0x000 Flink            : 0x00693568 _LIST_ENTRY [ 0x693568 - 0x693568 ]</div><div class="line">         +0x004 Blink            : 0x00693568 _LIST_ENTRY [ 0x693568 - 0x693568 ]</div><div class="line">      +0x004 Blink            : 0x00693568 _LIST_ENTRY [ 0x693568 - 0x693568 ]</div><div class="line">         +0x000 Flink            : 0x00693568 _LIST_ENTRY [ 0x693568 - 0x693568 ]</div><div class="line">         +0x004 Blink            : 0x00693568 _LIST_ENTRY [ 0x693568 - 0x693568 ]</div><div class="line">   +0x060 StaticLinks      : _LIST_ENTRY [ 0x694288 - 0x694260 ]</div><div class="line">      +0x000 Flink            : 0x00694288 _LIST_ENTRY [ 0x694260 - 0x693570 ]</div><div class="line">         +0x000 Flink            : 0x00694260 _LIST_ENTRY [ 0x693570 - 0x694288 ]</div><div class="line">         +0x004 Blink            : 0x00693570 _LIST_ENTRY [ 0x694288 - 0x694260 ]</div><div class="line">      +0x004 Blink            : 0x00694260 _LIST_ENTRY [ 0x693570 - 0x694288 ]</div><div class="line">         +0x000 Flink            : 0x00693570 _LIST_ENTRY [ 0x694288 - 0x694260 ]</div><div class="line">         +0x004 Blink            : 0x00694288 _LIST_ENTRY [ 0x694260 - 0x693570 ]</div><div class="line">   +0x068 ContextInformation : 0x7754c984 Void</div><div class="line">   +0x06c OriginalBase     : 0</div><div class="line">   +0x070 LoadTime         : _LARGE_INTEGER 0x0</div><div class="line">      +0x000 LowPart          : 0</div><div class="line">      +0x004 HighPart         : 0n0</div><div class="line">      +0x000 u                : &lt;unnamed-tag&gt;</div><div class="line">         +0x000 LowPart          : 0</div><div class="line">         +0x004 HighPart         : 0n0</div><div class="line">      +0x000 QuadPart         : 0n0</div></pre></td></tr></table></figure></p>
+<p>InInitializationOrderModuleLinks：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line">0:000&gt; dt _LDR_DATA_TABLE_ENTRY 0x6935a0  -r2</div><div class="line">ntdll!_LDR_DATA_TABLE_ENTRY</div><div class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x693920 - 0x693510 ]</div><div class="line">      +0x000 Flink            : 0x00693920 _LIST_ENTRY [ 0x693a38 - 0x6935a0 ]</div><div class="line">         +0x000 Flink            : 0x00693a38 _LIST_ENTRY [ 0x6941a8 - 0x693920 ]</div><div class="line">         +0x004 Blink            : 0x006935a0 _LIST_ENTRY [ 0x693920 - 0x693510 ]</div><div class="line">      +0x004 Blink            : 0x00693510 _LIST_ENTRY [ 0x6935a0 - 0x7761020c ]</div><div class="line">         +0x000 Flink            : 0x006935a0 _LIST_ENTRY [ 0x693920 - 0x693510 ]</div><div class="line">         +0x004 Blink            : 0x7761020c _LIST_ENTRY [ 0x693510 - 0x6941a8 ]</div><div class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x693928 - 0x693518 ]</div><div class="line">      +0x000 Flink            : 0x00693928 _LIST_ENTRY [ 0x693a40 - 0x6935a8 ]</div><div class="line">         +0x000 Flink            : 0x00693a40 _LIST_ENTRY [ 0x6941b0 - 0x693928 ]</div><div class="line">         +0x004 Blink            : 0x006935a8 _LIST_ENTRY [ 0x693928 - 0x693518 ]</div><div class="line">      +0x004 Blink            : 0x00693518 _LIST_ENTRY [ 0x6935a8 - 0x77610214 ]</div><div class="line">         +0x000 Flink            : 0x006935a8 _LIST_ENTRY [ 0x693928 - 0x693518 ]</div><div class="line">         +0x004 Blink            : 0x77610214 _LIST_ENTRY [ 0x693518 - 0x6941b0 ]</div><div class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x693a48 - 0x7761021c ]</div><div class="line">      +0x000 Flink            : 0x00693a48 _LIST_ENTRY [ 0x693930 - 0x6935b0 ]</div><div class="line">         +0x000 Flink            : 0x00693930 _LIST_ENTRY [ 0x6941b8 - 0x693a48 ]</div><div class="line">         +0x004 Blink            : 0x006935b0 _LIST_ENTRY [ 0x693a48 - 0x7761021c ]</div><div class="line">      +0x004 Blink            : 0x7761021c _LIST_ENTRY [ 0x6935b0 - 0x6941b8 ]</div><div class="line">         +0x000 Flink            : 0x006935b0 _LIST_ENTRY [ 0x693a48 - 0x7761021c ]</div><div class="line">         +0x004 Blink            : 0x006941b8 _LIST_ENTRY [ 0x7761021c - 0x693930 ]</div><div class="line">   +0x018 DllBase          : 0x77510000 Void</div><div class="line">   +0x01c EntryPoint       : (null) </div><div class="line">   +0x020 SizeOfImage      : 0x180000</div><div class="line">   +0x024 FullDllName      : _UNICODE_STRING &quot;C:\Windows\SysWOW64\ntdll.dll&quot;</div><div class="line">      +0x000 Length           : 0x3a</div><div class="line">      +0x002 MaximumLength    : 0x3c</div><div class="line">      +0x004 Buffer           : 0x00693630  &quot;C:\Windows\SysWOW64\ntdll.dll&quot;</div><div class="line">   +0x02c BaseDllName      : _UNICODE_STRING &quot;ntdll.dll&quot;</div><div class="line">      +0x000 Length           : 0x12</div><div class="line">      +0x002 MaximumLength    : 0x14</div><div class="line">      +0x004 Buffer           : 0x77555df0  &quot;ntdll.dll&quot;</div><div class="line">   +0x034 Flags            : 0x4004</div><div class="line">   +0x038 LoadCount        : 0xffff</div><div class="line">   +0x03a TlsIndex         : 0</div><div class="line">   +0x03c HashLinks        : _LIST_ENTRY [ 0x776148c0 - 0x776148c0 ]</div><div class="line">      +0x000 Flink            : 0x776148c0 _LIST_ENTRY [ 0x6935dc - 0x6935dc ]</div><div class="line">         +0x000 Flink            : 0x006935dc _LIST_ENTRY [ 0x776148c0 - 0x776148c0 ]</div><div class="line">         +0x004 Blink            : 0x006935dc _LIST_ENTRY [ 0x776148c0 - 0x776148c0 ]</div><div class="line">      +0x004 Blink            : 0x776148c0 _LIST_ENTRY [ 0x6935dc - 0x6935dc ]</div><div class="line">         +0x000 Flink            : 0x006935dc _LIST_ENTRY [ 0x776148c0 - 0x776148c0 ]</div><div class="line">         +0x004 Blink            : 0x006935dc _LIST_ENTRY [ 0x776148c0 - 0x776148c0 ]</div><div class="line">   +0x03c SectionPointer   : 0x776148c0 Void</div><div class="line">   +0x040 CheckSum         : 0x776148c0</div><div class="line">   +0x044 TimeDateStamp    : 0x4ec49d10</div><div class="line">   +0x044 LoadedImports    : 0x4ec49d10 Void</div><div class="line">   +0x048 EntryPointActivationContext : (null) </div><div class="line">   +0x04c PatchInformation : (null) </div><div class="line">   +0x050 ForwarderLinks   : _LIST_ENTRY [ 0x6935f0 - 0x6935f0 ]</div><div class="line">      +0x000 Flink            : 0x006935f0 _LIST_ENTRY [ 0x6935f0 - 0x6935f0 ]</div><div class="line">         +0x000 Flink            : 0x006935f0 _LIST_ENTRY [ 0x6935f0 - 0x6935f0 ]</div><div class="line">         +0x004 Blink            : 0x006935f0 _LIST_ENTRY [ 0x6935f0 - 0x6935f0 ]</div><div class="line">      +0x004 Blink            : 0x006935f0 _LIST_ENTRY [ 0x6935f0 - 0x6935f0 ]</div><div class="line">         +0x000 Flink            : 0x006935f0 _LIST_ENTRY [ 0x6935f0 - 0x6935f0 ]</div><div class="line">         +0x004 Blink            : 0x006935f0 _LIST_ENTRY [ 0x6935f0 - 0x6935f0 ]</div><div class="line">   +0x058 ServiceTagLinks  : _LIST_ENTRY [ 0x6935f8 - 0x6935f8 ]</div><div class="line">      +0x000 Flink            : 0x006935f8 _LIST_ENTRY [ 0x6935f8 - 0x6935f8 ]</div><div class="line">         +0x000 Flink            : 0x006935f8 _LIST_ENTRY [ 0x6935f8 - 0x6935f8 ]</div><div class="line">         +0x004 Blink            : 0x006935f8 _LIST_ENTRY [ 0x6935f8 - 0x6935f8 ]</div><div class="line">      +0x004 Blink            : 0x006935f8 _LIST_ENTRY [ 0x6935f8 - 0x6935f8 ]</div><div class="line">         +0x000 Flink            : 0x006935f8 _LIST_ENTRY [ 0x6935f8 - 0x6935f8 ]</div><div class="line">         +0x004 Blink            : 0x006935f8 _LIST_ENTRY [ 0x6935f8 - 0x6935f8 ]</div><div class="line">   +0x060 StaticLinks      : _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">      +0x000 Flink            : 0x00693600 _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">         +0x000 Flink            : 0x00693600 _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">         +0x004 Blink            : 0x00693600 _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">      +0x004 Blink            : 0x00693600 _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">         +0x000 Flink            : 0x00693600 _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">         +0x004 Blink            : 0x00693600 _LIST_ENTRY [ 0x693600 - 0x693600 ]</div><div class="line">   +0x068 ContextInformation : (null) </div><div class="line">   +0x06c OriginalBase     : 0x7de70000</div><div class="line">   +0x070 LoadTime         : _LARGE_INTEGER 0x0</div><div class="line">      +0x000 LowPart          : 0</div><div class="line">      +0x004 HighPart         : 0n0</div><div class="line">      +0x000 u                : &lt;unnamed-tag&gt;</div><div class="line">         +0x000 LowPart          : 0</div><div class="line">         +0x004 HighPart         : 0n0</div><div class="line">      +0x000 QuadPart         : 0n0</div></pre></td></tr></table></figure></p>
+<p>由此得到InMemoryOrderLinks中链表顺序：<br>0x693510       F:\helloworld.exe<br>0x6935a0         ntdll.dll<br>0x693920         kernel32.dll<br>0x693a38     KERNELBASE.dll<br>0x6941a8     MSVCR110D.dll<br>0x7761020c     null</p>
+<p>InInitializationOrderModuleLinks中链表顺序：<br>0x6935a0     ntdll.dll<br>0x693920     kernel32.dll<br>0x693a38     KERNELBASE.dll<br>0x6941a8     MSVCR110D.dll<br>0x7761020c     null<br>0x00693510  F:\helloworld.exe</p>
+<p>LDR链基本结构弄清楚之后，接下来要做的就是断链了，先占个坑，上完课晚上回来补充O(∩_∩)O~~</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Rootkit/" rel="tag"># Rootkit</a>
+          
+            <a href="/tags/底层/" rel="tag"># 底层</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/05/16/xss-dvwa平台下的实战/" rel="next" title="[xss]dvwa平台下的实战">
+                <i class="fa fa-chevron-left"></i> [xss]dvwa平台下的实战
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/06/03/VAD树分析/" rel="prev" title="VAD树分析">
+                VAD树分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/05/29/LDR-MODULE模块/"
+           data-title="LDR_MODULE模块的疑问与探索" data-url="http://venidic.com/2015/05/29/LDR-MODULE模块/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

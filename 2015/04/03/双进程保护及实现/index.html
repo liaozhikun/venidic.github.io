@@ -1,0 +1,827 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="反调试," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="考前2个星期都一直在搞这个，然后考试周考的死去活来，全部忘光了。最近瞅了一下，发现远远没我想象的那么简单，双进程保护如果用的好的话，SMC+调试进程与被调试进程处理不同异常，的确能在很大程度上限制动态调试。       《加密与解密》上写的很简单，只是大体讲了一下思路，差不多步骤如下        1.加载或者附加一个正在运行的进程（可以用createprocess创建或者用debugactive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[反调试]双进程保护及实现">
+<meta property="og:url" content="http://venidic.com/2015/04/03/双进程保护及实现/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="考前2个星期都一直在搞这个，然后考试周考的死去活来，全部忘光了。最近瞅了一下，发现远远没我想象的那么简单，双进程保护如果用的好的话，SMC+调试进程与被调试进程处理不同异常，的确能在很大程度上限制动态调试。       《加密与解密》上写的很简单，只是大体讲了一下思路，差不多步骤如下        1.加载或者附加一个正在运行的进程（可以用createprocess创建或者用debugactive">
+<meta property="og:updated_time" content="2015-04-03T15:04:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[反调试]双进程保护及实现">
+<meta name="twitter:description" content="考前2个星期都一直在搞这个，然后考试周考的死去活来，全部忘光了。最近瞅了一下，发现远远没我想象的那么简单，双进程保护如果用的好的话，SMC+调试进程与被调试进程处理不同异常，的确能在很大程度上限制动态调试。       《加密与解密》上写的很简单，只是大体讲了一下思路，差不多步骤如下        1.加载或者附加一个正在运行的进程（可以用createprocess创建或者用debugactive">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/04/03/双进程保护及实现/"/>
+
+
+
+
+
+  <title> [反调试]双进程保护及实现 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/04/03/双进程保护及实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [反调试]双进程保护及实现
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-03T22:40:25+08:00">
+                2015-04-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/03/双进程保护及实现/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/03/双进程保护及实现/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>考前2个星期都一直在搞这个，然后考试周考的死去活来，全部忘光了。最近瞅了一下，发现远远没我想象的那么简单，双进程保护如果用的好的话，SMC+调试进程与被调试进程处理不同异常，的确能在很大程度上限制动态调试。       《加密与解密》上写的很简单，只是大体讲了一下思路，差不多步骤如下<br>        1.加载或者附加一个正在运行的进程（可以用createprocess创建或者用debugactiveprocess附加）<br>        2.获取被调试程序的信息（waitfordebugevent等待调试事件发生）<br>        3.接受被调试进程发来的调试事件并处理然后我们在程序的开始，就可以做一些手脚，然后让调试进程，和被调试进程处理不同的事件，然后程序会沿着不同的逻辑进行，逆向起来就很头疼了。<br><a id="more"></a><br>下面我贴上以为看雪大牛之前发过的源码，然后自行填上了注释。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div></pre></td><td class="code"><pre><div class="line">#define _WIN32_WINNT 0x0500</div><div class="line">#include &quot;windows.h&quot;</div><div class="line">int DebugMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nCmdShow);</div><div class="line">void DecryptCode(HANDLE hProcess,DWORD begin,DWORD end);</div><div class="line">int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nCmdShow)</div><div class="line">&#123;</div><div class="line">        if(IsDebuggerPresent())   //区分调试进程与被调试进程，以执行不同代码，被调试的进程则调用DeBugMain</div><div class="line">        &#123;</div><div class="line">                return DebugMain(hInstance,hPrevInstance,lpCmdLine,nCmdShow);</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        __try</div><div class="line">        &#123;</div><div class="line">                __asm int 3        //断点异常想让调试进程处理</div><div class="line">        &#125;</div><div class="line">        __except(1)</div><div class="line">        &#123;</div><div class="line">                __asm pop eax; //如果调试器不处理断点异常，这里会被执行</div><div class="line">                __asm pop esp;//这两句汇编是破坏了堆栈</div><div class="line">        &#125;</div><div class="line"></div><div class="line"></div><div class="line">        int div=0;</div><div class="line">        __try</div><div class="line">        &#123;</div><div class="line">                __asm int 3        //断点异常交给被调试进程处理</div><div class="line">        &#125;</div><div class="line">        __except(1)</div><div class="line">        &#123;</div><div class="line">                div++;</div><div class="line">        &#125;</div><div class="line">        div=1/div;                //如果调试进程的异常处理模块未被执行，那么这里产生除0异常而使程序退出</div><div class="line"></div><div class="line"></div><div class="line">        __asm int 3;</div><div class="line">        MessageBox(0,&quot;这是一个简单的例子&quot;,&quot;TraceMe&quot;,0);</div><div class="line"></div><div class="line"></div><div class="line">        return 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">//加密messagebox函数，采用的是异或函数</div><div class="line">void DecryptCode(HANDLE hProcess,DWORD begin,DWORD end)</div><div class="line">&#123;</div><div class="line">        DWORD flOldProtect;</div><div class="line">        BYTE ch[1]=&#123;0&#125;;</div><div class="line">        DWORD num=end-begin;</div><div class="line">        VirtualProtectEx(hProcess, (LPVOID)begin,num,PAGE_EXECUTE_READWRITE,&amp;flOldProtect);</div><div class="line">        for(DWORD i=begin;i&lt;end;i++)</div><div class="line">        &#123;</div><div class="line">                ReadProcessMemory(hProcess,(LPCVOID)i,&amp;ch,sizeof(ch),NULL) ;</div><div class="line">                ch[0]^=0xDE;</div><div class="line">                WriteProcessMemory(hProcess,(LPVOID)i,&amp;ch,sizeof(ch),NULL);</div><div class="line">        &#125;</div><div class="line">        VirtualProtectEx(hProcess,(LPVOID)begin,num,flOldProtect,NULL);</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">//调试进程主函数</div><div class="line">int DebugMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nCmdShow)</div><div class="line">&#123;        </div><div class="line">        char filename[260];</div><div class="line">        GetModuleFileName(0,filename,260); //获取自身文件名</div><div class="line">        STARTUPINFO        si=&#123;0&#125;;</div><div class="line">        GetStartupInfo(&amp;si);                //获取创建信息</div><div class="line">        PROCESS_INFORMATION        pi=&#123;0&#125;;</div><div class="line">        if(!CreateProcess(filename,NULL,NULL,NULL,FALSE,DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS,NULL,NULL,&amp;si,&amp;pi)) //创建被调试进程</div><div class="line">        &#123;</div><div class="line">                return 0;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        BOOL WhileDoFlag=TRUE;</div><div class="line">        DEBUG_EVENT DBEvent ;</div><div class="line">        DWORD dwState;</div><div class="line">        CONTEXT Regs ;</div><div class="line">        Regs.ContextFlags = CONTEXT_FULL | CONTEXT_DEBUG_REGISTERS;</div><div class="line">        while (WhileDoFlag)</div><div class="line">        &#123;</div><div class="line">                /*WaitForDebugEvent:用来等待被调试事件，如果成功，则返回等待调试事件发生的毫秒数，如果没有调试事件发生，则返回函数的调用者，如果</div><div class="line">                函数被定义为INFINITE，那么则一直等待的函数的发生*/</div><div class="line">                WaitForDebugEvent (&amp;DBEvent, INFINITE);</div><div class="line">                dwState = DBG_EXCEPTION_NOT_HANDLED ;</div><div class="line">                switch (DBEvent.dwDebugEventCode)</div><div class="line">                &#123;</div><div class="line">                        case CREATE_PROCESS_DEBUG_EVENT:</div><div class="line">                                dwState = DBG_CONTINUE ;</div><div class="line">                                break;                        </div><div class="line">                                </div><div class="line">                        case EXIT_PROCESS_DEBUG_EVENT :</div><div class="line">                                WhileDoFlag=FALSE;</div><div class="line">                                break ;</div><div class="line">                        </div><div class="line">                        case EXCEPTION_DEBUG_EVENT:</div><div class="line">                                switch (DBEvent.u.Exception.ExceptionRecord.ExceptionCode)</div><div class="line">                                &#123;</div><div class="line">                                        case EXCEPTION_BREAKPOINT:                        //断点异常处理过程</div><div class="line">                                        &#123;</div><div class="line">                                                GetThreadContext(pi.hThread, &amp;Regs) ;</div><div class="line">                                                if(Regs.Eip==(DWORD)0x0040CC10) //地址值需纠正,处理上面第一个int 3指令地址+1</div><div class="line">                                                        dwState = DBG_CONTINUE ;</div><div class="line">                                                else if(Regs.Eip==(DWORD)0x0040CC20)        //地址值需纠正，处理上面第二个int 3，指令地址+1</div><div class="line">                                                        dwState = DBG_EXCEPTION_NOT_HANDLED ;</div><div class="line">                                                else if(Regs.Eip==(DWORD)0x0040CC30) //地址值需纠正，对加密代码的地址修正</div><div class="line">                                                &#123;</div><div class="line">                                                        DecryptCode(pi.hProcess,0x0040CC30,0x00401200); //地址值需纠正，对加密代码的地址修正</div><div class="line">                                                        dwState = DBG_CONTINUE;</div><div class="line">                                                &#125;</div><div class="line">                                                else</div><div class="line">                                                        dwState = DBG_CONTINUE ;</div><div class="line">                                                break;</div><div class="line">                                        &#125;</div><div class="line">                                &#125;</div><div class="line">                                break;</div><div class="line">                &#125;               </div><div class="line">                ContinueDebugEvent(pi.dwProcessId, pi.dwThreadId, dwState) ;</div><div class="line">        &#125;</div><div class="line"></div><div class="line"></div><div class="line">        CloseHandle(pi.hProcess) ;</div><div class="line">        CloseHandle(pi.hThread)  ;</div><div class="line">        return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们回过头来细看这段源码，程序一旦被调试，就会调用debugmain这个函数    在这个函数中有两个至关重要的函数。<br>    第一个是双进程保护的实现：CreateProcess，贴上msdn文档<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">BOOL CreateProcess</div><div class="line">(</div><div class="line">LPCTSTR lpApplicationName,   </div><div class="line">LPTSTR lpCommandLine,</div><div class="line">LPSECURITY_ATTRIBUTES lpProcessAttributes。</div><div class="line">LPSECURITY_ATTRIBUTES lpThreadAttributes,</div><div class="line">BOOL bInheritHandles,</div><div class="line">DWORD dwCreationFlags,</div><div class="line">LPVOID lpEnvironment,</div><div class="line">LPCTSTR lpCurrentDirectory,</div><div class="line">LPSTARTUPINFO lpStartupInfo,</div><div class="line">LPPROCESS_INFORMATION lpProcessInformation</div><div class="line">)</div></pre></td></tr></table></figure></p>
+<p>然后百科中有函数的讲解：<a href="http://baike.baidu.com/view/697167.htm?fr=aladdin（鸟文好的看msdn最好了）" target="_blank" rel="external">http://baike.baidu.com/view/697167.htm?fr=aladdin（鸟文好的看msdn最好了）</a><br>在这个函数的第6个参数dwCreationFlags此参数为指定 附加的用来控制优先类和进程的创建标志。<br>这里源码中设置为DEBUG_PROCESS，则代表着：调用进程将被当做一个调试程序，并且新进程会被当做被调试的进程，即父进程会调试子进程以及创建的所有进程。系统把被调试程序发生的所有调试事件通知给调试器。另外源码中与上了一个DEBUG_ONLY_THIS_PROCESS，表示为：创建的新进程为此调试程序的调试对象，此时子进程发生的所有特定事件都将通知父进程。反正个人理解相当于DEBUG_PROCESS将DEBUG_ONLY_THIS_PROCESS所能调试的进程做了推广。</p>
+<p>创建完进程之后开始进入双进程保护的核心部分——调试循环。这里有点类似于windows下的消息循环，在一个死循环下等待调试事件，如果有调试事件发生则处理调试事件，并执行相应操作，同时告知父进程。<br>当有调试事件被告知父进程时，子进程的线程会被挂起，父进程会调用WaitForDebugEvent来等待事件，并返回一个DEBUG_EVENT<br>源码里采用了 CREATE_PROCESS_DEBUG_EVENT（进程被创建），EXIT_PROCESS_DEBUG_EVENT（退出调试进程中最后一个线程） ，EXCEPTION_DEBUG_EVENT（调试异常），这里又会对异常在做出具体的判断，从而修改部分汇编代码，利用的算是简单是SMC代码自修改技术，可见写源码的人心有多狠。</p>
+<p>紧接着是双进程保护中第二个关键的函数，WaitForDebugEvent,用来等待被调试进程发生的调试事件。贴上函数定义：<br>BOOL WaitForDebugEvent(LPDEBUG<em>ENENT lpDebugEvent, DWORD dwMilliseconds)<br>      lpDebugEvent ：指向接收调试事件信息的DEBUG</em> ENENT结构的指针<br>      dwMilliseconds：指定用来等待调试事件发生的毫秒数，如果 这段时间内没有调试事件发生，函数将返回调用者；如果将该参数指定为INFINITE，函数将一直等待直到调试事件发生<br>      如果函数成功，则返回非零值；如果失败，则返回零<br>      在调试器调用WaitForDebugEvent返回后，得到事件通知，然后解析DEBUG_EVENT结构，并对事件进行响应，处理完成后调试器将会调用ContinueDebugEvent，并根据参数来通知调试目标执行相应操作。</p>
+<p>与此函数对应着的是ContinueDebugEvent，用于调试器恢复先前犹豫调试事件挂起的线程。<br>BOOL ContinueDebugEvent(DWORD dwProcessId,DWORD dwThreadId, DWORD dwContinueStatus )<br>      dwProcessId 为被调试进程的进程标识符<br>      dwThreadId  为欲恢复线程的线程标识符<br>      dwContinueStatus指定了该线程将以何种方式继续，包含两个定义值DBG_CONTINUE和DBG_EXCEPTION_NOT_HANDLED<br>如果函数成功，则返回非零值；如果失败，则返回零。</p>
+<p>在这个源码中这理解这两个函数是逆向的关键。<br>一般的思路都是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">while(Condition)  </div><div class="line">&#123;</div><div class="line">DEBUG_EVENT DebugEvent=&#123;0&#125;;  </div><div class="line">WaitForDebugEvent(&amp;DebugEvent,INFINITE);//等待调试事件   </div><div class="line">ProcessEvenet(DebugEvent)//处理调试事件。  </div><div class="line">ContinueDebugEvent(DebugEvent.dwProcessId,DebugEvent.dwThreadId,Condition);//通知调试目标继续执行。</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里也一样.<br>在源码中处理会给continuedebug的第三个参数赋为不同的值<br>DBG_CONTNUE表明该异常一杯妥善处理，<br>DBG_EXCEPTION_NOT_HANDLED则表明系统未被处理，会返回给操作系统，这个时候会返给调试器，就是我们开始的调试进程去处理。这就是双进程保护的精髓。<br>通过异常的处理与为处理来使程序走向不同的分支，从而来大大增加逆向的难度。<br>假如你此时进行黑盒测试的时候，如果并不清楚源码怎么写的，那么就很难搞清楚在不同的进程中的代码是怎样被执行的。<br>程序的大体流程应该就是这些了。然后可以对着这些先用编辑器（VS或者VC）进行调试，看看程序的走向。<br>具体的逆向过程下次再跟吧，码字好累。。。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/反调试/" rel="tag"># 反调试</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/02/调试原理-OD与硬件断点/" rel="next" title="[调试原理]OD与硬件断点">
+                <i class="fa fa-chevron-left"></i> [调试原理]OD与硬件断点
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/04/windows编程-c-s模式下的U盘检测/" rel="prev" title="[socket]c-s模式下的U盘检测">
+                [socket]c-s模式下的U盘检测 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/04/03/双进程保护及实现/"
+           data-title="[反调试]双进程保护及实现" data-url="http://venidic.com/2015/04/03/双进程保护及实现/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

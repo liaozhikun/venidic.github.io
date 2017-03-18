@@ -1,0 +1,876 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="逆向,反调试," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前不久破解一个软件的时候遇到了各种反调试，折腾的自己各种难受，最终爆破了之后感觉心情大快就顺手写下了这篇文章">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[反调试]去除各种反调试">
+<meta property="og:url" content="http://venidic.com/2015/04/13/反调试-去除各种反调试/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="前不久破解一个软件的时候遇到了各种反调试，折腾的自己各种难受，最终爆破了之后感觉心情大快就顺手写下了这篇文章">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413224441120">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413224618087">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413224629619">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413224817072">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225036423">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225047549">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225145925">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225239542">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225409055">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225437603">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225636956">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225735721">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225820087">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413225850195">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413230925226">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413230905589">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413233229404">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413233314675">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413234400965">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413234651973">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413235007616">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413235133039">
+<meta property="og:image" content="http://img.blog.csdn.net/20150413235214429">
+<meta property="og:updated_time" content="2015-11-19T11:55:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[反调试]去除各种反调试">
+<meta name="twitter:description" content="前不久破解一个软件的时候遇到了各种反调试，折腾的自己各种难受，最终爆破了之后感觉心情大快就顺手写下了这篇文章">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150413224441120">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/04/13/反调试-去除各种反调试/"/>
+
+
+
+
+
+  <title> [反调试]去除各种反调试 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/04/13/反调试-去除各种反调试/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [反调试]去除各种反调试
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-13T22:30:39+08:00">
+                2015-04-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/13/反调试-去除各种反调试/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/13/反调试-去除各种反调试/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  前不久破解一个软件的时候遇到了各种反调试，折腾的自己各种难受，最终爆破了之后感觉心情大快就顺手写下了这篇文章
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#使用工具</p>
+<p>十六进制分析工具：winhex<br>查壳工具：PEID<br>脱壳工具：ollydump插件或者LordPE<br>脱壳修复工具：ImportREC<br>逆向工具：OllyDbg</p>
+<p>#分析过程</p>
+<p>##PE修复<br>打开源程序所在文件夹，发现有一个crackme，双机运行程序发现有这个提示：<br><img src="http://img.blog.csdn.net/20150413224441120" alt="这里写图片描述"><br>应该是文件的PE结构被修改了，winhex载入分析发现：</p>
+<p><img src="http://img.blog.csdn.net/20150413224618087" alt="这里写图片描述"><br>果然是PE结构的问题，在DOS头后面的PE头的16进制应该为50 45，将上述52修改为45，保存文件之后发现仍然运行不了，证明PE结构仍然存在问题。<br>分析PE头后面的IMAGE_FILE_HEADER(映像文件头，NT头)，对比结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">typedef struct _IMAGE_FILE_HEADER &#123;</div><div class="line">    WORD    Machine;				//运行平台</div><div class="line">    WORD    NumberOfSections;		//文件的区块数目</div><div class="line">    DWORD   TimeDateStamp;			//文件创建的日期和时间</div><div class="line">    DWORD   PointerToSymbolTable;	//指向符号表</div><div class="line">    DWORD   NumberOfSymbols;		//符号表中符号个数</div><div class="line">    WORD    SizeOfOptionalHeader;		//IMAGE_OPTIONAL_HEADER32结构大小</div><div class="line">    WORD    Characteristics;			//文件属性</div><div class="line">&#125; IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;</div></pre></td></tr></table></figure>
+<p>上述地址分别相对于50450000之后偏移04h(4C01),06h(0300),08h,0Ch,10h,14h,16h对比之后发现在运行平台上为1F0h。<br>而我们熟知运行平台如下图：<br><img src="http://img.blog.csdn.net/20150413224629619" alt="这里写图片描述"><br>故将其修改为14Ch，保存文件。修复PE结构之后可以正常运行了<br>双机运行之后如下图<br><img src="http://img.blog.csdn.net/20150413224817072" alt="这里写图片描述"><br>输入用户名和注册码之后提示不正确，而且在过了一段时间之后程序自动退出，应该加了时间控制（此时主窗口已经退出，只有错误提示框）<br><img src="http://img.blog.csdn.net/20150413225036423" alt="这里写图片描述"></p>
+<p>##脱壳</p>
+<p>用PEID分析载入分析之后发现：<br><img src="http://img.blog.csdn.net/20150413225047549" alt="这里写图片描述"><br>程序加了WinUpack的壳好在只是一个普通的压缩弱壳，用PEID自带的插件Krypto ANAlzer扫了一遍程序<br><img src="http://img.blog.csdn.net/20150413225145925" alt="这里写图片描述"><br>了解到该程序并没有使用什么知名的加密算法。<br>因为这里加了壳，不便于静态分析，故笔者在这里并未使用IDA。用OD载入程序，OEP被壳修改，要先脱壳。因为WinUpack为弱壳，所以根据OEP定律，单步运行至OEP改变时右键数据窗口中跟随，然后下硬件访问断点，运行之后程序停在OEP，因为加了壳使OD并没有完全正常解析指令，：<br><img src="http://img.blog.csdn.net/20150413225239542" alt="这里写图片描述"><br>开始脱壳，用ollydump记录下程序OEP，lordpe转存，脱壳之后因为IAT被破坏所以无法正常运行软件。<br>使用ImportREC修复脱壳后程序，将 OEP改为上述14EC，获取输入表，发现全部有效，然后修复上面脱壳的转存文件：<br><img src="http://img.blog.csdn.net/20150413225409055" alt="这里写图片描述"><br>能正确运行。OD再次载入，停在正确的OEP，正式开始破解：（这里因为重建了输入表，所以程序的大小会比之前的源程序要大一些，属于正常情况）<br><img src="http://img.blog.csdn.net/20150413225437603" alt="这里写图片描述"></p>
+<p>##初步分析<br>看到程序的入口点应该想到程序使用了较为高级的花指令，伪装了一些API调用，然后通过call eax致使无法查到这些API的调用。<br>根据最开始的提示Error（标题栏）和“注册码错误”，使用字符串查找如下：<br><img src="http://img.blog.csdn.net/20150413225636956" alt="这里写图片描述"><br>Ctrl+G（转到上述地址），到这些地址处发现:<br><img src="http://img.blog.csdn.net/20150413225735721" alt="这里写图片描述"></p>
+<p>##去除单步异常<br>退回到OEP一步步分析：运行到这一步时程序会自动终止：<br><img src="http://img.blog.csdn.net/20150413225820087" alt="这里写图片描述"><br>因为前面有一个捕获异常函数SetUnhandledExceptionFilter，在程序被调试时，ptr ds[eax]此处地址为0是不可读写的，而这里向一块不可写的内存中写入0x1，自然触发异常，终止程序。<br>Nop掉这个函数和异常触发的mov。</p>
+<p>##去除父进程校验<br>重新载入程序至：<br><img src="http://img.blog.csdn.net/20150413225850195" alt="这里写图片描述"><br>这个是窗口主函数了，这个API的第4个参数为00401340，就是窗口主程序所在地址了，转到在00401340下int 3断点，运行至后得：<br>先不着急单步，浏览一遍代码之后发现程序在此段中多次调用了0040101E处的函数，enter进去之后发现第二层反调试：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">00401027  |.  68 28010000   push 0x128                               ; /Length = 128 (296.)</div><div class="line">0040102C  |.  8D85 D8FEFFFF lea eax,[local.74]                       ; |</div><div class="line">00401032  |.  50            push eax                                 ; |Destination</div><div class="line">00401033  |.  E8 FA050000   call &lt;jmp.&amp;kernel32.RtlZeroMemory&gt;       ; \RtlZeroMemory</div><div class="line">00401038  |.  C785 D8FEFFFF&gt;mov [local.74],0x128</div><div class="line">00401042  |.  6A 00         push 0x0                                 ; /ProcessID = 0</div><div class="line">00401044  |.  6A 02         push 0x2                                 ; |Flags = TH32CS_SNAPPROCESS</div><div class="line">00401046  |.  E8 AB050000   call &lt;jmp.&amp;kernel32.CreateToolhelp32Snap&gt;; \CreateToolhelp32Snapshot</div><div class="line">0040104B  |.  8985 D4FEFFFF mov [local.75],eax</div><div class="line">00401051  |.  8D85 D8FEFFFF lea eax,[local.74]</div><div class="line">00401057  |.  50            push eax                                 ; /lppe</div><div class="line">00401058  |.  FFB5 D4FEFFFF push [local.75]                          ; |hSnapshot</div><div class="line">0040105E  |.  E8 C3050000   call &lt;jmp.&amp;kernel32.Process32First&gt;      ; \Process32First</div><div class="line">00401063  |.  EB 1F         jmp Xdump1.00401084</div><div class="line">00401065  |&gt;  E8 98050000   /call &lt;jmp.&amp;kernel32.GetCurrentProcessId&gt;; [GetCurrentProcessId</div><div class="line">0040106A  |.  3B85 E0FEFFFF |cmp eax,[local.72]</div><div class="line">00401070  |.  74 26         |je Xdump1.00401098</div><div class="line">00401072  |.  8D85 D8FEFFFF |lea eax,[local.74]</div><div class="line">00401078  |.  50            |push eax                                ; /lppe</div><div class="line">00401079  |.  FFB5 D4FEFFFF |push [local.75]                         ; |hSnapshot</div><div class="line">0040107F  |.  E8 A8050000   |call &lt;jmp.&amp;kernel32.Process32Next&gt;      ; \Process32Next</div><div class="line">00401084  |&gt;  0BC0           or eax,eax</div><div class="line">00401086  |.^ 75 DD         \jnz Xdump1.00401065</div></pre></td></tr></table></figure>
+<p>上面主要是通过调用系统快照函数（红色字体标注部分），然后遍历这个系统当前的进程ID，直到找到当前dump的进程ID后跳走，数据窗口中跟踪[local.72]地址，发现确实在遍历进程名和ID。证实了上面我的想法。<br>而在以下代码中发现了第二层反调试的真面目：<br><img src="http://img.blog.csdn.net/20150413230925226" alt="这里写图片描述"><br>将当前进程的父进程与系统下Explorer.exe进行对比。<br>继续单步运行：第二次判断父进程是否为CMD.exe<br><img src="http://img.blog.csdn.net/20150413230905589" alt="这里写图片描述"><br>这里因为一般运行在windows系统下进程调度时，大部分进程都是有父进程Explorer.exe或者cmd.exe创建的，而当程序处于调试状态时父进程肯定是调试进程，所以这一层反调试能针对很多调试软件起到很好的反调试作用。<br>在程序中多次调用了这一层反调试，所以单纯的nop需要靠IDC脚本实现多次，这里我们让</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">00401114  |. /74 68         je Xdump1.0040117E</div></pre></td></tr></table></figure>
+<p>改为jmp 00401117E,让它恒跳走，让程序误以为父进程校验正确。<br>保存文件之后想到刚开始注册时会有成功或者失败提示，那么是调用了MessageBox这个函数。根据这个信息，我们想到了查找函数。于是查找api调用如下<br><img src="http://img.blog.csdn.net/20150413233229404" alt="这里写图片描述"><br>发现这里并没有messagebox，这里应该是到了宏，调用api之前将api名字做了隐藏，之后直接call eax，程序刚开始时代码说明了这一点：<br><img src="http://img.blog.csdn.net/20150413233314675" alt="这里写图片描述"></p>
+<p>##去除时间差校验<br>在调用的API中发现了GetDlgItem，这是一个破绽。直接下int 3断点，运行之后发现自己还没来得及输入用户名和注册码程序自动退出，这让我想到刚刚主窗口中的两个可疑的函数SetTimer</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">0040138E  |.  6A 00         push 0x0                                 ; /Timerproc = NULL</div><div class="line">00401390  |.  68 E8030000   push 0x3E8                               ; |Timeout = 1000. ms</div><div class="line">00401395  |.  6A 06         push 0x6                                 ; |TimerID = 6</div><div class="line">00401397  |.  FF75 08       push [arg.1]                             ; |hWnd</div><div class="line">0040139A  |.  E8 45020000   call &lt;jmp.&amp;user32.SetTimer&gt;              ; \SetTimer</div><div class="line">和</div><div class="line">004013C4  |.  6A 00         push 0x0                                 ; /Timerproc = NULL</div><div class="line">004013C6  |.  68 10270000   push 0x2710                              ; |Timeout = 10000. ms</div><div class="line">004013CB  |.  6A 05         push 0x5                                 ; |TimerID = 5</div><div class="line">004013CD  |.  FF75 08       push [arg.1]                             ; |hWnd</div><div class="line">004013D0  |.  E8 0F020000   call &lt;jmp.&amp;user32.SetTimer&gt;              ; \SetTimer</div></pre></td></tr></table></figure>
+<p>两个都是SetTimer，这个就能解释之前程序会自动退出的原因了，SetTmier函数即为每隔固定的一个时间向所在窗口发送消息。上面这段应该发送的是WM_CLOSE而销毁了窗口。，分析代码知道一个是1000ms一个是10000ms，而我们在反调试分析代码过程中所需要的时间远远大于这些时间，所以自然会退出。这也是利用调试时间差起到反调试的思路。<br>将timeout参数值改成FFFF，时间应该我们足够逆向分析用了。保存文件之后载入文件，进一步分析</p>
+<p>##逆向分析</p>
+<p>在getdlgitem上下int 3断点，成功断下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">0040143B  |.  6A 03         push 0x3                                 ; /ControlID = 3</div><div class="line">0040143D  |.  FF75 08       push [arg.1]                             ; |hWnd</div><div class="line">00401440  |.  E8 8D010000   call &lt;jmp.&amp;user32.GetDlgItem&gt;            ; \GetDlgItem</div><div class="line">00401445  |.  A3 60304000   mov dword ptr ds:[0x403060],eax</div><div class="line">0040144A  |.  6A 04         push 0x4                                 ; /ControlID = 4</div><div class="line">0040144C  |.  FF75 08       push [arg.1]                             ; |hWnd</div><div class="line">0040144F  |.  E8 7E010000   call &lt;jmp.&amp;user32.GetDlgItem&gt;            ; \GetDlgItem</div><div class="line">00401454  |.  A3 64304000   mov dword ptr ds:[0x403064],eax</div><div class="line">00401459  |.  68 74304000   push dump3.00403074                      ; /lParam = 403074</div><div class="line">0040145E  |.  6A 32         push 0x32                                ; |wParam = 32</div><div class="line">00401460  |.  6A 0D         push 0xD                                 ; |Message = WM_GETTEXT</div><div class="line">00401462  |.  FF35 60304000 push dword ptr ds:[0x403060]             ; |hWnd = C0B2C</div><div class="line">00401468  |.  E8 71010000   call &lt;jmp.&amp;user32.SendMessageA&gt;          ; \SendMessageA</div><div class="line">0040146D  |.  68 F4304000   push dump3.004030F4                      ; /lParam = 4030F4</div><div class="line">00401472  |.  6A 32         push 0x32                                ; |wParam = 32</div><div class="line">00401474  |.  6A 0D         push 0xD                                 ; |Message = WM_GETTEXT</div><div class="line">00401476  |.  FF35 64304000 push dword ptr ds:[0x403064]             ; |hWnd = A07EC</div><div class="line">0040147C  |.  E8 5D010000   call &lt;jmp.&amp;user32.SendMessageA&gt;          ; \SendMessageA</div></pre></td></tr></table></figure>
+<p>程序使用SendMessageA,将字符串的内容送至00403074和004030F4两处，避免使用GetDlgItemTextA函数直接能获取明文。<br>单步跟踪<br><img src="http://img.blog.csdn.net/20150413234400965" alt="这里写图片描述"><br>发现算法在call eax之后来到如下代码。跟进之后算法分析见代码中注释：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">004011D9   &gt; \A1 56304000   mov eax,dword ptr ds:[0x403056]          ;  核心算法,此地址处存放用户名的长度</div><div class="line">004011DE   .  83F8 06       cmp eax,0x6                              ;  用户名长度&gt;=6</div><div class="line">004011E1   .  0F8C 97000000 jl dump3.0040127E</div><div class="line">004011E7   .  50            push eax</div><div class="line">004011E8   .  59            pop ecx</div><div class="line">004011E9   .  8D35 00304000 lea esi,dword ptr ds:[0x403000]          ;  预定字符串S1</div><div class="line">004011EF   .  8D3D 74304000 lea edi,dword ptr ds:[0x403074]          ;  用户名</div><div class="line">004011F5   &gt;  33C0          xor eax,eax</div><div class="line">004011F7   .  33DB          xor ebx,ebx</div><div class="line">004011F9   .  8B07          mov eax,dword ptr ds:[edi]               ;  将4位用户名给eax</div><div class="line">004011FB   .  8B1E          mov ebx,dword ptr ds:[esi]               ;  将4位s1给ebx</div><div class="line">004011FD   .  25 FF000000   and eax,0xFF                             ;  去掉高位保留第一位，即取一位用户名</div><div class="line">00401202   .  81E3 FF000000 and ebx,0xFF                             ;  去掉高位保留第一位，取S一位</div><div class="line">00401208   .  33C3          xor eax,ebx                              ;  二者异或</div><div class="line">0040120A   .  0305 4E304000 add eax,dword ptr ds:[0x40304E]          ;  然后累加</div><div class="line">00401210   .  A3 4E304000   mov dword ptr ds:[0x40304E],eax</div><div class="line">00401215   .  46            inc esi</div><div class="line">00401216   .  47            inc edi                                  ;  循环向后读取</div><div class="line">00401217   .^ E2 DC         loopd Xdump3.004011F5</div><div class="line">00401219   .  33C9          xor ecx,ecx</div><div class="line">0040121B   .  8B0D 5A304000 mov ecx,dword ptr ds:[0x40305A]          ;  注册码长度</div><div class="line">00401221   .  8D35 25304000 lea esi,dword ptr ds:[0x403025]          ;  预定字符串S2</div><div class="line">00401227   .  8D3D F4304000 lea edi,dword ptr ds:[0x4030F4]          ;  注册码</div><div class="line">0040122D   &gt;  33C0          xor eax,eax</div><div class="line">0040122F   .  33DB          xor ebx,ebx</div><div class="line">00401231   .  8B07          mov eax,dword ptr ds:[edi]               ;  算法同上</div><div class="line">00401233   .  8B1E          mov ebx,dword ptr ds:[esi]</div><div class="line">00401235   .  25 FF000000   and eax,0xFF</div><div class="line">0040123A   .  81E3 FF000000 and ebx,0xFF</div><div class="line">00401240   .  33C3          xor eax,ebx</div><div class="line">00401242   .  0305 52304000 add eax,dword ptr ds:[0x403052]</div><div class="line">00401248   .  A3 52304000   mov dword ptr ds:[0x403052],eax</div><div class="line">0040124D   .  46            inc esi</div><div class="line">0040124E   .  47            inc edi</div><div class="line">0040124F   .^ E2 DC         loopd Xdump3.0040122D                    ;  循环读取</div><div class="line">00401251   .  A1 52304000   mov eax,dword ptr ds:[0x403052]</div><div class="line">00401256   .  8B1D 4A304000 mov ebx,dword ptr ds:[0x40304A]</div><div class="line">0040125C   .  85DB          test ebx,ebx</div><div class="line">0040125E   .  75 3A         jnz Xdump3.0040129A                      ;  不等跳至失败</div><div class="line">00401260   .  8505 4E304000 test dword ptr ds:[0x40304E],eax         ;  比较用户名与S1异或和是否等于注册码与S2的异或和</div><div class="line">00401266   .  75 32         jnz Xdump3.0040129A                      ;  不等则跳向失败</div><div class="line">00401268   .  6A 00         push 0x0</div><div class="line">0040126A   .  68 98114000   push dump3.00401198                      ;  ASCII &quot;Success&quot;</div></pre></td></tr></table></figure>
+<p>在jnz时将标志位Z改为1之后看到程序注册成功了，<br><img src="http://img.blog.csdn.net/20150413234651973" alt="这里写图片描述"><br>然后直接将jnz修改为nop<br>保存之后按照理论上来讲，应该爆破成功，此时无论输入任何用户名和注册码都应该会提示成功，但是当我们再次运行程序的时候发现</p>
+<p>##去除SMC<br>我们在到反汇编窗口发现代码刚刚爆破的jnz被还原了<br><img src="http://img.blog.csdn.net/20150413235007616" alt="这里写图片描述"><br>看来是有代码SMC防爆自校验，防止爆破技术，回溯之前代码，发现在程序载入时又一个这样的call<br><img src="http://img.blog.csdn.net/20150413235133039" alt="这里写图片描述"><br>跟进之后发现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">004012F3  /$  B8 66124000   mov eax,dump4.00401266</div><div class="line">004012F8  |.  A3 90384000   mov dword ptr ds:[0x403890],eax</div><div class="line">004012FD  |.  8B18          mov ebx,dword ptr ds:[eax]</div><div class="line">004012FF  |.  66:81FB 753A  cmp bx,0x3A75</div><div class="line">00401304  |.  74 41         je Xdump4.00401347</div><div class="line">00401306  |.  68 94384000   push dump4.00403894                      ; /pOldProtect = dump4.00403894</div><div class="line">0040130B  |.  6A 40         push 0x40                                ; |NewProtect = PAGE_EXECUTE_READWRITE</div><div class="line">0040130D  |.  6A 10         push 0x10                                ; |Size = 10 (16.)</div><div class="line">0040130F  |.  FF35 90384000 push dword ptr ds:[0x403890]             ; |Address = NULL</div><div class="line">00401315  |.  E8 2C030000   call &lt;jmp.&amp;kernel32.VirtualProtect&gt;      ; \VirtualProtect</div><div class="line">0040131A  |.  A1 90384000   mov eax,dword ptr ds:[0x403890]</div><div class="line">0040131F  |.  BB 753A0000   mov ebx,0x3A75</div><div class="line">00401324  |.  66:8918       mov word ptr ds:[eax],bx</div><div class="line">00401327  |.  B8 6E124000   mov eax,dump4.0040126E</div><div class="line">0040132C  |.  A3 90384000   mov dword ptr ds:[0x403890],eax</div><div class="line">00401331  |.  8B18          mov ebx,dword ptr ds:[eax]</div><div class="line">00401333  |.  66:81FB 7532  cmp bx,0x3275</div><div class="line">00401338  |.  74 0D         je Xdump4.00401347</div><div class="line">0040133A  |.  A1 90384000   mov eax,dword ptr ds:[0x403890]</div><div class="line">0040133F  |.  BB 75320000   mov ebx,0x3275</div><div class="line">00401344  |.  66:8918       mov word ptr ds:[eax],bx</div><div class="line">00401347  \&gt;  C3            retn</div></pre></td></tr></table></figure>
+<p>原来在程序载入的时候会对上面两个关键的jnz进行检验，因为jnz机器码为7532如果发现被修改了就再次修改回去，这样就无法简单的nop成功了。<br>于是我们将这个函数也nop掉保存文件，再次注册时成功了</p>
+<p>#后<br>总算分析的差不多了，贴上一张图<br><img src="http://img.blog.csdn.net/20150413235214429" alt="这里写图片描述"></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/逆向/" rel="tag"># 逆向</a>
+          
+            <a href="/tags/反调试/" rel="tag"># 反调试</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/10/调试原理-逆向peid-判定vc/" rel="next" title="[调试原理]逆向peid_判定vc">
+                <i class="fa fa-chevron-left"></i> [调试原理]逆向peid_判定vc
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/20/csdn访问量/" rel="prev" title="csdn访问量">
+                csdn访问量 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/04/13/反调试-去除各种反调试/"
+           data-title="[反调试]去除各种反调试" data-url="http://venidic.com/2015/04/13/反调试-去除各种反调试/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,907 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="python," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近看书实在是看不下去了，于是乎赶紧找些代码来压压惊，好在发现了一个不错的python练手的题目。相比较一些单纯的将一些无聊的算法翻来覆去的写，感觉这个有意思多了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python一日一练（00-13）">
+<meta property="og:url" content="http://venidic.com/2015/12/29/python一日一练00-13/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="最近看书实在是看不下去了，于是乎赶紧找些代码来压压惊，好在发现了一个不错的python练手的题目。相比较一些单纯的将一些无聊的算法翻来覆去的写，感觉这个有意思多了。">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0578weoqej20om0cwwil.jpg">
+<meta property="og:updated_time" content="2016-01-19T14:59:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="python一日一练（00-13）">
+<meta name="twitter:description" content="最近看书实在是看不下去了，于是乎赶紧找些代码来压压惊，好在发现了一个不错的python练手的题目。相比较一些单纯的将一些无聊的算法翻来覆去的写，感觉这个有意思多了。">
+<meta name="twitter:image" content="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0578weoqej20om0cwwil.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/12/29/python一日一练00-13/"/>
+
+
+
+
+
+  <title> python一日一练（00-13） | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/12/29/python一日一练00-13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                python一日一练（00-13）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-29T14:13:41+08:00">
+                2015-12-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程/" itemprop="url" rel="index">
+                    <span itemprop="name">编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/12/29/python一日一练00-13/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/29/python一日一练00-13/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近看书实在是看不下去了，于是乎赶紧找些代码来压压惊，好在发现了一个不错的python练手的题目。相比较一些单纯的将一些无聊的算法翻来覆去的写，感觉这个有意思多了。<br><a id="more"></a></p>
+<p>#0000</p>
+<blockquote>
+<p>将你的QQ头像或者微博头像右上角加上红色数字，类似于微信未读取信息数量的提示效果</p>
+</blockquote>
+<p>需要用到PIL库，这个库在处理图片上有着异常强大的功能<br>可以到<a href="http://pythonware.com/products/pil/" target="_blank" rel="external">Python Imaging Library (PIL)</a>下载相应平台的安装包<br>对应的<a href="http://effbot.org/imagingbook/" target="_blank" rel="external">The Python Imaging Library Handbook</a>为这个库的详细说明</p>
+<p>下面直接看代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">#test0000</div><div class="line">from PIL import Image,ImageDraw,ImageFont</div><div class="line"></div><div class="line">class AddTagToPhoto:</div><div class="line">    def __init__(self):</div><div class="line">        self.image = None</div><div class="line">        self.number = None</div><div class="line">        self.x = 0</div><div class="line">        self.y = 0</div><div class="line"></div><div class="line"></div><div class="line">    def OpenImage(self, image_path):</div><div class="line">        self.image = Image.open(image_path)</div><div class="line">        return True</div><div class="line"></div><div class="line">    def AddNum(self, number):</div><div class="line">        num_size = max(self.image.size[0], self.image.size[1]) / 5</div><div class="line">        num_font = ImageFont.truetype(&apos;C:/windows/fonts/Arial.ttf&apos;,num_size)</div><div class="line">        num_color = &quot;#ff0000&quot;</div><div class="line">        self.x = self.image.size[0] - num_font.getsize(number)[0]</div><div class="line">        draw = ImageDraw.Draw(self.image)</div><div class="line">        draw.text((self.x,self.y),number,num_color,num_font)</div><div class="line"></div><div class="line">        self.image.save(&apos;photo&apos;+number+&apos;.jpg&apos;)</div><div class="line">        return True</div><div class="line"></div><div class="line">photo_tag = AddTagToPhoto()</div><div class="line">photo_tag.OpenImage(&quot;photo.jpg&quot;)</div><div class="line">photo_tag.AddNum(&apos;7&apos;)</div></pre></td></tr></table></figure>
+<p><em>注：在执行过程中，windows平台可以考虑使用pillow库代替PIL，以防止出现各种奇葩的问题</em><br>下载地址：<a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#pil" target="_blank" rel="external">pillow</a></p>
+<p>#0001</p>
+<blockquote>
+<p>作为Apple Store App 独立开发者，你要搞限时促销，为你的应用生成激活码（或者优惠券），使用 Python 如何生成 200 个激活码（或者优惠券）？</p>
+</blockquote>
+<p>其实这些小题目主要是带动你对python库的理解，不得不说，python真的好强大。<br>这个题目挺简单的，主要考察对random和string的运用，顺带文件的操作<br>直接看代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">#0001</div><div class="line">import random</div><div class="line">str = &apos;AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789&apos;</div><div class="line"></div><div class="line">def randkey(length):</div><div class="line">    key = &apos;&apos;</div><div class="line">    for i in range(length):</div><div class="line">        key += random.choice(str)</div><div class="line">    return key</div><div class="line"></div><div class="line">print randkey(200)</div></pre></td></tr></table></figure></p>
+<p>来一个更强大一点的，运用uuid这个库，简直不要不要得<br><strong>UUID是128位全局唯一标识符，通常由32字节的字符组成，它可以保证时间和空间的唯一性</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">#0001</div><div class="line"></div><div class="line">import uuid</div><div class="line">print uuid.uuid1()</div><div class="line">print uuid.uuid3(uuid.NAMESPACE_DNS, &apos;venidic&apos;)</div><div class="line">print uuid.uuid4()</div><div class="line">print uuid.uuid5(uuid.NAMESPACE_DNS, &apos;venididc&apos;)</div></pre></td></tr></table></figure></p>
+<p>上述代码中，</p>
+<ol>
+<li>uuid1()——基于时间戳，由MAC地址、当前时间戳、随机数生成。可以保证全球范围内的唯一性，但MAC的使用同时带来安全性问题，局域网中可以使用IP来代替MAC。</li>
+<li>uuid2()——基于分布式计算环境DCE（Python中没有这个函数）算法与uuid1相同，不同的是把时间戳的前4位置换为POSIX的UID。实际中很少用到该方法。</li>
+<li>uuid3()——基于名字的MD5散列值。通过计算名字和命名空间的MD5散列值得到，保证了同一命名空间中不同名字的唯一性，和不同命名空间的唯一性，但同一命名空间的同一名字生成相同的uuid。    </li>
+<li>uuid4()——基于随机数。由伪随机数得到，有一定的重复概率，该概率可以计算出来。</li>
+<li>uuid5()——基于名字的SHA-1散列值。算法与uuid3相同，不同的是使用 Secure Hash Algorithm 1 算法</li>
+</ol>
+<p>#0002</p>
+<blockquote>
+<p>将 0001 题生成的 200 个激活码（或者优惠券）保存到 MySQL 关系型数据库中。</p>
+</blockquote>
+<p>#0003</p>
+<blockquote>
+<p>将 0001 题生成的 200 个激活码（或者优惠券）保存到 Redis 非关系型数据库中。</p>
+</blockquote>
+<p>#0004</p>
+<blockquote>
+<p>任一个英文的纯文本文件，统计其中的单词出现的个数。</p>
+</blockquote>
+<p>主要考察python 正则表达式的运用<br>直接上代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">import re</div><div class="line">fin=open(&quot;in.txt&quot;,&quot;r&quot;)</div><div class="line">fout=open(&quot;out.txt&quot;,&quot;w&quot;)</div><div class="line">str=fin.read()</div><div class="line">reObj=re.compile(&quot;\b?([a-zA-Z]+)\b?&quot;)</div><div class="line">words=reObj.findall(str)</div><div class="line">word_dict=&#123;&#125;</div><div class="line">count_word = 0</div><div class="line">count_character = 0</div><div class="line">for word in words:</div><div class="line">    count_word += 1</div><div class="line">    count_character += len(word)</div><div class="line">    if(word_dict.has_key(word)):</div><div class="line">        word_dict[word.lower()]=max(word_dict[word.lower()],words.count(word.lower())+words.count(word.upper())+words.count(word))</div><div class="line">    else:</div><div class="line">        word_dict[word.lower()]=max(0,words.count(word.lower())+words.count(word.upper())+words.count(word))</div><div class="line"></div><div class="line"></div><div class="line">fout.write(&quot;count_word:%d\n&quot;%count_word+&quot;count_character:%d\n&quot;%count_character)</div><div class="line">fout.write(&quot;Anly this article:\n&quot;)</div><div class="line"></div><div class="line">for(word,number) in word_dict.items():</div><div class="line">    fout.write(word+&quot;:%d\n&quot;%number)</div></pre></td></tr></table></figure></p>
+<p>#0005</p>
+<blockquote>
+<p>你有一个目录，装了很多照片，把它们的尺寸变成都不大于 iPhone5 分辨率的大小。</p>
+</blockquote>
+<p>这个题目仍然考察的是python对图像的处理，所以还是对PIL库的用法。为了方便修改多张照片的分辨率，同时引入glob模块<br>具体参见代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">from PIL import Image</div><div class="line">import glob,os</div><div class="line"></div><div class="line">def photo_resize(width, height):</div><div class="line">    for infile in glob.glob(&quot;*.jpg&quot;):</div><div class="line">        jpg_path,ext = os.path.splitext(infile)</div><div class="line">        jpg = Image.open(infile)</div><div class="line">        (jpg_width, jpg_height) = jpg.size</div><div class="line">        if jpg_width &gt; width:</div><div class="line">            jpg_height = jpg_height * width // jpg_width</div><div class="line">            jpg_width = width</div><div class="line">        if jpg_height &gt; height:</div><div class="line">            jpg_width = jpg_width * height // jpg_height</div><div class="line">            jpg_height = height</div><div class="line">        jpg_change = jpg.resize((jpg_width,jpg_height),Image.ANTIALIAS)</div><div class="line">        jpg_change.save(&quot;_&quot;+jpg_path + &quot;.jpg&quot;, &quot;JPEG&quot;)</div><div class="line"></div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    photo_resize(1366,768)</div></pre></td></tr></table></figure></p>
+<p>这里可以直接通过参数将自己想要的分辨率穿进去，因为没有土豪phone，所以并不清楚土豪phone的分辨率ಥ_ಥ</p>
+<p>#0006</p>
+<blockquote>
+<p>你有一个目录，放了你一个月的日记，都是 txt，为了避免分词的问题，假设内容都是英文，请统计出你认为每篇日记最重要的词</p>
+</blockquote>
+<p>这个题目跟上面的第4题有些类似，只不过第4题是统计一篇文章里面字符拼读，而这一题是统计一个文件夹里面所有文件的字符拼读，稍微改下就可以实现要求：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">import re</div><div class="line">import os,glob</div><div class="line"></div><div class="line"></div><div class="line">def anlykeyfromdirect():</div><div class="line">    str = &quot;&quot;</div><div class="line">    for infile in glob.glob(&quot;*.txt&quot;):</div><div class="line">        txt_path,ext = os.path.splitext(infile)</div><div class="line">        print (infile)</div><div class="line">        txt_file = open(infile,&quot;r&quot;)</div><div class="line">        str += txt_file.read()</div><div class="line">        str += &quot;\n&quot;</div><div class="line"></div><div class="line"></div><div class="line">    reObj = re.compile(&quot;\b?([a-zA-Z]+)\b?&quot;)</div><div class="line">    words = reObj.findall(str)</div><div class="line">    word_dict = &#123;&#125;</div><div class="line"></div><div class="line">    for word in words:</div><div class="line">        if(word_dict.has_key(word)):</div><div class="line">            word_dict[word.lower()] = max(word_dict[word.lower()],words.count(word.lower())+words.count(word.upper())+words.count(word))</div><div class="line">        else:</div><div class="line">            word_dict[word.lower()] = max(0,words.count(word.lower())+words.count(word.upper())+words.count(word))</div><div class="line"></div><div class="line">    fout = open(&quot;anly.txt&quot;,&quot;w&quot;)</div><div class="line">    for(word,number) in word_dict.items():</div><div class="line">        fout.write(word+&quot;:%d\n&quot;%number)</div><div class="line"></div><div class="line"></div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    anlykeyfromdirect()</div></pre></td></tr></table></figure></p>
+<p>#0007</p>
+<blockquote>
+<p>有个目录，里面是你自己写过的程序，统计一下你写过多少行代码。包括空行和注释，但是要分别列出来。</p>
+</blockquote>
+<p>思路很简单，统计行数的话需要统计“\n”，稍微难一点的就在对于目录的遍历，编程文件的甄别，对空行和注释的判断。其中对注释的判断稍微显得麻烦，要考虑到注释行和注释块所占的行数。具体参加代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">import os</div><div class="line">#add file type if you want to anly</div><div class="line">file_type_anly = (&apos;.c&apos;, &apos;.h&apos;, &apos;.cpp&apos;)</div><div class="line"></div><div class="line">def CodeAnly(code_file_path):</div><div class="line">    #init</div><div class="line">    line_note = line_blank = line_total = line_count = 0</div><div class="line">    flag = False</div><div class="line">    with open(code_file_path) as f:</div><div class="line">        lines = f.readlines()</div><div class="line">        line_total = len(lines)</div><div class="line">        for line_temp in lines:</div><div class="line">            line_temp = line_temp.strip()</div><div class="line">            if line_temp == &apos;&apos;:</div><div class="line">                line_blank += 1</div><div class="line">            elif line_temp.startswith(&quot;//&quot;):</div><div class="line">                line_note += 1</div><div class="line">            elif (line_temp.startswith(&apos;/*&apos;) and True == line_temp.endswith(&apos;*/&apos;)):</div><div class="line">                line_note += 1</div><div class="line">            elif (line_temp.startswith(&apos;/*&apos;) and False == line_temp.endswith(&apos;*/&apos;)):</div><div class="line">                line_note += 1</div><div class="line">                flag = True</div><div class="line">            elif flag == True:</div><div class="line">                line_note += 1</div><div class="line">                if line_temp.endswith(&apos;*/&apos;):</div><div class="line">                    flag = False</div><div class="line"></div><div class="line">    print (&apos;%s: \n\tCodeLines:%d \n\tLineBlank:%d  \n\tLineNotes:%d&apos;%(code_file_path, line_total, line_blank, line_note))</div><div class="line">    return (line_total, line_blank, line_note)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">def GetFile(root):</div><div class="line">    for lists in os.listdir(root):</div><div class="line">        path = os.path.join(root,lists)</div><div class="line">        #print path</div><div class="line">        if os.path.isdir(path):</div><div class="line">            GetFile(path)</div><div class="line">        if os.path.isfile(path):</div><div class="line">        #anly file type</div><div class="line">            infile_name, infile_type = os.path.splitext(path)</div><div class="line">            if infile_type in file_type_anly:</div><div class="line">                (temp1, temp2, temp3) = CodeAnly(path)</div><div class="line">               </div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    GetFile(r&apos;F:\\temp&apos;)</div></pre></td></tr></table></figure></p>
+<p>其中也可以用正则代替部分代码<br>因为要判断代码中的空行和注释，所以这里没有选择使用<code>enumerate</code>，如果没有空行和注释的需求，则可以这样写：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">def linecount(filepath):</div><div class="line">    count = -1</div><div class="line">    for count, line in enumerate(open(filepath, &apos;rU&apos;)):</div><div class="line">        pass</div><div class="line">    count += 1</div><div class="line">    return count</div></pre></td></tr></table></figure></p>
+<p>如果是大文件的话，可以使用<code>linecache</code>库，效率也挺高的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">import linecache</div><div class="line">count = linecache.getline(filename,linenum)</div></pre></td></tr></table></figure></p>
+<p>用自己的代码统计了下在鹅厂实习的那两个月，前前后后写的代码竟然竟然有将近12w呃，虽然里面有些重复的版本，引用第三方的库（逃<br>不过想想，几万行也是写到了嘛，好歹人家一个搞逆向分析的，哼(；◔ิω◔ิ)</p>
+<p>#0008</p>
+<blockquote>
+<p>一个HTML文件，找出里面的正文</p>
+</blockquote>
+<p>本题目主要考察对python的<code>Beautiful Soup</code>库的使用，它可以从HTML和XML中提取数据。<br>下面是官方说明文档：<br><a href="http://www.crummy.com/software/BeautifulSoup/bs4/doc/index.zh.html#id5" target="_blank" rel="external">Beautiful Soup 4.2.0 文档</a><br>使用了这个库，这个题目就变得很简单了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">from bs4 import BeautifulSoup</div><div class="line"></div><div class="line">def find_the_content(path):</div><div class="line">    fout = open(&quot;out.txt&quot;,&quot;w&quot;)</div><div class="line">    with open(path) as f:</div><div class="line">        text = BeautifulSoup(f, &apos;html.parser&apos;)</div><div class="line">        content = text.get_text().strip(&apos;\n&apos;)</div><div class="line">        fout.write(content.encode(&apos;gbk&apos;,&apos;ignore&apos;))</div><div class="line">       </div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">     find_the_content(&apos;1.html&apos;)</div></pre></td></tr></table></figure></p>
+<p>关于<code>BeautifulSoup</code>这个函数的使用上，可以选择相应的html的解释器，这里我使用了python自带，对小文件解析效果不错，其他的<code>lxml，html5lib</code>可以参考上述的官方说明文档对应部分。</p>
+<p>#0009</p>
+<blockquote>
+<p>一个HTML文件，找出里面的链接</p>
+</blockquote>
+<p>仍然可以使用<code>BeautifulSoup</code>解决这些问题，具体参加代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">from bs4 import BeautifulSoup</div><div class="line"></div><div class="line">def find_the_link(path):</div><div class="line">    fout = open(&apos;out.txt&apos;, &apos;w&apos;)</div><div class="line">    with open(path) as f:</div><div class="line">        soup = BeautifulSoup(f, &apos;html.parser&apos;)</div><div class="line">        for link in soup.find_all(&apos;a&apos;):</div><div class="line">            content = link.get(&apos;href&apos;)</div><div class="line">            fout.write(content.encode(&apos;gbk&apos;, &apos;ignore&apos;) + &apos;\n&apos;)</div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">     find_the_link(&apos;1.html&apos;)</div></pre></td></tr></table></figure></p>
+<p>#0010</p>
+<blockquote>
+<p>使用 Python 生成类似于下图中的字母验证码图片</p>
+</blockquote>
+<p><em>这里是图片描述：字母数字随机，具有模糊效果</em><br>生成随机的数字上面在0001中已经有详细的参考代码，主要是图片模糊和噪点效果，大体算法是通过颜色随机，在生成验证码的图片上绘制噪点。需要python下面的PIL库，具体参加代码（<em>代码转自Jaccorot</em>）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;Jaccorot&apos;</div><div class="line">from PIL import Image, ImageDraw, ImageFont, ImageFilter</div><div class="line">import random</div><div class="line"></div><div class="line">IMAGE_MODE = &apos;RGB&apos;</div><div class="line">IMAGE_BG_COLOR = (255,255,255)</div><div class="line">Image_Font = &apos;arial.ttf&apos;</div><div class="line">text = &apos;&apos;.join(random.sample(&apos;abcdefghijklmnopqrstuvwxyz\</div><div class="line">ABCDEFGHIJKLMNOPQRSTUVWXYZ&apos;,4))</div><div class="line"></div><div class="line">def colorRandom():</div><div class="line">    return (random.randint(32,127),random.randint(32,127),random.randint(32,127))</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">def create_identifying_code(strs, width=400, height=200, chance=2):</div><div class="line">    im = Image.new(IMAGE_MODE, (width, height), IMAGE_BG_COLOR)</div><div class="line">    draw = ImageDraw.Draw(im)</div><div class="line"></div><div class="line">    for w in xrange(width):</div><div class="line">        for h in xrange(height):</div><div class="line">            if chance &lt; random.randint(1, 100):</div><div class="line">                draw.point((w, h), fill=colorRandom())</div><div class="line"></div><div class="line">    font = ImageFont.truetype(Image_Font, 80)</div><div class="line">    font_width, font_height = font.getsize(strs)</div><div class="line">    strs_len = len(strs)</div><div class="line">    x = (width - font_width)/2</div><div class="line">    y = (height - font_height)/2</div><div class="line"></div><div class="line">    for i in strs:</div><div class="line">        draw.text((x,y), i, colorRandom(), font)</div><div class="line">        x += font_width/strs_len</div><div class="line"></div><div class="line">    im = im.filter(ImageFilter.BLUR)</div><div class="line">    im.save(&apos;identifying_code_pic.jpg&apos;)</div><div class="line"></div><div class="line"></div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    create_identifying_code(text)</div></pre></td></tr></table></figure></p>
+<p>#0011</p>
+<blockquote>
+<p> 敏感词文本文件filtered_words.txt，里面的内容为以下内容，当用户输入敏感词语时，则打印出 Freedom，否则打印出 Human Rights。</p>
+<p>北京<br>程序员<br>公务员<br>领导<br>牛比<br>牛逼<br>你娘<br>你妈<br>love<br>sex<br>jiangge</p>
+</blockquote>
+<p>#0012</p>
+<blockquote>
+<p>敏感词文本文件 filtered_words.txt，里面的内容 和 0011题一样，当用户输入敏感词语，则用 星号 <em> 替换，例如当用户输入「北京是个好城市」，则变成「*</em>是个好城市」。</p>
+</blockquote>
+<p>#0013</p>
+<blockquote>
+<p>用 Python 写一个爬图片的程序</p>
+</blockquote>
+<p>爬 <a href="http://tieba.baidu.com/p/2166231880" target="_blank" rel="external">这个链接里的日本妹子图片 :-)</a></p>
+<p>最喜欢解决这种问题了，想想爬妹子的照片就忍不住激动。之前用c++写了一个类似的爬取图片的程序，后来就没有再改进了。这次趁着自己学习python的时候，打算好好攻下python网络这块和<code>scrapy</code><br>单单就这个题目而言，思路也挺简单：获取图片链接+保存图片 即可。因为python web这一块的库实在太多，所以实现方式也有很多，下面是我的实现方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">__author__ = &apos;venidic&apos;</div><div class="line">import os</div><div class="line">import urllib</div><div class="line">from bs4 import BeautifulSoup</div><div class="line">from urlparse import urlsplit</div><div class="line"></div><div class="line">def DownloadPic(url):</div><div class="line">    image_content = urllib.urlopen(url).read()</div><div class="line">    filename = os.path.basename(urlsplit(url)[2])</div><div class="line">    pout = open(r&apos;photo/&apos;+filename, &apos;wb&apos;)</div><div class="line">    pout.write(image_content)</div><div class="line">    pout.close()</div><div class="line"></div><div class="line">def FindPic(url):</div><div class="line">    if False == os.path.isdir(&apos;photo&apos;):</div><div class="line">        os.mkdir(&apos;photo&apos;)</div><div class="line">    content = urllib.urlopen(url)</div><div class="line">    soup = BeautifulSoup(content, &apos;html.parser&apos;)</div><div class="line">    for img in soup.find_all(&apos;img&apos;, &#123;&apos;class&apos;: &apos;BDE_Image&apos;&#125;):</div><div class="line">        DownloadPic(img[&apos;src&apos;])</div><div class="line"></div><div class="line"></div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    FindPic(&apos;http://tieba.baidu.com/p/2166231880&apos;)</div></pre></td></tr></table></figure></p>
+<p><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f0578weoqej20om0cwwil.jpg" alt=""><br>目前只针对百度贴吧中图片可适用，后续先会将爬虫改为遍历网页自动爬取，然后会写针对知乎和豆瓣写出相应爬虫，敬请期待…</p>
+<p><em>未完待续，持续更新中……</em></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/12/06/游戏安全入门浅谈/" rel="next" title="游戏安全入门浅谈">
+                <i class="fa fa-chevron-left"></i> 游戏安全入门浅谈
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/12/31/python一日一练（14-21）/" rel="prev" title="python一日一练（14-21）">
+                python一日一练（14-21） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/12/29/python一日一练00-13/"
+           data-title="python一日一练（00-13）" data-url="http://venidic.com/2015/12/29/python一日一练00-13/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

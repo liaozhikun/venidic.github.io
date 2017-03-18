@@ -1,0 +1,849 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Rootkit,底层," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="接着上一篇分析，我们一般通过LDR断链（分别断掉InLoadOrderLinks，InMemoryOrderLinks，InInitializationOrderLinks以及HashLinks），并为了暴力搜索抹去了PE指纹，但仍然过不了pchunter和冰刃的检测，这是为什么呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VAD树分析">
+<meta property="og:url" content="http://venidic.com/2015/06/03/VAD树分析/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="接着上一篇分析，我们一般通过LDR断链（分别断掉InLoadOrderLinks，InMemoryOrderLinks，InInitializationOrderLinks以及HashLinks），并为了暴力搜索抹去了PE指纹，但仍然过不了pchunter和冰刃的检测，这是为什么呢？">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/VAD.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/hide.jpg">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/windgbprint.png">
+<meta property="og:updated_time" content="2016-01-25T06:11:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VAD树分析">
+<meta name="twitter:description" content="接着上一篇分析，我们一般通过LDR断链（分别断掉InLoadOrderLinks，InMemoryOrderLinks，InInitializationOrderLinks以及HashLinks），并为了暴力搜索抹去了PE指纹，但仍然过不了pchunter和冰刃的检测，这是为什么呢？">
+<meta name="twitter:image" content="http://7xieyq.com1.z0.glb.clouddn.com/VAD.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/06/03/VAD树分析/"/>
+
+
+
+
+
+  <title> VAD树分析 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/06/03/VAD树分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                VAD树分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-03T14:16:31+08:00">
+                2015-06-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统安全/" itemprop="url" rel="index">
+                    <span itemprop="name">系统安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/06/03/VAD树分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/06/03/VAD树分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>接着上一篇分析，我们一般通过LDR断链（分别断掉InLoadOrderLinks，InMemoryOrderLinks，InInitializationOrderLinks以及HashLinks），并为了暴力搜索抹去了PE指纹，但仍然过不了pchunter和冰刃的检测，这是为什么呢？<br><a id="more"></a></p>
+<p>#VAD结构<br>我们通过双机调下EPROCESS结构：<br>查看进程信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !dml_proc</div><div class="line">Address  PID  Image file name</div><div class="line">865b5830 4    System         </div><div class="line">8642c6b8 23c  smss.exe       </div><div class="line">860b0650 27c  csrss.exe      </div><div class="line">861e45d0 294  winlogon.exe   </div><div class="line">8631e558 2c0  services.exe   </div><div class="line">8613f7e8 2cc  lsass.exe      </div><div class="line">8644a9a0 37c  vmacthlp.exe   </div><div class="line">86161488 38c  svchost.exe    </div><div class="line">864ad020 3d0  svchost.exe    </div><div class="line">86083208 434  svchost.exe    </div><div class="line">8613f3b8 4c4  svchost.exe    </div><div class="line">86440020 52c  svchost.exe    </div><div class="line">864a83e0 5b4  spoolsv.exe    </div><div class="line">86422a78 668  explorer.exe   </div><div class="line">86208020 714  rundll32.exe   </div><div class="line">863a2da0 71c  vmtoolsd.exe   </div><div class="line">8613c020 748  ctfmon.exe     </div><div class="line">862715f0 758  msmsgs.exe     </div><div class="line">864457b8 4e8  svchost.exe    </div><div class="line">8606c2c8 600  svchost.exe    </div><div class="line">8637d980 464  vmtoolsd.exe   </div><div class="line">864b0b28 3ac  TPAutoConnSvc.e</div><div class="line">8630fb28 678  alg.exe        </div><div class="line">86063020 808  wscntfy.exe    </div><div class="line">86084478 878  TPAutoConnect.e</div><div class="line">864baa20 a58  wuauclt.exe    </div><div class="line">86132a80 b68  conime.exe     </div><div class="line">8615bda0 f6c  cutldrlinks.exe</div></pre></td></tr></table></figure>
+<p>查看cutldrlinks的进程信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !process 0 0 cutldrlinks.exe</div><div class="line">PROCESS 8615bda0  SessionId: 0  Cid: 0f6c    Peb: 7ffd4000  ParentCid: 0668</div><div class="line">    DirBase: 06d40340  ObjectTable: e18b6e48  HandleCount:  61.</div><div class="line">    Image: cutldrlinks.exe</div></pre></td></tr></table></figure>
+<p>得到EPROCESS结构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _eprocess 8615bda0</div><div class="line">nt!_EPROCESS</div><div class="line">   +0x000 Pcb              : _KPROCESS</div><div class="line">   +0x06c ProcessLock      : _EX_PUSH_LOCK</div><div class="line">   +0x070 CreateTime       : _LARGE_INTEGER 0x01d0cb36`e3ade4e2</div><div class="line">... ... ... ... ... </div><div class="line"></div><div class="line"></div><div class="line">   +0x118 HardwareTrigger  : 0</div><div class="line">   +0x11c VadRoot          : 0x86064208 Void</div><div class="line">   +0x120 VadHint          : 0x86277180 Void</div><div class="line">... ... ... ...</div></pre></td></tr></table></figure>
+<p>进而我们可以得到VAD树</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !vad 0x86064208</div><div class="line">VAD     level      start      end    commit</div><div class="line">86391880 ( 2)         10       10         1 Private      READWRITE          </div><div class="line">862a9708 ( 3)         20       20         1 Private      READWRITE          </div><div class="line">862f1650 ( 1)         30      12f         5 Private      READWRITE          </div><div class="line">864c0a70 ( 3)        130      132         0 Mapped       READONLY           Pagefile-backed section</div><div class="line">… … … …</div><div class="line">6227740 (11)        de0      edf         3 Private      READWRITE          </div><div class="line">8642ced8 ( 3)      10000    10037         9 Mapped  Exe  EXECUTE_WRITECOPY  \hide\dllinject.dll</div><div class="line">86274e98 ( 7)      5adc0    5adf6         2 Mapped  Exe  EXECUTE_WRITECOPY  \WINDOWS\system32\uxtheme.dll</div><div class="line">860aa9d8 ( 6)      62c20    62c28         1 Mapped  Exe  EXECUTE_WRITECOPY  \WINDOWS\system32\lpk.dll</div><div class="line">86421370 ( 8)      73640    7366d         2 Mapped  Exe  EXECUTE_WRITECOPY  \WINDOWS\system32\MSCTFIME.IME</div><div class="line">86210f90 ( 7)      73fa0    7400a        16 Mapped  Exe  EXECUTE_WRITECOPY  \WINDOWS\system32\usp10.dll</div><div class="line">86429530 ( 8)      74680    746cb         3 Mapped  Exe  EXECUTE_WRITECOPY  \WINDOWS\system32\MSCTF.dll</div><div class="line">8627a308 ( 5)      76300    7631c         1 Mapped  Exe  EXECUTE_WRITECOPY  \WINDOWS\system32\imm32.dll</div></pre></td></tr></table></figure>
+<p>我们可以发现，就算断链之后仍然可以通过遍历VAD树得到模块名</p>
+<p>#获得模块名<br>那么程序是怎么获得模块名的呢<br>我们继续分析VAD结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _MMVAD 0x8642ced8</div><div class="line">nt!_MMVAD</div><div class="line">   +0x000 StartingVpn      : 0x10000</div><div class="line">   +0x004 EndingVpn        : 0x10037</div><div class="line">   +0x008 Parent           : 0x864b80a8 _MMVAD</div><div class="line">   +0x00c LeftChild        : 0x860b0360 _MMVAD</div><div class="line">   +0x010 RightChild       : 0x8637b120 _MMVAD</div><div class="line">   +0x014 u                : __unnamed</div><div class="line">   +0x018 ControlArea      : 0x860727b8 _CONTROL_AREA</div><div class="line">   +0x01c FirstPrototypePte : 0xe12d95c8 _MMPTE</div><div class="line">   +0x020 LastContiguousPte : 0xfffffffc _MMPTE</div><div class="line">   +0x024 u2               : __unnamed</div></pre></td></tr></table></figure>
+<p>可以看出VAD为二叉树的结构，我们着重关注下_CONTROL_AREA结构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _control_area 0x860727b8</div><div class="line">nt!_CONTROL_AREA</div><div class="line">   +0x000 Segment          : 0xe12d9588 _SEGMENT</div><div class="line">   +0x004 DereferenceList  : _LIST_ENTRY [ 0x0 - 0x0 ]</div><div class="line">   +0x00c NumberOfSectionReferences : 0</div><div class="line">   +0x010 NumberOfPfnReferences : 0x1a</div><div class="line">   +0x014 NumberOfMappedViews : 1</div><div class="line">   +0x018 NumberOfSubsections : 6</div><div class="line">   +0x01a FlushInProgressCount : 0</div><div class="line">   +0x01c NumberOfUserReferences : 1</div><div class="line">   +0x020 u                : __unnamed</div><div class="line">   +0x024 FilePointer      : 0x86471b58 _FILE_OBJECT</div><div class="line">   +0x028 WaitingForDeletion : (null) </div><div class="line">   +0x02c ModifiedWriteCount : 0</div><div class="line">   +0x02e NumberOfSystemCacheViews : 0</div></pre></td></tr></table></figure>
+<p>继续分析<strong>FilePointer</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _file_object 0x86471b58</div><div class="line">nt!_FILE_OBJECT</div><div class="line">   +0x000 Type             : 0n5</div><div class="line">   +0x002 Size             : 0n112</div><div class="line">   +0x004 DeviceObject     : 0x864853e0 _DEVICE_OBJECT</div><div class="line">   +0x008 Vpb              : 0x865db1d8 _VPB</div><div class="line">… … … … </div><div class="line">+0x030 FileName         : _UNICODE_STRING &quot;\hide\dllinject.dll&quot;</div><div class="line">   +0x038 CurrentByteOffset : _LARGE_INTEGER 0x0</div><div class="line">   +0x040 Waiters          : 0</div><div class="line">… … … …</div></pre></td></tr></table></figure>
+<p>通过上面的调试我们大体知道在EPROCESS结构中应该为</p>
+<p> <img src="http://7xieyq.com1.z0.glb.clouddn.com/VAD.png" alt="这里写图片描述"></p>
+<p>即使我们将PEB中LDR链断掉，但是仍然能通过遍历VAD树来找到我们注入的模块。<br>其实很多检测模块的工具通过枚举进程模块，使用ZwQueryVirtualMemory，<br>NtQueryVirtualMemory。首先判断 Vad-&gt;ControlArea-&gt;FilePointer是否有效，若有效则调用ObQueryNameString查询此文件对象的名 称，最终由文件系统完成此次查询工作。这就是冰刃和pchunter即使在 断掉LDR链，抹去PE指纹之后依然能检测到模块的原因。</p>
+<p>#demo实现<br>知道了检测思路，想要绕过检测，如果通过断链和抹除思路上来想方法的话，将fileobject抹除掉，或者将name去掉，都能实现隐藏模块的效果。<br>我们编写驱动模块</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">PEPROCESS pProcess;</div><div class="line">PsLookupProcessByProcessId((HANDLE)3948,&amp;pProcess);</div><div class="line">//PsLookupProcessByProcessId((HANDLE)GetProId,&amp;pProcess);</div><div class="line">EnumDllByProcess(pProcess);</div><div class="line">ObDereFerenceObject(pProcess);</div></pre></td></tr></table></figure>
+<p>枚举VAD树<br>递归调用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">ulleftChild = *(PULONG)((ULONG)ulVad + LEFTCHILDOFFSET);</div><div class="line">	if(!MmIsAddressValid((PVOID)ulleftChild))</div><div class="line">	&#123;</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line">	else</div><div class="line">	&#123;</div><div class="line">		SearchDLLByVAD(ulleftChild);</div><div class="line">	&#125;</div><div class="line">	ulrightChild=*(PULONG)((ULONG)ulVad + RIGHTCHILDOFFSET);</div><div class="line">	if(!MmIsAddressValid((PVOID)ulrightChild))</div><div class="line">	&#123;</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line">	else</div><div class="line">	&#123;</div><div class="line">		SearchDLLByVAD(ulrightChild);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	ulcontrolarea = *(PULONG)((ULONG)ulVad + CONTROLAREAOFFSET);</div><div class="line">	if(!MmIsAddressValid((PVOID)ulcontrolarea))</div><div class="line">	&#123;</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	ulsegment = *(PULONG)((ULONG)ulcontrolarea);</div><div class="line">	if(!MmIsAddressValid((PVOID)ulsegment))</div><div class="line">	&#123;</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line">	//获取模块的信息</div><div class="line">	//size = *(PULONG)((ULONG)segment+SIZEOFFSET);</div><div class="line">	//base = *(PULONG)((ULONG)segment+BASEOFFSET);</div><div class="line"></div><div class="line">	ulFilePointer = *(PULONG)((ULONG)ulcontrolarea + FILEPOINTEROFFSET);</div><div class="line">	psFileName = (PUNICODE_STRING)(ulFilePointer + FILENAMEOFFSET);</div><div class="line"></div><div class="line">	DbgPrint(&quot;模块名称为%wZ\n&quot;,psFileName);</div></pre></td></tr></table></figure>
+<p>我在编译的时候发现不能通过，然后这里需要加一个库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">#pragma comment(lib,&quot;ntoskrnl.lib&quot;)</div></pre></td></tr></table></figure>
+<p>在写makefile时加上MSC_WARNING_LEVEL=/W1降低警告等级<br>编译成功并加载<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/hide.jpg" alt="这里写图片描述"><br>在windbg上打印出来我们隐藏的模块名<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/windgbprint.png" alt="这里写图片描述"></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Rootkit/" rel="tag"># Rootkit</a>
+          
+            <a href="/tags/底层/" rel="tag"># 底层</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/05/29/LDR-MODULE模块/" rel="next" title="LDR_MODULE模块的疑问与探索">
+                <i class="fa fa-chevron-left"></i> LDR_MODULE模块的疑问与探索
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/06/20/模块隐藏/" rel="prev" title="模块隐藏">
+                模块隐藏 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/06/03/VAD树分析/"
+           data-title="VAD树分析" data-url="http://venidic.com/2015/06/03/VAD树分析/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="底层,内存管理," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="写这篇文章的初衷是为了做一个跨进程读写驱动，在内核层进程内地址很多情况下需要通过物理地址去访问，而不再借助映射成虚拟地址去访问，所以弄清楚windows的虚拟地址和分页机制是完成跨进程读写驱动的前提。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows分页机制分析">
+<meta property="og:url" content="http://venidic.com/2015/08/12/windows分页机制分析/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="写这篇文章的初衷是为了做一个跨进程读写驱动，在内核层进程内地址很多情况下需要通过物理地址去访问，而不再借助映射成虚拟地址去访问，所以弄清楚windows的虚拟地址和分页机制是完成跨进程读写驱动的前提。">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_01.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_02.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_03.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_04.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_05.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_06.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_18.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_07.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_08.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_09.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_10.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_11.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_12.png">
+<meta property="og:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_13.png">
+<meta property="og:updated_time" content="2015-11-19T11:57:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="windows分页机制分析">
+<meta name="twitter:description" content="写这篇文章的初衷是为了做一个跨进程读写驱动，在内核层进程内地址很多情况下需要通过物理地址去访问，而不再借助映射成虚拟地址去访问，所以弄清楚windows的虚拟地址和分页机制是完成跨进程读写驱动的前提。">
+<meta name="twitter:image" content="http://7xieyq.com1.z0.glb.clouddn.com/PAE_01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/08/12/windows分页机制分析/"/>
+
+
+
+
+
+  <title> windows分页机制分析 | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/08/12/windows分页机制分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                windows分页机制分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-08-12T15:17:06+08:00">
+                2015-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统安全/" itemprop="url" rel="index">
+                    <span itemprop="name">系统安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/08/12/windows分页机制分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/12/windows分页机制分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>写这篇文章的初衷是为了做一个跨进程读写驱动，在内核层进程内地址很多情况下需要通过物理地址去访问，而不再借助映射成虚拟地址去访问，所以弄清楚windows的虚拟地址和分页机制是完成跨进程读写驱动的前提。<br><a id="more"></a></p>
+<p>#PAE分页机制<br>intel通过在处理器上把管脚数从32增加到36，以提高处理器的寻址能力，使其达到2^36=64GB，然而线性地址的位数仍然是32位，为此，intel引入了一种物理地址扩展（PAE）<br>作为新的分页机制。<br>    下面4张图说明了不同情况下的页表结构（图片摘自Wikipedia）</p>
+<p>未启用PAE下的4k分页页表结构<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_01.png" alt="此处输入图片的描述"><br>未启动PAE下的4M分页页表结构<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_02.png" alt="此处输入图片的描述"><br>启用PAE下的4K分页的页表结构<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_03.png" alt="此处输入图片的描述"><br>启用PAE下的2M分页页表结构<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_04.png" alt="此处输入图片的描述"></p>
+<p>#判断分页机制<br>首先是 是判断是否开启PAE，</p>
+<p>##方法一<br>在我的电脑属性中就可以看到<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_05.png" alt="此处输入图片的描述"></p>
+<p>##方法二<br>通过控制寄存器，我们查阅intel手册<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_06.png" alt="此处输入图片的描述"><br>进一步查阅解释：<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_18.png" alt="此处输入图片的描述"></p>
+<p>接下来是如何判断页大小，我们查阅intel手册可以发现未开启PAE情况下PDE的第7位标志了页的大小<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_07.png" alt="此处输入图片的描述"><br>对比开启PAE情况下的PDE结构，也可以确定第7位确定了大页还是小页<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_08.png" alt="此处输入图片的描述"><br>有了上述基本概念之后我们分析下虚拟地址在不同的分页情况下与物理地址的对应</p>
+<p>#虚拟地址与物理地址对应<br>随便开启一个winmine.exe 附加找一个地址：<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_09.png" alt="此处输入图片的描述"><br>查看是否开启了PAE：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; r cr4</div><div class="line">cr4=000006f9</div><div class="line"></div><div class="line">0: kd&gt; .formats cr4</div><div class="line">Evaluate expression:</div><div class="line">  Hex:     000006f9</div><div class="line">  Decimal: 1785</div><div class="line">  Octal:   00000003371</div><div class="line">  Binary:  00000000 00000000 00000110 11111001</div><div class="line">  Chars:   ....</div><div class="line">  Time:    Thu Jan 01 08:29:45 1970</div><div class="line">  Float:   low 2.50132e-042 high 0</div><div class="line">  Double:  8.81907e-321</div></pre></td></tr></table></figure></p>
+<p>发现PAE = 1<br>则确定开启了PAE机制<br>我们进入内核，列举进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !dml_proc</div><div class="line">Address  PID  Image file name</div><div class="line">865b5830 4    System         </div><div class="line">86015c08 23c  smss.exe       </div><div class="line">86074b10 27c  csrss.exe      </div><div class="line">860b4da0 294  winlogon.exe   </div><div class="line">.......</div><div class="line">86494508 580  alg.exe        </div><div class="line">86473580 c30  wuauclt.exe    </div><div class="line">86014ba0 5c0  winmine.exe</div></pre></td></tr></table></figure></p>
+<p>切换至winmine.exe进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; .process /p 86014ba0</div><div class="line">Implicit process is now 86014ba0</div><div class="line">.cache forcedecodeuser done</div></pre></td></tr></table></figure></p>
+<p>查看刚刚的虚拟地址<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; db 01005c00</div><div class="line">01005c00  fe 24 7d 90 77 00 00 00-00 0d f3 ff ff 00 97 1c  .$&#125;.w...........</div></pre></td></tr></table></figure></p>
+<p>发现相符合</p>
+<p>我们尝试结合虚拟地址找到物理地址<br>将01005c00转化成二进制<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; .formats 01005c00</div><div class="line">Evaluate expression:</div><div class="line">  Hex:     01005c00</div><div class="line">  Decimal: 16800768</div><div class="line">  Octal:   00100056000</div><div class="line">  Binary:  00000001 00000000 01011100 00000000</div></pre></td></tr></table></figure></p>
+<p>将其按照一定规律分段<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_10.png" alt="此处输入图片的描述"><br>00 000001000 000000101 110000000000<br>很清楚知道<br>Page-directory-pointer 00<br>Page directory 1000<br>Page table 101<br>Offset 110000000000</p>
+<p>调试可以知道winmine.exe的信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !process 0 0  winmine.exe</div><div class="line">PROCESS 86014ba0  SessionId: 0  Cid: 05c0    Peb: 7ffde000  ParentCid: 0698</div><div class="line">    DirBase: 06d40380  ObjectTable: e1dee378  HandleCount:  72.</div><div class="line">    Image: winmine.exe</div></pre></td></tr></table></figure></p>
+<p>Dirbase便是在winmine.exe进程中Eprocess+0x18对应的值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; dt _eprocess 86014ba0 -v -r1</div><div class="line">nt!_EPROCESS</div><div class="line">struct _EPROCESS, 107 elements, 0x260 bytes</div><div class="line">   +0x000 Pcb              : struct _KPROCESS, 29 elements, 0x6c bytes</div><div class="line">      +0x000 Header           : struct _DISPATCHER_HEADER, 6 elements, 0x10 bytes</div><div class="line">      +0x010 ProfileListHead  : struct _LIST_ENTRY, 2 elements, 0x8 bytes</div><div class="line"> [ 0x86014bb0 - 0x86014bb0 ]</div><div class="line">      +0x018 DirectoryTableBase : [2] 0x6d40380</div><div class="line">      +0x020 LdtDescriptor    : struct _KGDTENTRY, 3 elements, 0x8 bytes</div></pre></td></tr></table></figure></p>
+<p>我们查看内容<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !dq 0x6d40380</div><div class="line"># 6d40380 00000000`2c977801 00000000`2c878801</div><div class="line"># 6d40390 00000000`2c879801 00000000`2c736801</div><div class="line">… … … …</div></pre></td></tr></table></figure></p>
+<p>根据上面Page-directory-pointer 00<br>得知Page-directory-pointer为00000000 2c977801<br>查询intel手册<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_11.png" alt="此处输入图片的描述"><br>得知第12位到第35位为page directory的基址<br>即0000 …  0000 0000 00101100 10010111 01111000 00000001<br>转换为地址为：0x2c977000<br>又因为：Page directory 1000偏移为8<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !dq 2c977000+ 0x8*8</div><div class="line">#2c977040 00000000`2c8ad867 00000000`00000000</div></pre></td></tr></table></figure></p>
+<p>查看intel手册<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_12.png" alt="此处输入图片的描述"><br>故Page table基址为0x2c8ad000<br>同时我们注意PDE的第7位<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; .formats  2c8ad867</div><div class="line">Evaluate expression:</div><div class="line">  Hex:     2c8ad867</div><div class="line">  Decimal: 747296871</div><div class="line">  Octal:   05442554147</div><div class="line">  Binary:  00101100 10001010 11011000 01100111</div><div class="line">  Chars:   ,..g</div><div class="line">  Time:    Mon Sep 06 14:27:51 1993</div><div class="line">  Float:   low 3.94622e-012 high 0</div><div class="line">  Double:  3.69214e-315</div></pre></td></tr></table></figure></p>
+<p>证实了页大小为4Kb<br>又因为偏移为：Page table 101<br>所以page table地址为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !dq 2c8ad000+0x5*8</div><div class="line">#2c8ad028 00000000`2c9ad867 00000000`22a81025</div></pre></td></tr></table></figure></p>
+<p>查看intel手册<br><img src="http://7xieyq.com1.z0.glb.clouddn.com/PAE_13.png" alt="此处输入图片的描述"><br>故页地址为0x2c9ad000<br>又因为之前我们了解的偏移为：<br>Offset 110000000000    即 0xc00<br>故查看对应地址为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !db 2c9ad000+0xc00</div><div class="line">#2c9adc00 fe 24 7d 90 77 00 00 00-00 0d f3 ff ff 00 97 1c .$&#125;.w...........</div><div class="line">#2c9adc10 00 00 00 fe 88 bf fa bb-18 02 20 37 3c 05 46 00 .......... 7&lt;.F.</div></pre></td></tr></table></figure></p>
+<p>故寻找到对应内存数据与虚拟地址下完全对应！<br>我们通过windbg验证一下通过我们的寻址转化到的地址是否正确<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; !vtop 06d40380 01005c00</div><div class="line">X86VtoP: Virt 01005c00, pagedir 6d40380</div><div class="line">X86VtoP: PAE PDPE 6d40380 - 000000002c977801</div><div class="line">X86VtoP: PAE PDE 2c977040 - 000000002c8ad867</div><div class="line">X86VtoP: PAE PTE 2c8ad028 - 000000002c9ad867</div><div class="line">X86VtoP: PAE Mapped phys 2c9adc00</div><div class="line">Virtual address 1005c00 translates to physical address 2c9adc00.</div></pre></td></tr></table></figure></p>
+<p>由上可以证实通过我们自己将虚拟地址手动转化为理论物理地址与实际物理地址完全相符。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/底层/" rel="tag"># 底层</a>
+          
+            <a href="/tags/内存管理/" rel="tag"># 内存管理</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/06/20/模块隐藏/" rel="next" title="模块隐藏">
+                <i class="fa fa-chevron-left"></i> 模块隐藏
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/08/15/虚拟地址与物理地址分析/" rel="prev" title="虚拟地址与物理地址分析">
+                虚拟地址与物理地址分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/08/12/windows分页机制分析/"
+           data-title="windows分页机制分析" data-url="http://venidic.com/2015/08/12/windows分页机制分析/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

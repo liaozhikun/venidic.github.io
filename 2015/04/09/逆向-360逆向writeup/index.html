@@ -1,0 +1,863 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="逆向,竞赛," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="2014年360信息对抗大赛逆向分析writeup">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[逆向]360逆向writeup">
+<meta property="og:url" content="http://venidic.com/2015/04/09/逆向-360逆向writeup/index.html">
+<meta property="og:site_name" content="Night May Say">
+<meta property="og:description" content="2014年360信息对抗大赛逆向分析writeup">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/181957u3c6wgv9w51ukjin.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/182852ygggdqm7edm5m0dr.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/182913c3zsysyuyfhskclt.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183053p03r7wl82o03j77o.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183109w5b53w6c5tg7coqc.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183126uzbn573mn37bn5co.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183157a5gcp5hve575gphe.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183208rhthwt9f7kfrz69y.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183658jrz3ryhhq0y1xxrz.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183757o42hnil006cbh0vq.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/183807bx6m7pycjj6x6cdy.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195306ytrhttfqewfnfqth.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195307iyfzz7yxxluu7ytx.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195308javvscas2fcy9b7q.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195309gml0lknb6pqtjjm6.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195309ysbb3b3suise17tr.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195310whum6bycxu23hciy.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195311tvgt2d3hgxkh4smv.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195311ar6fomwi77mr47pb.png">
+<meta property="og:image" content="http://218.244.133.30/data/attachment/forum/201405/29/195311x7pz0p070npu7rn7.png">
+<meta property="og:updated_time" content="2015-04-09T03:47:44.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[逆向]360逆向writeup">
+<meta name="twitter:description" content="2014年360信息对抗大赛逆向分析writeup">
+<meta name="twitter:image" content="http://218.244.133.30/data/attachment/forum/201405/29/181957u3c6wgv9w51ukjin.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://venidic.com/2015/04/09/逆向-360逆向writeup/"/>
+
+
+
+
+
+  <title> [逆向]360逆向writeup | Night May Say </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d4af486f771155e47d0064be892093c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Night May Say</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">呓语</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'yjNAKfs2i_CxMAF_sm43','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://venidic.com/2015/04/09/逆向-360逆向writeup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="venidic">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Night May Say">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [逆向]360逆向writeup
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-09T11:26:13+08:00">
+                2015-04-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/逆向分析/" itemprop="url" rel="index">
+                    <span itemprop="name">逆向分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/09/逆向-360逆向writeup/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/09/逆向-360逆向writeup/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  2014年360信息对抗大赛逆向分析writeup
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#Crackme逆向分析<br>逆向第一题，很简单，分分钟能搞定。题目大致是说找一个key，提示success就行。<br>Peid查一下没有任何壳，是vc写的程序，里面没有知名的算法。开始分析<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/181957u3c6wgv9w51ukjin.png" alt="这里写图片描述"><br>错误的时候是这个样子<br>首先这一点就能给我们以下几点提示：<br>1此程序是vc写的，那么得到用户输入肯定是用到getdigitemtext系列函数，通过对函数下断即可以得到用户的输入<br>2.比较字符串，提示错误的字符串为done，查找字符串<br>3.失败与成功都会弹出对话框，那么同理也可也对messagebox系列函数下断<br>4.……其他 的方法暂且不说<br>直接getdigitemtext下断发现断不下，嗯嗯，后来查看程序的时候发现这个程序并不是调用了这个函数，而是他的同类型函数 GetWindowTextA,下断点之后，截断了用户的输入来到这个函数开头：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div></pre></td><td class="code"><pre><div class="line">0042BAA3  |. 8B4D 10       mov ecx,[arg.3]</div><div class="line">0042BAA6  |.  6AFF         push -0x1</div><div class="line">0042BAA8  |.  E8846BFFFF   call CrackMe.00422631</div><div class="line">0042BAAD  |.  EB0B         jmp XCrackMe.0042BABA</div><div class="line">0042BAAF  |&gt; 8B45 10       mov eax,[arg.3]</div><div class="line">0042BAB2  |. FF30          push dword ptrds:[eax]</div><div class="line">0042BAB4  |. 56            push esi</div><div class="line">0042BAB5  |.  E8E4EBFFFF   call CrackMe.0042A69E</div><div class="line">0042BABA  |&gt; 5F            pop edi</div><div class="line">0042BABB  |. 5E            pop esi</div><div class="line">0042BABC  |. 5D            pop ebp</div><div class="line">0042BABD  \.  C20C00       retn 0xC</div><div class="line">，嗯嗯，直接单步掉，过几个跳转之后来到算法的地方：</div><div class="line">00401420   .  6AFF         push -0x1</div><div class="line">00401422   .  68D0904300   push CrackMe.004390D0                    ;  SE 处理程序安装</div><div class="line">00401427   . 64:A1 0000000&gt;mov eax,dword ptr fs:[0]                 ;  关键代码</div><div class="line">0040142D   . 50            push eax</div><div class="line">0040142E   . 64:8925 00000&gt;mov dword ptr fs:[0],esp</div><div class="line">00401435   . 83EC 0C       sub esp,0xC                              ;  保护现场</div><div class="line">00401438   . 56            push esi</div><div class="line">00401439   . 57            push edi</div><div class="line">0040143A   . 8BF9          mov edi,ecx</div><div class="line">0040143C   .  6A01         push 0x1</div><div class="line">0040143E   .  E8FD3E0200   call CrackMe.00425340                    ;  读字符串给edx</div><div class="line">00401443   .  6A00         push 0x0</div><div class="line">00401445   . 8D4F 5C       lea ecx,dword ptrds:[edi+0x5C]</div><div class="line">00401448   .  E895110200   call CrackMe.004225E2                    ;  读输入字符串给eax</div><div class="line">0040144D   . 51            push ecx</div><div class="line">0040144E   . 8BF0          mov esi,eax</div><div class="line">00401450   . 8BCC          mov ecx,esp</div><div class="line">00401452   . 896424 14     mov dword ptrss:[esp+0x14],esp</div><div class="line">00401456   .  68CCA04400   push CrackMe.0044A0CC                    ;  strawberry</div><div class="line">0040145B   .  E8C00D0200   call CrackMe.00422220</div><div class="line">00401460   .  E81BFFFFFF   call CrackMe.00401380                    ;  读入一系列key做运算</div><div class="line">00401465   . 83C4 04       add esp,0x4</div><div class="line">00401468   . 8D4C24 0C     lea ecx,dword ptrss:[esp+0xC]</div><div class="line">0040146C   . 50            push eax</div><div class="line">0040146D   .  E8AE0D0200   call CrackMe.00422220</div><div class="line">00401472   . 8D4C24 0C     lea ecx,dword ptrss:[esp+0xC]</div><div class="line">00401476   . C74424 1C 000&gt;mov dword ptr ss:[esp+0x1C],0x0</div><div class="line">0040147E   .  E8CF120200   call CrackMe.00422752</div><div class="line">00401483   .  6A00         push 0x0</div><div class="line">00401485   . 8D4C24 10     lea ecx,dword ptrss:[esp+0x10]</div><div class="line">00401489   .  E854110200   call CrackMe.004225E2</div><div class="line">0040148E   . 50            push eax</div><div class="line">0040148F   . 8D4C24 0C     lea ecx,dword ptrss:[esp+0xC]</div><div class="line">00401493   . C640 09 4B    mov byte ptrds:[eax+0x9],0x4B</div><div class="line">00401497   .  E8840D0200   call CrackMe.00422220</div><div class="line">0040149C   . 8D4C24 08     lea ecx,dword ptrss:[esp+0x8]</div><div class="line">004014A0   . C64424 1C 01  mov byte ptrss:[esp+0x1C],0x1</div><div class="line">004014A5   .  E8A8120200   call CrackMe.00422752</div><div class="line">004014AA   .  6A00         push 0x0</div><div class="line">004014AC   . 8D4C24 0C     lea ecx,dword ptrss:[esp+0xC]</div><div class="line">004014B0   .  E82D110200   call CrackMe.004225E2</div><div class="line">004014B5   &gt;  8A10          mov dl,byte ptr ds:[eax]                 ;  判断成功的代码</div><div class="line">004014B7   .  8ACA          mov cl,dl                                ;  查看比较就知道是上面出现过的key</div><div class="line">004014B9   .  3A16          cmp dl,byte ptr ds:[esi]</div><div class="line">004014BB   .  75 1C         jnz XCrackMe.004014D9</div><div class="line">004014BD   .  84C9          test cl,cl</div><div class="line">004014BF   .  74 14         je XCrackMe.004014D5</div><div class="line">004014C1   .  8A50 01       mov dl,byte ptr ds:[eax+0x1]</div><div class="line">004014C4   .  8ACA          mov cl,dl</div><div class="line">004014C6   .  3A56 01       cmp dl,byte ptr ds:[esi+0x1]</div><div class="line">004014C9   .  75 0E         jnz XCrackMe.004014D9</div><div class="line">004014CB   .  83C0 02       add eax,0x2</div><div class="line">004014CE   .  83C6 02       add esi,0x2</div><div class="line">004014D1   .  84C9          test cl,cl</div><div class="line">004014D3   .^ 75 E0         jnz XCrackMe.004014B5</div><div class="line">004014D5   &gt;  33C0          xor eax,eax</div><div class="line">004014D7   .  EB 05         jmp XCrackMe.004014DE</div><div class="line">004014D9   &gt;  1BC0          sbb eax,eax</div><div class="line">004014DB   .  83D8 FF       sbb eax,-0x1</div><div class="line">004014DE   &gt;  85C0          test eax,eax</div><div class="line">004014E0   .  6A 00         push 0x0</div><div class="line">004014E2   .  6A 00         push 0x0</div><div class="line">004014E4   .  75 07         jnz XCrackMe.004014ED</div><div class="line">004014E6   .  68 E0A04400   push CrackMe.0044A0E0                    ;  success</div><div class="line">004014EB   .  EB 05         jmp XCrackMe.004014F2                    ;  破解完成</div><div class="line">004014ED   &gt;  68 D8A04400   push CrackMe.0044A0D8                    ;  Done</div></pre></td></tr></table></figure>
+<p>破解过程直接看注释吧，比较累，所以写的比较简单，没有仔细分析算法。<br>嗯嗯，破到这个地方，看看堆栈，发现暂停堆栈分析也能秒破这个程序</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">0018F830   00422761  CrackMe.00422761</div><div class="line">0018F834   01D3D8E8  ASCII &quot;K$q*a_+@Xt&quot;</div><div class="line">0018F838   01D3D848  ASCII &quot;123456&quot;</div><div class="line">0018F83C   00000000</div><div class="line">0018F840   0018FE6C</div><div class="line">0018F844   0043B890  CrackMe.0043B890</div><div class="line">0018F848   01D3D8E8  ASCII &quot;K$q*a_+@Xt&quot;</div><div class="line">0018F84C   01D3D898  ASCII &quot;tX@+_a*q$K&quot;</div></pre></td></tr></table></figure>
+<p>分析结束，大牛勿喷！</p>
+<p>#Reverseme逆向分析<br>题目只记得大致意思，是说有一个文件.db被这个程序加密了，要想得到key就要么逆向这个加密程序的算法，然后自己写解密程序解密，要么用这个软件修复里面的bug运行两次就可以得到key（坑爹的提示，反正我没有运行两次就整出来了）<br>同样peid查出无壳，没有加过壳，运行这个程序：<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/182852ygggdqm7edm5m0dr.png" alt="这里写图片描述"><br>嗯嗯，根据提示，肯定是里面某个函数传参出了问题。<br>OD载入，刚入口就有这个messagebox，一开始参数出现了错误。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">0040103D&gt;/$  68 10304000   push ReverseM.00403010</div><div class="line">00401042      6A 01         push 0x1</div><div class="line">00401044  |.  E873010000   call ReverseM.004011BC</div><div class="line">00401049  |. 83F8 01       cmp eax,0x1</div><div class="line">0040104C  |.  7414         je XReverseM.00401062</div><div class="line">0040104E  |.  6A00         push 0x0                                 ; /Style =MB_OK|MB_APPLMODAL</div><div class="line">00401050  |.  681D344000   push ReverseM.0040341D                   ; |Title = &quot;提示&quot;</div><div class="line">00401055  |.  6810344000   push ReverseM.00403410                   ; |Text = &quot;输入参数错误&quot;</div><div class="line">0040105A  |.  6A00         push 0x0                                 ; |hOwner =NULL</div><div class="line">0040105C  |.  E847010000   call&lt;jmp.&amp;user32.MessageBoxA&gt;          ; \MessageBoxA</div></pre></td></tr></table></figure>
+<p>跟进Reverse,.004011BC,发现这个函数实际上是在读这个软件的路径，但是没有成功。（算法分析过，结果最近手残OD清空过一次，算法没了，有兴趣的可以自己下去分析，）用IDA分析的算法差不多是下面这个样子：<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/182913c3zsysyuyfhskclt.png" alt="这里写图片描述"><br>将读出的路径写到00403010去，这里管不管都行，，因为程序的大致思路是在下面的readfile读出来，然后在write回去。加上pass.db把参数push0x1改为 push 0x0（这个时候会读reverseme.exe）。<br>单步到这个地方：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">00401089  |.  6A00         push 0x0                                 ;/pFileSizeHigh = NULL</div><div class="line">0040108B  |. FF35 00304000 push dword ptr ds:[0x403000]             ; |hFile = 0000005C</div><div class="line">00401091  |.  E8EE000000   call&lt;jmp.&amp;kernel32.GetFileSize&gt;        ; \GetFileSize</div><div class="line">00401096  |.  A304304000   mov dword ptrds:[0x403004],eax</div><div class="line">0040109B  |.  6A04         push 0x4                                 ; /Protect = PAGE_READWRITE</div><div class="line">0040109D  |.  6800100000   push 0x1000                              ; |AllocationType= MEM_COMMIT</div><div class="line">004010A2      FF35 FA2F4000 push dword ptrds:[0x402FFA]</div><div class="line">004010A8  |.  6A00         push 0x0                                 ; |Address = NULL</div><div class="line">004010AA  |.  E8E1000000   call&lt;jmp.&amp;kernel32.VirtualAlloc&gt;       ; \VirtualAlloc</div></pre></td></tr></table></figure>
+<p>发现virtualalloc在分配内存的时候分配了0字节（关于这个api不懂的可以百度或者msdn），往上面瞅瞅，刚好有GetFileSize，将参数传递给他，然后绕过这个bug<br>然后哈，文件就可以正常的读进来了<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183053p03r7wl82o03j77o.png" alt="这里写图片描述"><br>（这个地方其实是已经得到的正确的key，貌似之前读进来的是一堆asc值好像，记不太清了）同理，绕过下面的bug，然后key就是刚刚那个了。<br>关于程序入口处第一个messagebox，是要修改跳转的，如果不修改跳转，而把参数0x1改为0x0,发现读进来的是<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183109w5b53w6c5tg7coqc.png" alt="这里写图片描述"><br>然后messagebox是没有异常存在了，但是下面那个分配内存的地方还是会出错，然后修改一下，在createfile和readfile之后文件夹中多了这么一个文件<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183126uzbn573mn37bn5co.png" alt="这里写图片描述"></p>
+<p>Winhex分析之后实际上就是这个.exe的代码<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183157a5gcp5hve575gphe.png" alt="这里写图片描述"></p>
+<p>熟悉的PE结构，然后下面写之后变成这样<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183208rhthwt9f7kfrz69y.png" alt="这里写图片描述"><br>哈，分析上面的之后加密算法就可以找出来了。然后找出来之后同样可以对.db解密。<br>至此，分析完毕，大牛勿喷！</p>
+<p>#inject</p>
+<p>第三个程序：inject：<br>依然没有壳，想到病毒，第一反应是PE结构，然后也神马都不懂的就winhex了一下，结果啥子都不晓得。管他，运行一下，尼玛啊，啥都没有。看看资源管理器，并没有inject的进程。估计是被玩坏了的样子。<br>OD载入一下，没的啥思路，看了看字符串，嗯？<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183658jrz3ryhhq0y1xxrz.png" alt="这里写图片描述"><br>提示啊，来到这个函数地方<br>开始没搞懂这个是神马杰宝，代码并没有分析完全，然后分析了一下代码弄成这个样子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">0043E005   .  6A00         push 0x0</div><div class="line">0043E007   .  685BE04300   push Inject.0043E05B                     ;  Key?NO!</div><div class="line">0043E00C   .  682BE04300   push Inject.0043E02B                     ;  A02B8DE7F2BCD4ED</div><div class="line">0043E011   .  6A 00        push 0x0</div><div class="line">0043E013   .  E8F909A775   call kernel32.75EAEA11</div><div class="line">0043E018   .  6A00         push 0x0</div><div class="line">0043E01A      E8            db E8</div><div class="line">0043E01B      47            db 47                                    ;  CHAR &apos;G&apos;</div><div class="line">0043E01C      62            db 62                                    ;  CHAR &apos;b&apos;</div><div class="line">0043E01D      08            db 08</div><div class="line">0043E01E      75            db 75</div></pre></td></tr></table></figure>
+<p>下面的OD还是没法分析，不过同样是call kernel32.75EAEA11（机器码一样）<br>在call的时候又一个A02B……的字符串，不过不是key，然后程序因为被病毒感染，所以IAT应该受到破坏了，一运行程序就自己蹦掉<br>了。</p>
+<p>然后想想看还有木有其他办法：<br>程序从开头直接跳到假码，然后就直接崩了，所以直接把jmp给nop掉<br>发现了一些很有特征的函数，GetVersion,GetCommandLine……，擦，c程序的入口啊，尼玛跑下来，估计然后查一下字符串，发现了另外一个<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183757o42hnil006cbh0vq.png" alt="这里写图片描述"><br>坑爹啊，这货就是！！！，但是是在sendmessagebox后面，估计会弹出来个什么框框吧。<br>最坑爹的事情来了，尼玛nop掉之后我还在程序里面想怎么让他弹出个框，想了好久，每次还是会让这个程序崩掉，后来觉得每次改一遍nop麻烦，就直接先把nop保存下来，然后无聊点了一下保存的文件，靠，直接弹框啊<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/183807bx6m7pycjj6x6cdy.png" alt="这里写图片描述"><br>没道理啊，嗯，要去吃饭了，没怎么弄明白为什么保存之后程序可以正常运行了<br>，看这个样子估计是程序里面有反调试吧，在OD环境下不会正常运行。<br>分析完毕，大牛勿喷！！！</p>
+<p>#第4题<del>题目忘记了</del><br>很遗憾当时第4题因为在web上被卡住了未能做出来。第4道题转自我的队友：<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195306ytrhttfqewfnfqth.png" alt="这里写图片描述"><br>下午做了一下，这一题共有两个文件</p>
+<p> <img src="http://218.244.133.30/data/attachment/forum/201405/29/195307iyfzz7yxxluu7ytx.png" alt="这里写图片描述"><br>那个exe打开后如下图<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195308javvscas2fcy9b7q.png" alt="这里写图片描述"><br>看到那个图片了么，还有一串像key的数字，我猜那串数字一定不是key，而且也不是隐写的题，要不然怎么放逆向这边了呢，所以咱还是要分析这个程序，经过几番尝试，知道源文件编辑框中输入上边这张图，数据文件是你要加入的数据，用txt保存，目的文件是将以上两个文件组合成第三个文件，所以这个目的文件也要是bmp文件。<br>点按钮“开始隐藏”，会弹出“隐藏信息完毕！”的对话框，可这怎么得到key呢，我们只有从图片中提取key。<br>用IDA看看，<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195309gml0lknb6pqtjjm6.png" alt="这里写图片描述"><br>发现不但有“隐藏信息完毕！”，还有“提取信息完毕！”，找到引用该字符串的代码，在401DD2处，向上翻，<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195309ysbb3b3suise17tr.png" alt="这里写图片描述"><br>有两个CreateFile，然后又两个ReadFile,又有一个WriteFile,发现CreateFile中的Filename是空的，应该就是那两个特别小的编辑框了，用PE-Explorer将编辑框放大。<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195310whum6bycxu23hciy.png" alt="这里写图片描述"><br>就可以输入文件名了，可是怎么到达这处代码呢，看“开始隐藏”,<br>这部分功能代码与提取信息的那部分代码相似。<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195311tvgt2d3hgxkh4smv.png" alt="这里写图片描述"><br>具体就不分析了，因为无关紧要，直接改代码，使它跳转到提取信息的代码处<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195311ar6fomwi77mr47pb.png" alt="这里写图片描述"><br>保存运行：<br><img src="http://218.244.133.30/data/attachment/forum/201405/29/195311x7pz0p070npu7rn7.png" alt="这里写图片描述"><br>这时候2.txt中就有key了，“B0ACD1BDA3FD1CD6”。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/逆向/" rel="tag"># 逆向</a>
+          
+            <a href="/tags/竞赛/" rel="tag"># 竞赛</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/08/调试原理-逆向pe-脱壳/" rel="next" title="[调试原理]逆向peid_脱壳">
+                <i class="fa fa-chevron-left"></i> [调试原理]逆向peid_脱壳
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/10/调试原理-逆向peid-判定vc/" rel="prev" title="[调试原理]逆向peid_判定vc">
+                [调试原理]逆向peid_判定vc <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/04/09/逆向-360逆向writeup/"
+           data-title="[逆向]360逆向writeup" data-url="http://venidic.com/2015/04/09/逆向-360逆向writeup/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
+               alt="venidic" />
+          <p class="site-author-name" itemprop="name">venidic</p>
+           
+              <p class="site-description motion-element" itemprop="description">veni vedi veci...</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/venidic" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/hiraethshaw" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/venidic" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/venidic" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=gPbl7unk6ePA8fGu4_-t" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">venidic</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"venidic"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>
