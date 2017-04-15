@@ -77,7 +77,7 @@
 
 
 
-  <link rel="alternate" href="/atom.xml" title="Night May Say" type="application/atom+xml" />
+  <link rel="alternate" href="/atom.xml" title="以梦为马" type="application/atom+xml" />
 
 
 
@@ -93,7 +93,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="腾讯游戏安全竞赛分析">
 <meta property="og:url" content="http://venidic.com/2016/03/10/腾讯游戏安全竞赛分析/index.html">
-<meta property="og:site_name" content="Night May Say">
+<meta property="og:site_name" content="以梦为马">
 <meta property="og:description" content="最近被告知部门举办了关于游戏安全的比赛，网址是游戏安全技术竞赛,看了下，奖励还算可以，就是不该全是QB，再加上这几天实在是冻的不行，宅在寝室就分析了下这个题。">
 <meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1046d6j20cz05b74h.jpg">
 <meta property="og:image" content="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr1htgvuj20p20etgra.jpg">
@@ -104,7 +104,7 @@
 <meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr2rc3vuj20d4058t8x.jpg">
 <meta property="og:image" content="http://ww4.sinaimg.cn/large/dcfd67b5gw1f1rr32i0bxj20g208i3z2.jpg">
 <meta property="og:image" content="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr3d7ll3j20d005c74i.jpg">
-<meta property="og:updated_time" content="2016-03-11T13:01:18.000Z">
+<meta property="og:updated_time" content="2017-04-15T15:40:37.778Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="腾讯游戏安全竞赛分析">
 <meta name="twitter:description" content="最近被告知部门举办了关于游戏安全的比赛，网址是游戏安全技术竞赛,看了下，奖励还算可以，就是不该全是QB，再加上这几天实在是冻的不行，宅在寝室就分析了下这个题。">
@@ -142,7 +142,7 @@
 
 
 
-  <title> 腾讯游戏安全竞赛分析 | Night May Say </title>
+  <title> 腾讯游戏安全竞赛分析 | 以梦为马 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -188,12 +188,12 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Night May Say</span>
+        <span class="site-title">以梦为马</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
       
-        <p class="site-subtitle">呓语</p>
+        <p class="site-subtitle">诗酒趁年华</p>
       
   </div>
 
@@ -330,7 +330,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Night May Say">
+      <meta itemprop="name" content="以梦为马">
     </span>
 
     
@@ -426,9 +426,9 @@
 
       
         <p>最近被告知部门举办了关于游戏安全的比赛，网址是<a href="http://gslab.qq.com/competition/index.shtml" title="游戏安全技术竞赛" target="_blank" rel="external">游戏安全技术竞赛</a>,看了下，奖励还算可以，就是不该全是QB，再加上这几天实在是冻的不行，宅在寝室就分析了下这个题。<br><a id="more"></a></p>
-<p>#初步分析<br>刚拿到程序，还是老套路PEID扫扫，然后就直接OD打开了，好在没有什么壳和反调，所以找到关键点也是比较容易的。<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1046d6j20cz05b74h.jpg" alt=""><br>打开OD，查找字符串和GetDlgItemText都无果，于是进一步分析，发现在读取用户名和序列号都用到了GetDlgItem，然后调用了SendMessage，差不多应该可以知道是Get到每一个按钮的ID，然后获得对应的句柄，在调用SendMessage进行传递。<br>我们打开资源工具进行分析<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr1htgvuj20p20etgra.jpg" alt=""><br>结合OD分析<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1pkrkcj20jz084zn1.jpg" alt=""><br>验证上述猜想。<br>我们接着分析得到字符串和注册码之后的流程，发现在运行过程中，将“失败”和“成功”这两个字符传入内存，这就是为什么查不到字符的原因：<br><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f1rr1zg2hhj20da086acq.jpg" alt=""><br>继续往下分析，发现最后调用了GetDlgItem之后SendMessage，由此可以知道，是通过算法判断判定最后是否注册成功，然后取相应的“成功”或“失败”字串，拷贝到相应的ID为1005的静态控件上，进而通过Send显示出来<br>下图是运行前<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr2864ufj20ei029wf6.jpg" alt=""><br>出错后将“失败”拷贝到前面内存处<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f1rr2go097j20eq0220t4.jpg" alt=""><br>那么大体流程弄清楚后，patch就很好写了，修改跳转，修改寄存器，或者直接修改内存即可以爆破成功，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">013E21E7   &gt; \33C0          xor eax,eax                              ;  不能走这一步</div><div class="line">013E21E9   &gt;  8B5484 7D     mov edx,dword ptr ss:[esp+eax*4+0x7D]    ;  eax控制取成功还是失败，这里需要=1</div><div class="line">013E21ED   .  8B4C24 54     mov ecx,dword ptr ss:[esp+0x54]</div><div class="line">013E21F1   .  8D4424 74     lea eax,dword ptr ss:[esp+0x74]</div><div class="line">013E21F5   .  50            push eax</div><div class="line">013E21F6   .  53            push ebx</div><div class="line">013E21F7   .  6A 0C         push 0xC</div><div class="line">013E21F9   .  68 ED030000   push 0x3ED</div><div class="line">013E21FE   .  899424 880000&gt;mov dword ptr ss:[esp+0x88],edx</div><div class="line">013E2205   .  E8 52580000   call Tencent2.013E7A5C</div></pre></td></tr></table></figure></p>
+<h1 id="初步分析"><a href="#初步分析" class="headerlink" title="初步分析"></a>初步分析</h1><p>刚拿到程序，还是老套路PEID扫扫，然后就直接OD打开了，好在没有什么壳和反调，所以找到关键点也是比较容易的。<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1046d6j20cz05b74h.jpg" alt=""><br>打开OD，查找字符串和GetDlgItemText都无果，于是进一步分析，发现在读取用户名和序列号都用到了GetDlgItem，然后调用了SendMessage，差不多应该可以知道是Get到每一个按钮的ID，然后获得对应的句柄，在调用SendMessage进行传递。<br>我们打开资源工具进行分析<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr1htgvuj20p20etgra.jpg" alt=""><br>结合OD分析<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr1pkrkcj20jz084zn1.jpg" alt=""><br>验证上述猜想。<br>我们接着分析得到字符串和注册码之后的流程，发现在运行过程中，将“失败”和“成功”这两个字符传入内存，这就是为什么查不到字符的原因：<br><img src="http://ww3.sinaimg.cn/large/dcfd67b5gw1f1rr1zg2hhj20da086acq.jpg" alt=""><br>继续往下分析，发现最后调用了GetDlgItem之后SendMessage，由此可以知道，是通过算法判断判定最后是否注册成功，然后取相应的“成功”或“失败”字串，拷贝到相应的ID为1005的静态控件上，进而通过Send显示出来<br>下图是运行前<br><img src="http://ww1.sinaimg.cn/large/dcfd67b5gw1f1rr2864ufj20ei029wf6.jpg" alt=""><br>出错后将“失败”拷贝到前面内存处<br><img src="http://ww4.sinaimg.cn/large/dcfd67b5gw1f1rr2go097j20eq0220t4.jpg" alt=""><br>那么大体流程弄清楚后，patch就很好写了，修改跳转，修改寄存器，或者直接修改内存即可以爆破成功，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">013E21E7   &gt; \33C0          xor eax,eax                              ;  不能走这一步</div><div class="line">013E21E9   &gt;  8B5484 7D     mov edx,dword ptr ss:[esp+eax*4+0x7D]    ;  eax控制取成功还是失败，这里需要=1</div><div class="line">013E21ED   .  8B4C24 54     mov ecx,dword ptr ss:[esp+0x54]</div><div class="line">013E21F1   .  8D4424 74     lea eax,dword ptr ss:[esp+0x74]</div><div class="line">013E21F5   .  50            push eax</div><div class="line">013E21F6   .  53            push ebx</div><div class="line">013E21F7   .  6A 0C         push 0xC</div><div class="line">013E21F9   .  68 ED030000   push 0x3ED</div><div class="line">013E21FE   .  899424 880000&gt;mov dword ptr ss:[esp+0x88],edx</div><div class="line">013E2205   .  E8 52580000   call Tencent2.013E7A5C</div></pre></td></tr></table></figure></p>
 <p>这里不再过多叙述：<br><img src="http://ww2.sinaimg.cn/large/dcfd67b5gw1f1rr2rc3vuj20d4058t8x.jpg" alt=""></p>
-<p>#算法分析<br>题目要求是写出算法注册机，那么patch肯定不行的。那我们开始分析算法：</p>
+<h1 id="算法分析"><a href="#算法分析" class="headerlink" title="算法分析"></a>算法分析</h1><p>题目要求是写出算法注册机，那么patch肯定不行的。那我们开始分析算法：</p>
 <p>##用户名部分<br>直接定位到用户名部分算法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">013E1FE2   .  99            cdq</div><div class="line">013E1FE3   .  F7FF          idiv edi</div><div class="line">013E1FE5   .  8DB40C 880000&gt;lea esi,dword ptr ss:[esp+ecx+0x88]</div><div class="line">013E1FEC   .  41            inc ecx</div><div class="line">013E1FED   .  0FBE8414 9C00&gt;movsx eax,byte ptr ss:[esp+edx+0x9C]     ;  遍历用户名，取ascii</div><div class="line">013E1FF5   .  8D142E        lea edx,dword ptr ds:[esi+ebp]</div><div class="line">013E1FF8   .  0FAFC2        imul eax,edx                             ;  edx = 20160126+次数</div><div class="line">013E1FFB   .  0FAFC7        imul eax,edi                             ;  eax = len_name*(name_asii*(20160126+次数))</div><div class="line">013E1FFE   .  0106          add dword ptr ds:[esi],eax</div><div class="line">013E2000   .  83F9 10       cmp ecx,0x10                             ;  循环次数</div></pre></td></tr></table></figure></p>
 <p>其实可以看到用户名部分算法还是蛮简单的，将每一个用户名的字符取ASCII，然后x（ 用户名长度） ×（20160126+次数），最后通过取余，进行循环乘16次，最后累加到内存中<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0025EF08  8C 1F 46 8B 21 5A 07 BB BA A8 B9 59 86 0E 64 26  ?F?Z缓üY?d&amp;</div><div class="line">0025EF18  AE 6F 52 00                                      畂R.v</div></pre></td></tr></table></figure></p>
 <p>##序列号部分<br>其实这个题刚开始看的时候，觉得序列号部分的算法还是蛮复杂的。跟了很多函数，后来发现很多函数其实是编译器进行了安全优化。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">013E2053   &gt; /8A08          mov cl,byte ptr ds:[eax]                 ;  注册码长度遍历</div><div class="line">013E2055   . |40            inc eax</div><div class="line">013E2056   . |3ACB          cmp cl,bl</div><div class="line">013E2058   .^\75 F9         jnz XTencent2.013E2053</div><div class="line">013E205A   .  2BC2          sub eax,edx                              ;  得到注册码的长度</div><div class="line">013E205C   .  50            push eax                                 ;  key_len</div><div class="line">013E205D   .  8D9424 A40100&gt;lea edx,dword ptr ss:[esp+0x1A4]</div><div class="line">013E2064   .  52            push edx                                 ;  key_str</div><div class="line">013E2065   .  8D4C24 60     lea ecx,dword ptr ss:[esp+0x60]</div><div class="line">013E2069   .  E8 A2050000   call Tencent2.013E2610                   ;  key安全拷贝</div><div class="line">013E206E   .  8D4424 58     lea eax,dword ptr ss:[esp+0x58]          ;  key_str偏移-0x4</div><div class="line">013E2072   .  50            push eax</div><div class="line">013E2073   .  8D4424 18     lea eax,dword ptr ss:[esp+0x18]</div><div class="line">013E2077   .  C68424 B40200&gt;mov byte ptr ss:[esp+0x2B4],0x2</div><div class="line">013E207F   .  E8 DCF8FFFF   call Tencent2.013E1960                   ;  关键call</div></pre></td></tr></table></figure></p>
@@ -500,8 +500,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/03/18/test/" rel="prev" title="test">
-                test <i class="fa fa-chevron-right"></i>
+              <a href="/2017/04/16/以梦为马，诗酒趁年华/" rel="prev" title="以梦为马，诗酒趁年华">
+                以梦为马，诗酒趁年华 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -553,8 +553,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://7xieyq.com1.z0.glb.clouddn.com/molang.jpg"
@@ -670,6 +679,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#初步分析"><span class="nav-number">1.</span> <span class="nav-text">初步分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#算法分析"><span class="nav-number">2.</span> <span class="nav-text">算法分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
